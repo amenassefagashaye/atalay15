@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes">
-    <title>Bete-Markose BP‑SMS</title>
+    <title>Bete-Markose BP‑SMS | Advanced Stock Management</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
@@ -56,7 +56,7 @@
         .welcome-content {
             text-align: center;
             padding: 2rem;
-            max-width: 400px;
+            max-width: 450px;
             width: 90%;
             background: rgba(255,255,255,0.05);
             backdrop-filter: blur(10px);
@@ -169,18 +169,18 @@
             position: fixed;
             top: 10px;
             left: 10px;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             background: rgba(255,215,0,0.2);
             border: 1px solid var(--accent);
-            border-radius: 4px;
+            border-radius: 6px;
             color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10000;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.3s;
         }
 
@@ -193,18 +193,18 @@
             position: fixed;
             top: 10px;
             right: 10px;
-            width: 30px;
-            height: 30px;
+            width: 35px;
+            height: 35px;
             background: rgba(255,215,0,0.2);
             border: 1px solid var(--accent);
-            border-radius: 4px;
+            border-radius: 6px;
             color: var(--accent);
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             z-index: 10000;
-            font-size: 14px;
+            font-size: 16px;
             transition: all 0.3s;
         }
 
@@ -427,10 +427,11 @@
         }
 
         .notification-counter {
-            width: 50px;
-            height: 50px;
+            width: 55px;
+            height: 55px;
             border-radius: 50%;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
             font-weight: bold;
@@ -459,15 +460,13 @@
         }
 
         .notification-counter .count {
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            font-weight: bold;
         }
 
         .notification-counter .label {
-            position: absolute;
-            bottom: -20px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             white-space: nowrap;
-            color: var(--light);
         }
 
         @keyframes pulse-red {
@@ -494,7 +493,7 @@
             left: 50%;
             transform: translate(-50%, -50%);
             width: 90%;
-            max-width: 500px;
+            max-width: 550px;
             max-height: 80vh;
             background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
             border: 2px solid var(--accent);
@@ -562,6 +561,7 @@
             gap: 8px;
             animation: slideIn 0.3s ease;
             min-width: 250px;
+            max-width: 350px;
         }
 
         .toast.critical { border-color: var(--danger); }
@@ -733,7 +733,7 @@
 
         .settings-container {
             background: transparent;
-            max-width: 800px;
+            max-width: 900px;
             margin: 50px auto;
             color: var(--light);
             position: relative;
@@ -955,8 +955,8 @@
             background: rgba(255,255,255,0.1);
             border: 1px solid rgba(255,215,0,0.2);
             color: var(--accent);
-            width: 30px;
-            height: 30px;
+            width: 32px;
+            height: 32px;
             border-radius: 4px;
             cursor: pointer;
             display: flex;
@@ -990,15 +990,54 @@
             display: none;
         }
 
-        /* Sales Table Horizontal Scroll */
         .sales-table-wrapper {
             overflow-x: auto;
             width: 100%;
             -webkit-overflow-scrolling: touch;
         }
         .sales-table {
-            min-width: 1200px;
+            min-width: 1800px;
             width: 100%;
+            font-size: 0.8rem;
+        }
+        .sales-table input, .sales-table select {
+            padding: 4px;
+            font-size: 0.75rem;
+        }
+
+        .modal-fullscreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 20000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+        .modal-fullscreen.active {
+            display: flex;
+        }
+        .modal-content {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary));
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+        }
+        .modal-exit {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--accent);
         }
 
         @media (max-width: 768px) {
@@ -1022,6 +1061,9 @@
             .btn {
                 width: 100%;
             }
+            .sales-table {
+                min-width: 1600px;
+            }
         }
 
         @media (max-width: 480px) {
@@ -1044,8 +1086,8 @@
             }
             
             .notification-counter {
-                width: 40px;
-                height: 40px;
+                width: 45px;
+                height: 45px;
             }
             
             .notification-counter .count {
@@ -1053,7 +1095,7 @@
             }
             
             .notification-counter .label {
-                font-size: 0.6rem;
+                font-size: 0.55rem;
             }
         }
     </style>
@@ -1110,29 +1152,29 @@
         </header>
 
         <div class="nav-buttons">
-            <button class="nav-btn" id="navRegisterStock" data-tooltip="Register new stock items">
+            <button class="nav-btn customizable-btn" id="navRegisterStock" data-btn-id="register" data-tooltip="Register new stock items">
                 <i class="fas fa-pills"></i>
-                <span>Register</span>
+                <span class="btn-text">Register</span>
             </button>
-            <button class="nav-btn" id="navSales" data-tooltip="Process sales transactions">
+            <button class="nav-btn customizable-btn" id="navSales" data-btn-id="sales" data-tooltip="Process sales transactions">
                 <i class="fas fa-shopping-cart"></i>
-                <span>Sales</span>
+                <span class="btn-text">Sales</span>
             </button>
-            <button class="nav-btn" id="navCurrentStock" data-tooltip="View current inventory">
+            <button class="nav-btn customizable-btn" id="navCurrentStock" data-btn-id="inventory" data-tooltip="View current inventory">
                 <i class="fas fa-list-alt"></i>
-                <span>Inventory</span>
+                <span class="btn-text">Inventory</span>
             </button>
-            <button class="nav-btn" id="navReduceStock" data-tooltip="Deduct stock for various reasons">
+            <button class="nav-btn customizable-btn" id="navReduceStock" data-btn-id="deduct" data-tooltip="Deduct stock for various reasons">
                 <i class="fas fa-arrow-up"></i>
-                <span>Deduct</span>
+                <span class="btn-text">Deduct</span>
             </button>
-            <button class="nav-btn admin-only" id="navReview" data-tooltip="Review dashboard and analytics">
+            <button class="nav-btn customizable-btn admin-only" id="navReview" data-btn-id="review" data-tooltip="Review dashboard and analytics">
                 <i class="fas fa-chart-bar"></i>
-                <span>Review</span>
+                <span class="btn-text">Review</span>
             </button>
-            <button class="nav-btn admin-only" id="navAudit" data-tooltip="View audit trail">
+            <button class="nav-btn customizable-btn admin-only" id="navAudit" data-btn-id="audit" data-tooltip="View audit trail">
                 <i class="fas fa-shield-alt"></i>
-                <span>Audit</span>
+                <span class="btn-text">Audit</span>
             </button>
         </div>
 
@@ -1169,7 +1211,7 @@
     <div class="notification-panel" id="notificationPanel">
         <div class="notification-panel-header">
             <h3 id="notificationPanelTitle">Notifications</h3>
-            <button class="close-full-screen" onclick="document.getElementById('notificationPanel').classList.remove('active')">
+            <button class="close-full-screen" onclick="if(window.ultraStock) window.ultraStock.closeNotificationPanel()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
@@ -1180,7 +1222,6 @@
     <audio id="notificationSound" loop preload="auto">
         <source src="data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gR2VuZXJpYyBTb3VuZCBFZmZlY3RzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/mp3">
     </audio>
-
     <div class="settings-panel" id="settingsPanel">
         <div class="settings-container">
             <div class="settings-header">
@@ -1253,6 +1294,18 @@
             </div>
             
             <div class="settings-section">
+                <h3 data-tooltip="Configure button text">Customizable Buttons</h3>
+                <div class="settings-row">
+                    <div><label>Register Button Text</label><input type="text" id="btnRegisterText" value="Register"></div>
+                    <div><label>Sales Button Text</label><input type="text" id="btnSalesText" value="Sales"></div>
+                    <div><label>Inventory Button Text</label><input type="text" id="btnInventoryText" value="Inventory"></div>
+                    <div><label>Deduct Button Text</label><input type="text" id="btnDeductText" value="Deduct"></div>
+                    <div><label>Review Button Text</label><input type="text" id="btnReviewText" value="Review"></div>
+                    <div><label>Audit Button Text</label><input type="text" id="btnAuditText" value="Audit"></div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
                 <h3 data-tooltip="Configure notification preferences">Notifications</h3>
                 <div class="checkbox-group">
                     <label><input type="checkbox" id="notifyLowStock" checked> Low Stock Alerts</label>
@@ -1275,6 +1328,10 @@
                     <div>
                         <label data-tooltip="Change admin password">Admin Password</label>
                         <input type="password" id="adminPassword" value="Dr. -----2123">
+                    </div>
+                    <div>
+                        <label data-tooltip="Master password (one-time setup)">Master Password</label>
+                        <input type="password" id="masterPassword" value="asse19maki23elishi13" readonly>
                     </div>
                 </div>
             </div>
@@ -1591,8 +1648,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label data-tooltip="Invoice number"><i class="fas fa-file-invoice"></i> Invoice Number</label>
-                        <input type="text" id="salesInvoiceNumber" placeholder="Auto-generated" readonly>
+                        <label data-tooltip="Invoice number (editable)"><i class="fas fa-file-invoice"></i> Invoice Number</label>
+                        <input type="text" id="salesInvoiceNumber" placeholder="Auto-generated or enter manually">
                     </div>
                 </div>
 
@@ -1607,22 +1664,28 @@
                     <table class="sales-table" id="salesItemsTable">
                         <thead>
                             <tr>
-                                <th data-tooltip="Item name">Item</th>
-                                <th data-tooltip="Category">Category</th>
-                                <th data-tooltip="Type">Type</th>
-                                <th data-tooltip="Base unit">Base Unit</th>
-                                <th data-tooltip="Registered unit">Registered Unit</th>
-                                <th data-tooltip="Display unit">Display Unit</th>
-                                <th data-tooltip="Quantity (Base)">Qty (Base)</th>
-                                <th data-tooltip="Quantity (Registered)">Qty (Reg)</th>
-                                <th data-tooltip="Quantity (Display)">Qty (Display)</th>
-                                <th data-tooltip="Price per unit">Unit Price</th>
-                                <th data-tooltip="Markup Value">Markup Val</th>
-                                <th data-tooltip="Discount Value">Disc Val</th>
-                                <th data-tooltip="Total">Total</th>
-                                <th data-tooltip="Batch">Batch</th>
-                                <th data-tooltip="Expiry">Expiry</th>
-                                <th data-tooltip="Action">Action</th>
+                                <th>Item</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Base Unit</th>
+                                <th>Reg. Unit</th>
+                                <th>Disp. Unit</th>
+                                <th>Qty (Base)</th>
+                                <th>Qty (Reg)</th>
+                                <th>Qty (Disp)</th>
+                                <th>Base Unit Price</th>
+                                <th>Reg. Unit Price</th>
+                                <th>Disp. Unit Price</th>
+                                <th>Base Total</th>
+                                <th>Reg. Total</th>
+                                <th>Disp. Total</th>
+                                <th>Markup</th>
+                                <th>Discount</th>
+                                <th>VAT</th>
+                                <th>Grand Total</th>
+                                <th>Batch</th>
+                                <th>Expiry</th>
+                                <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="salesItemsBody">
@@ -1731,30 +1794,10 @@
             <table id="stockTable">
                 <thead>
                     <tr>
-                        <th data-tooltip="Item name">Item</th>
-                        <th data-tooltip="Category">Category</th>
-                        <th data-tooltip="Type">Type</th>
-                        <th data-tooltip="Base unit">Base Unit</th>
-                        <th data-tooltip="Registered unit">Registered Unit</th>
-                        <th data-tooltip="Display unit">Display Unit</th>
-                        <th data-tooltip="Quantity in base units">Qty (Base)</th>
-                        <th data-tooltip="Quantity in registered units">Qty (Reg)</th>
-                        <th data-tooltip="Quantity in display units">Qty (Display)</th>
-                        <th data-tooltip="Beginning Balance">Beg Balance</th>
-                        <th data-tooltip="Quantity Received">Received</th>
-                        <th data-tooltip="Quantity Issued/Sold">Issued/Sold</th>
-                        <th data-tooltip="Ending Balance (Expected)">End Balance</th>
-                        <th data-tooltip="Stock on Hand (Physical Count)">Physical Count</th>
-                        <th data-tooltip="Variance (+/-)">Variance</th>
-                        <th data-tooltip="Min/Reorder/Max levels">Min/Reorder/Max</th>
-                        <th data-tooltip="Purchase price">Purchase</th>
-                        <th data-tooltip="Selling price">Selling</th>
-                        <th data-tooltip="Margin">Margin</th>
-                        <th data-tooltip="Total value">Value</th>
-                        <th data-tooltip="Batch number">Batch</th>
-                        <th data-tooltip="Expiry date">Expiry</th>
-                        <th data-tooltip="FEFO Priority">FEFO</th>
-                        <th data-tooltip="Actions">Actions</th>
+                        <th>Item</th><th>Category</th><th>Type</th><th>Base Unit</th><th>Registered Unit</th><th>Display Unit</th>
+                        <th>Qty (Base)</th><th>Qty (Reg)</th><th>Qty (Display)</th><th>Beg Balance</th><th>Received</th>
+                        <th>Issued/Sold</th><th>End Balance</th><th>Physical Count</th><th>Variance</th><th>Min/Reorder/Max</th>
+                        <th>Purchase</th><th>Selling</th><th>Margin</th><th>Value</th><th>Batch</th><th>Expiry</th><th>FEFO</th><th>Actions</th>
                     </tr>
                 </thead>
                 <tbody id="stockTableBody">
@@ -1783,127 +1826,30 @@
             <form id="reduceStockForm">
                 <div class="form-grid">
                     <div class="form-group">
-                        <label data-tooltip="Select item to deduct"><i class="fas fa-box"></i> Select Item *</label>
-                        <select id="reduceItemSelect" required>
-                            <option value="">Choose an item...</option>
-                        </select>
+                        <label><i class="fas fa-box"></i> Select Item *</label>
+                        <select id="reduceItemSelect" required><option value="">Choose an item...</option></select>
                     </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Available quantity"><i class="fas fa-balance-scale"></i> Available</label>
-                        <input type="text" id="reduceAvailable" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Item category">Category</label>
-                        <input type="text" id="reduceCategory" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Item type">Type</label>
-                        <input type="text" id="reduceType" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Base unit">Base Unit</label>
-                        <input type="text" id="reduceBaseUnit" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Registered unit">Registered Unit</label>
-                        <input type="text" id="reduceRegUnit" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Display unit">Display Unit</label>
-                        <input type="text" id="reduceDisplayUnit" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Branch where deduction occurs"><i class="fas fa-store"></i> Branch *</label>
-                        <select id="reduceBranch" required>
-                            <option value="pharmacy">Bete‑Markose Pharmacy</option>
-                            <option value="wholesaler">Bete‑Markose Wholesaler</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Warehouse location">Warehouse</label>
-                        <select id="reduceWarehouse">
-                            <option value="main">Main Warehouse</option>
-                            <option value="branch">Branch Warehouse</option>
-                            <option value="cold">Cold Storage</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Storage conditions">Storage Conditions</label>
-                        <select id="reduceStorageCondition">
-                            <option value="ambient">Ambient</option>
-                            <option value="refrigerated">Refrigerated (2-8°C)</option>
-                            <option value="frozen">Frozen (-20°C)</option>
-                            <option value="cold-chain">Cold Chain</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Shelf/Bin location">Shelf/Bin</label>
-                        <input type="text" id="reduceShelfBin" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Batch number">Batch Number</label>
-                        <input type="text" id="reduceBatchNumber" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Expiry date">Expiry Date</label>
-                        <input type="text" id="reduceExpiryDate" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Invoice number">Invoice Number</label>
-                        <input type="text" id="reduceInvoiceNumber" readonly>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Quantity to deduct in display units"><i class="fas fa-calculator"></i> Quantity (Display) *</label>
-                        <input type="number" id="reduceQuantity" min="0.01" step="0.01" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Reason for deduction"><i class="fas fa-clipboard-list"></i> Reason *</label>
-                        <select id="reduceReason" required>
-                            <option value="sale">Sale</option>
-                            <option value="damaged">Damaged</option>
-                            <option value="expired">Expired</option>
-                            <option value="internal">Internal Use</option>
-                            <option value="donation">Donation</option>
-                            <option value="return">Supplier Return</option>
-                            <option value="transfer_out">Transfer Out</option>
-                            <option value="theft">Theft/Shrinkage</option>
-                            <option value="other">Other</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Person responsible"><i class="fas fa-user-check"></i> Responsible Person *</label>
-                        <input type="text" id="whom" required>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label data-tooltip="Additional notes"><i class="fas fa-sticky-note"></i> Notes</label>
-                        <textarea id="reduceNotes" rows="2"></textarea>
-                    </div>
+                    <div class="form-group"><label>Available</label><input type="text" id="reduceAvailable" readonly></div>
+                    <div class="form-group"><label>Category</label><input type="text" id="reduceCategory" readonly></div>
+                    <div class="form-group"><label>Type</label><input type="text" id="reduceType" readonly></div>
+                    <div class="form-group"><label>Base Unit</label><input type="text" id="reduceBaseUnit" readonly></div>
+                    <div class="form-group"><label>Registered Unit</label><input type="text" id="reduceRegUnit" readonly></div>
+                    <div class="form-group"><label>Display Unit</label><input type="text" id="reduceDisplayUnit" readonly></div>
+                    <div class="form-group"><label>Branch *</label><select id="reduceBranch" required><option value="pharmacy">Pharmacy</option><option value="wholesaler">Wholesaler</option></select></div>
+                    <div class="form-group"><label>Warehouse</label><select id="reduceWarehouse"><option value="main">Main</option><option value="branch">Branch</option><option value="cold">Cold</option></select></div>
+                    <div class="form-group"><label>Storage</label><select id="reduceStorageCondition"><option value="ambient">Ambient</option><option value="refrigerated">Refrigerated</option><option value="frozen">Frozen</option></select></div>
+                    <div class="form-group"><label>Shelf/Bin</label><input type="text" id="reduceShelfBin" readonly></div>
+                    <div class="form-group"><label>Batch</label><input type="text" id="reduceBatchNumber" readonly></div>
+                    <div class="form-group"><label>Expiry</label><input type="text" id="reduceExpiryDate" readonly></div>
+                    <div class="form-group"><label>Invoice</label><input type="text" id="reduceInvoiceNumber" readonly></div>
+                    <div class="form-group"><label>Quantity (Display) *</label><input type="number" id="reduceQuantity" min="0.01" step="0.01" required></div>
+                    <div class="form-group"><label>Reason *</label><select id="reduceReason" required><option value="sale">Sale</option><option value="damaged">Damaged</option><option value="expired">Expired</option><option value="internal">Internal Use</option><option value="donation">Donation</option><option value="return">Return</option><option value="transfer_out">Transfer Out</option><option value="theft">Theft</option><option value="other">Other</option></select></div>
+                    <div class="form-group"><label>Responsible *</label><input type="text" id="whom" required></div>
+                    <div class="form-group"><label>Notes</label><textarea id="reduceNotes" rows="2"></textarea></div>
                 </div>
-                
                 <div class="btn-group">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-check"></i> Deduct Stock
-                    </button>
-                    <button type="button" class="btn btn-secondary" id="clearReduceForm">
-                        <i class="fas fa-times"></i> Clear
-                    </button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-check"></i> Deduct Stock</button>
+                    <button type="button" class="btn btn-secondary" id="clearReduceForm"><i class="fas fa-times"></i> Clear</button>
                 </div>
             </form>
         </div>
@@ -1912,27 +1858,8 @@
             <h3 style="color: var(--accent); margin-bottom: 1rem;">Deduction History</h3>
             <div class="table-container">
                 <table id="deductionHistoryTable">
-                    <thead>
-                        <tr>
-                            <th data-tooltip="Date of deduction">Date</th>
-                            <th data-tooltip="Item name">Item</th>
-                            <th data-tooltip="Category">Category</th>
-                            <th data-tooltip="Type">Type</th>
-                            <th data-tooltip="Quantity in display units">Quantity</th>
-                            <th data-tooltip="Unit">Unit</th>
-                            <th data-tooltip="Batch">Batch</th>
-                            <th data-tooltip="Expiry">Expiry</th>
-                            <th data-tooltip="Reason for deduction">Reason</th>
-                            <th data-tooltip="Branch">Branch</th>
-                            <th data-tooltip="Warehouse">Warehouse</th>
-                            <th data-tooltip="Storage">Storage</th>
-                            <th data-tooltip="Shelf/Bin">Shelf/Bin</th>
-                            <th data-tooltip="Responsible person">Responsible</th>
-                            <th data-tooltip="Value lost">Value Lost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="deductionHistoryBody">
-                    </tbody>
+                    <thead><tr><th>Date</th><th>Item</th><th>Category</th><th>Type</th><th>Qty</th><th>Unit</th><th>Batch</th><th>Expiry</th><th>Reason</th><th>Branch</th><th>Warehouse</th><th>Storage</th><th>Shelf/Bin</th><th>Responsible</th><th>Value Lost</th></tr></thead>
+                    <tbody id="deductionHistoryBody"></tbody>
                 </table>
             </div>
         </div>
@@ -1942,273 +1869,73 @@
         <div class="full-screen-header">
             <h2><i class="fas fa-chart-bar"></i> Review Dashboard</h2>
             <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <select id="reviewPeriodFilter" class="filter-select" data-tooltip="Filter analytics by period">
-                    <option value="all">All Time</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
+                <select id="reviewPeriodFilter" class="filter-select">
+                    <option value="all">All Time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option>
                 </select>
-                <button class="close-full-screen" data-close="reviewPage">
-                    <i class="fas fa-times"></i>
-                </button>
+                <button class="close-full-screen" data-close="reviewPage"><i class="fas fa-times"></i></button>
             </div>
         </div>
         
         <div class="dashboard-grid">
-            <div class="dashboard-card" data-page="stockInventoryPage">
-                <h3 data-tooltip="Total number of stock items"><i class="fas fa-boxes"></i> Total Items</h3>
-                <div class="value" id="totalStockItems">0</div>
-                <div class="sub-value">Active inventory</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="salesPage">
-                <h3 data-tooltip="Total sales amount"><i class="fas fa-shopping-cart"></i> Total Sales</h3>
-                <div class="value" id="totalSales">ETB 0</div>
-                <div class="sub-value">This period</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="low">
-                <h3 data-tooltip="Items below minimum stock"><i class="fas fa-exclamation-triangle"></i> Low Stock</h3>
-                <div class="value" id="lowStockItems">0</div>
-                <div class="sub-value">Below threshold</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="reorder">
-                <h3 data-tooltip="Items at or below reorder level"><i class="fas fa-redo-alt"></i> Reorder Level</h3>
-                <div class="value" id="reorderItems">0</div>
-                <div class="sub-value">Needs reorder</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="expiry">
-                <h3 data-tooltip="Items expiring within 90 days"><i class="fas fa-calendar-times"></i> Near Expiry</h3>
-                <div class="value" id="nearExpiryItems">0</div>
-                <div class="sub-value">30-90 days</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="expired">
-                <h3 data-tooltip="Expired items"><i class="fas fa-times-circle"></i> Expired</h3>
-                <div class="value" id="expiredItems">0</div>
-                <div class="sub-value">Total loss</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage">
-                <h3 data-tooltip="Total value of current stock"><i class="fas fa-money-bill-wave"></i> Inventory Value</h3>
-                <div class="value" id="totalInventoryValue">ETB 0</div>
-                <div class="sub-value">Current stock</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="fast">
-                <h3 data-tooltip="Fast moving items"><i class="fas fa-rocket"></i> Fast Moving</h3>
-                <div class="value" id="fastMovingItems">0</div>
-                <div class="sub-value">High demand</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="slow">
-                <h3 data-tooltip="Slow moving items"><i class="fas fa-turtle"></i> Slow Moving</h3>
-                <div class="value" id="slowMovingItems">0</div>
-                <div class="sub-value">Low demand</div>
-            </div>
-            
-            <div class="dashboard-card" data-page="auditPage">
-                <h3 data-tooltip="Total loss this period"><i class="fas fa-skull-crossbones"></i> Total Loss</h3>
-                <div class="value" id="periodLoss">ETB 0</div>
-                <div class="sub-value">This period</div>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3 data-tooltip="Inventory Turnover Ratio"><i class="fas fa-chart-line"></i> Turnover Ratio</h3>
-                <div class="value" id="inventoryTurnover">0</div>
-                <div class="sub-value">This period</div>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3 data-tooltip="Stock Accuracy"><i class="fas fa-check-circle"></i> Stock Accuracy</h3>
-                <div class="value" id="stockAccuracy">100%</div>
-                <div class="sub-value">Variance free items</div>
-            </div>
+            <div class="dashboard-card" data-page="stockInventoryPage"><h3>Total Items</h3><div class="value" id="totalStockItems">0</div><div class="sub-value">Active inventory</div></div>
+            <div class="dashboard-card" data-page="salesPage"><h3>Total Sales</h3><div class="value" id="totalSales">ETB 0</div><div class="sub-value">This period</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="low"><h3>Low Stock</h3><div class="value" id="lowStockItems">0</div><div class="sub-value">Below threshold</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="reorder"><h3>Reorder Level</h3><div class="value" id="reorderItems">0</div><div class="sub-value">Needs reorder</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="expiry"><h3>Near Expiry</h3><div class="value" id="nearExpiryItems">0</div><div class="sub-value">30-90 days</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="expired"><h3>Expired</h3><div class="value" id="expiredItems">0</div><div class="sub-value">Total loss</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage"><h3>Inventory Value</h3><div class="value" id="totalInventoryValue">ETB 0</div><div class="sub-value">Current stock</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="fast"><h3>Fast Moving</h3><div class="value" id="fastMovingItems">0</div><div class="sub-value">High demand</div></div>
+            <div class="dashboard-card" data-page="stockInventoryPage" data-filter="slow"><h3>Slow Moving</h3><div class="value" id="slowMovingItems">0</div><div class="sub-value">Low demand</div></div>
+            <div class="dashboard-card" data-page="auditPage"><h3>Total Loss</h3><div class="value" id="periodLoss">ETB 0</div><div class="sub-value">This period</div></div>
+            <div class="dashboard-card"><h3>Turnover Ratio</h3><div class="value" id="inventoryTurnover">0</div><div class="sub-value">This period</div></div>
+            <div class="dashboard-card"><h3>Stock Accuracy</h3><div class="value" id="stockAccuracy">100%</div><div class="sub-value">Variance free</div></div>
         </div>
         
-        <div class="form-container">
-            <h3 style="color: var(--accent); margin-bottom: 1rem;">Demand Forecast (Next 30 Days)</h3>
-            <div class="value-display" id="demandForecast">Calculating...</div>
-        </div>
-        
-        <div class="form-container">
-            <h3 style="color: var(--accent); margin-bottom: 1rem;">Reorder Recommendations</h3>
-            <div class="value-display" id="reorderRecommendations">No items need reorder</div>
-        </div>
+        <div class="form-container"><h3 style="color: var(--accent);">Demand Forecast (Next 30 Days)</h3><div class="value-display" id="demandForecast">Calculating...</div></div>
+        <div class="form-container"><h3 style="color: var(--accent);">Reorder Recommendations</h3><div class="value-display" id="reorderRecommendations">No items need reorder</div></div>
         
         <div class="charts-container">
-            <div class="chart-card">
-                <h3 data-tooltip="Stock movement over time">Stock Movement</h3>
-                <canvas id="stockMovementChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 data-tooltip="Sales trend">Sales Trend</h3>
-                <canvas id="salesTrendChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 data-tooltip="Profit analysis">Profit Analysis</h3>
-                <canvas id="profitChart"></canvas>
-            </div>
-            <div class="chart-card">
-                <h3 data-tooltip="Item movement distribution">Fast vs Slow Moving</h3>
-                <canvas id="movementChart"></canvas>
-            </div>
+            <div class="chart-card"><h3>Stock Movement</h3><canvas id="stockMovementChart"></canvas></div>
+            <div class="chart-card"><h3>Sales Trend</h3><canvas id="salesTrendChart"></canvas></div>
+            <div class="chart-card"><h3>Profit Analysis</h3><canvas id="profitChart"></canvas></div>
+            <div class="chart-card"><h3>Fast vs Slow Moving</h3><canvas id="movementChart"></canvas></div>
         </div>
         
-        <div class="form-container">
-            <h3 style="color: var(--accent); margin-bottom: 1rem;">Top Selling Items</h3>
-            <div class="table-container">
-                <table id="topItemsTable">
-                    <thead>
-                        <tr>
-                            <th data-tooltip="Item name">Item</th>
-                            <th data-tooltip="Category">Category</th>
-                            <th data-tooltip="Type">Type</th>
-                            <th data-tooltip="Quantity sold">Qty Sold</th>
-                            <th data-tooltip="Revenue generated">Revenue</th>
-                            <th data-tooltip="Profit earned">Profit</th>
-                            <th data-tooltip="Profit margin">Margin</th>
-                        </tr>
-                    </thead>
-                    <tbody id="topItemsBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
-        
-        <div class="form-container">
-            <h3 style="color: var(--accent); margin-bottom: 1rem;">Expiry & Wastage Report</h3>
-            <div class="table-container">
-                <table id="expiryWastageTable">
-                    <thead>
-                        <tr>
-                            <th>Item</th>
-                            <th>Batch</th>
-                            <th>Expiry Date</th>
-                            <th>Days to Expiry</th>
-                            <th>Current Qty</th>
-                            <th>Potential Loss</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expiryWastageBody">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+        <div class="form-container"><h3 style="color: var(--accent);">Top Selling Items</h3><div class="table-container"><table id="topItemsTable"><thead><tr><th>Item</th><th>Category</th><th>Type</th><th>Qty Sold</th><th>Revenue</th><th>Profit</th><th>Margin</th></tr></thead><tbody id="topItemsBody"></tbody></table></div></div>
+        <div class="form-container"><h3 style="color: var(--accent);">Expiry & Wastage Report</h3><div class="table-container"><table id="expiryWastageTable"><thead><tr><th>Item</th><th>Batch</th><th>Expiry</th><th>Days Left</th><th>Current Qty</th><th>Potential Loss</th><th>Status</th></tr></thead><tbody id="expiryWastageBody"></tbody></table></div></div>
     </div>
 
     <div class="full-screen-mode" id="auditPage">
         <div class="full-screen-header">
             <h2><i class="fas fa-shield-alt"></i> Audit Summary</h2>
-            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
-                <select id="auditPeriodFilter" class="filter-select" data-tooltip="Filter audit by period">
-                    <option value="all">All Time</option>
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="monthly">Monthly</option>
-                </select>
-                <button class="close-full-screen" data-close="auditPage">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
+            <div style="display: flex; gap: 0.5rem;"><select id="auditPeriodFilter" class="filter-select"><option value="all">All Time</option><option value="daily">Daily</option><option value="weekly">Weekly</option><option value="monthly">Monthly</option></select>
+            <button class="close-full-screen" data-close="auditPage"><i class="fas fa-times"></i></button></div>
         </div>
         
         <div class="form-container">
             <div class="audit-summary-grid">
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Beginning Balance (Value)">Beginning Balance</h4>
-                    <div class="audit-summary-value" id="auditBeginningBalance">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Stock on Hand (Value)">Stock on Hand</h4>
-                    <div class="audit-summary-value" id="auditStockOnHandValue">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Ending Balance (Value)">Ending Balance</h4>
-                    <div class="audit-summary-value" id="auditEndingBalance">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Positive Variance (Items)">Positive Variance (Items)</h4>
-                    <div class="audit-summary-value" id="auditPosVarItems">0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Negative Variance (Items)">Negative Variance (Items)</h4>
-                    <div class="audit-summary-value" id="auditNegVarItems">0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Positive Variance (Cost)">Positive Variance (Cost)</h4>
-                    <div class="audit-summary-value" id="auditPosVarCost">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Negative Variance (Cost)">Negative Variance (Cost)</h4>
-                    <div class="audit-summary-value" id="auditNegVarCost">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Net Variance">Net Variance</h4>
-                    <div class="audit-summary-value" id="auditNetVariance">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Total Loss">Total Loss</h4>
-                    <div class="audit-summary-value" id="auditTotalLoss">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Total Gain">Total Gain</h4>
-                    <div class="audit-summary-value" id="auditTotalGain">ETB 0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Adjustment Recommendation">Recommendation</h4>
-                    <div class="audit-summary-value" id="auditRecommendation">-</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Audit Status">Audit Status</h4>
-                    <div class="audit-summary-value" id="auditStatus">-</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Audit Accuracy %">Accuracy %</h4>
-                    <div class="audit-summary-value" id="auditAccuracy">100%</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Item-Level Differences">Item Diff</h4>
-                    <div class="audit-summary-value" id="auditItemDiff">0</div>
-                </div>
-                <div class="audit-summary-item">
-                    <h4 data-tooltip="Financial Impact">Financial Impact</h4>
-                    <div class="audit-summary-value" id="auditFinancialImpact">ETB 0</div>
-                </div>
+                <div class="audit-summary-item"><h4>Beginning Balance</h4><div class="audit-summary-value" id="auditBeginningBalance">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Stock on Hand</h4><div class="audit-summary-value" id="auditStockOnHandValue">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Ending Balance</h4><div class="audit-summary-value" id="auditEndingBalance">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Positive Variance (Items)</h4><div class="audit-summary-value" id="auditPosVarItems">0</div></div>
+                <div class="audit-summary-item"><h4>Negative Variance (Items)</h4><div class="audit-summary-value" id="auditNegVarItems">0</div></div>
+                <div class="audit-summary-item"><h4>Positive Variance (Cost)</h4><div class="audit-summary-value" id="auditPosVarCost">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Negative Variance (Cost)</h4><div class="audit-summary-value" id="auditNegVarCost">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Net Variance</h4><div class="audit-summary-value" id="auditNetVariance">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Total Loss</h4><div class="audit-summary-value" id="auditTotalLoss">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Total Gain</h4><div class="audit-summary-value" id="auditTotalGain">ETB 0</div></div>
+                <div class="audit-summary-item"><h4>Recommendation</h4><div class="audit-summary-value" id="auditRecommendation">-</div></div>
+                <div class="audit-summary-item"><h4>Audit Status</h4><div class="audit-summary-value" id="auditStatus">-</div></div>
+                <div class="audit-summary-item"><h4>Accuracy %</h4><div class="audit-summary-value" id="auditAccuracy">100%</div></div>
+                <div class="audit-summary-item"><h4>Item Diff</h4><div class="audit-summary-value" id="auditItemDiff">0</div></div>
+                <div class="audit-summary-item"><h4>Financial Impact</h4><div class="audit-summary-value" id="auditFinancialImpact">ETB 0</div></div>
             </div>
             <div class="form-grid" style="margin-top: 1rem;">
-                <div class="form-group">
-                    <label>Reason</label>
-                    <input type="text" id="auditReasonField" placeholder="Enter variance reason">
-                </div>
-                <div class="form-group">
-                    <label>Responsible Body</label>
-                    <input type="text" id="auditResponsibleField" placeholder="Responsible person/department">
-                </div>
-                <div class="form-group">
-                    <label>Resolution Method</label>
-                    <select id="auditResolutionField">
-                        <option value="Pending">Pending</option>
-                        <option value="Adjusted">Adjusted</option>
-                        <option value="Written Off">Written Off</option>
-                        <option value="Investigation">Investigation</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>Auditor Comment</label>
-                    <input type="text" id="auditCommentField" placeholder="Auditor notes">
-                </div>
-                <div class="form-group">
-                    <label>Approval Status</label>
-                    <select id="auditApprovalField">
-                        <option value="Draft">Draft</option>
-                        <option value="Approved">Approved</option>
-                        <option value="Reviewed">Reviewed</option>
-                    </select>
-                </div>
+                <div class="form-group"><label>Reason</label><input type="text" id="auditReasonField" placeholder="Enter variance reason"></div>
+                <div class="form-group"><label>Responsible</label><input type="text" id="auditResponsibleField" placeholder="Responsible person/department"></div>
+                <div class="form-group"><label>Resolution</label><select id="auditResolutionField"><option value="Pending">Pending</option><option value="Adjusted">Adjusted</option><option value="Written Off">Written Off</option><option value="Investigation">Investigation</option></select></div>
+                <div class="form-group"><label>Comment</label><input type="text" id="auditCommentField" placeholder="Auditor notes"></div>
+                <div class="form-group"><label>Approval</label><select id="auditApprovalField"><option value="Draft">Draft</option><option value="Approved">Approved</option><option value="Reviewed">Reviewed</option></select></div>
             </div>
             <div class="btn-group">
                 <button class="btn btn-primary" id="updateAuditFindings">Update Audit Findings</button>
@@ -2216,56 +1943,22 @@
             </div>
             
             <div class="search-filter" style="margin: 1rem 0;">
-                <div class="search-box">
-                    <i class="fas fa-search"></i>
-                    <input type="text" id="searchAudit" placeholder="Search audit..." data-tooltip="Search by item or user">
-                </div>
-                <div class="filter-select">
-                    <select id="auditTypeFilter" data-tooltip="Filter by audit type">
-                        <option value="">All Types</option>
-                        <option value="purchase">Purchase</option>
-                        <option value="sale">Sale</option>
-                        <option value="damaged">Damaged</option>
-                        <option value="expired">Expired</option>
-                        <option value="verification">Verification</option>
-                    </select>
-                </div>
-                <div class="filter-select">
-                    <select id="auditDateFilter" data-tooltip="Filter by date">
-                        <option value="all">All Time</option>
-                        <option value="today">Today</option>
-                        <option value="week">This Week</option>
-                        <option value="month">This Month</option>
-                    </select>
-                </div>
+                <div class="search-box"><i class="fas fa-search"></i><input type="text" id="searchAudit" placeholder="Search audit..."></div>
+                <select id="auditTypeFilter"><option value="">All Types</option><option value="purchase">Purchase</option><option value="sale">Sale</option><option value="damaged">Damaged</option><option value="expired">Expired</option><option value="verification">Verification</option></select>
+                <select id="auditDateFilter"><option value="all">All Time</option><option value="today">Today</option><option value="week">This Week</option><option value="month">This Month</option></select>
             </div>
             
             <div class="table-container">
-                <table id="auditTable">
-                    <thead>
-                        <tr>
-                            <th data-tooltip="Date of event">Date</th>
-                            <th data-tooltip="Type of transaction">Type</th>
-                            <th data-tooltip="Item name">Item</th>
-                            <th data-tooltip="Category">Category</th>
-                            <th data-tooltip="Type">Type</th>
-                            <th data-tooltip="Base Unit">Base Unit</th>
-                            <th data-tooltip="Registered Unit">Reg Unit</th>
-                            <th data-tooltip="Display Unit">Display Unit</th>
-                            <th data-tooltip="User who performed action">User</th>
-                            <th data-tooltip="Quantity">Quantity</th>
-                            <th data-tooltip="Transaction value">Value</th>
-                            <th data-tooltip="Batch">Batch</th>
-                            <th data-tooltip="Expiry">Expiry</th>
-                            <th data-tooltip="Invoice #">Invoice</th>
-                            <th data-tooltip="Branch">Branch</th>
-                            <th data-tooltip="Additional details">Details</th>
-                        </tr>
-                    </thead>
-                    <tbody id="auditTableBody">
-                    </tbody>
-                </table>
+                <table id="auditTable"><thead><tr><th>Date</th><th>Type</th><th>Item</th><th>Category</th><th>Type</th><th>Base Unit</th><th>Reg Unit</th><th>Display Unit</th><th>User</th><th>Qty</th><th>Value</th><th>Batch</th><th>Expiry</th><th>Invoice</th><th>Branch</th><th>Details</th></tr></thead><tbody id="auditTableBody"></tbody></table>
             </div>
+        </div>
+    </div>
+
+    <div class="modal-fullscreen" id="fullscreenModal">
+        <div class="modal-content">
+            <span class="modal-exit" id="modalExitBtn">&times;</span>
+            <div id="modalMessage"></div>
+            <button class="btn btn-primary" id="modalConfirmBtn" style="margin-top: 20px;">OK</button>
         </div>
     </div>
 
@@ -2306,14 +1999,16 @@
                     registeredUnitsList: "box,strip,bottle,pack,carton,jar,tube,sachet,vial,ampoule",
                     userPassword: "123456",
                     adminPassword: "Dr. -----2123",
+                    masterPassword: "asse19maki23elishi13",
                     pharmacyName: "BETE‑MARKOSE PHARMACEUTICALS",
-                    brandName: "BP‑SMS"
+                    brandName: "BP‑SMS",
+                    buttonTexts: { register: "Register", sales: "Sales", inventory: "Inventory", deduct: "Deduct", review: "Review", audit: "Audit" }
                 };
                 this.charts = {};
                 this.notificationInterval = null;
+                this.masterPasswordSet = false;
                 this.init();
             }
-
             async init() {
                 await this.loadFromLocalStorage();
                 this.setupEventListeners();
@@ -2324,13 +2019,27 @@
                 this.updateDashboardFromCards();
                 this.updateTextEdits();
                 this.setupEditableText();
+                this.applyButtonCustomizations();
+                this.checkMasterPassword();
+            }
+
+            checkMasterPassword() {
+                if (!localStorage.getItem('bp-sms-master-authenticated')) {
+                    const masterInput = prompt("Enter Master Password for first-time setup (provided by system administrator):");
+                    if (masterInput === this.settings.masterPassword) {
+                        localStorage.setItem('bp-sms-master-authenticated', 'true');
+                        this.showToast("Master access granted", "success");
+                    } else if (masterInput !== null) {
+                        alert("Invalid master password. Some features will be limited.");
+                    }
+                }
             }
 
             setupEditableText() {
                 document.querySelectorAll('.editable-text').forEach(el => {
                     el.addEventListener('click', (e) => {
                         if (this.currentUserType !== 'admin') {
-                            this.showToast('Admin access required to edit text', 'warning');
+                            this.showFullscreenModal('Admin access required to edit text', 'warning');
                             return;
                         }
                         const currentText = el.innerText;
@@ -2341,10 +2050,41 @@
                             if (el.id === 'pharmacyOwnerName') this.settings.brandName = newText;
                             if (el.id === 'mainHeaderTitle') this.settings.pharmacyName = newText.split(' ')[0];
                             this.saveToLocalStorage();
-                            this.showToast('Text updated', 'success');
+                            this.showFullscreenModal('Text updated successfully!', 'success');
                         }
                     });
                 });
+            }
+
+            showFullscreenModal(message, type = 'info') {
+                const modal = document.getElementById('fullscreenModal');
+                const modalMsg = document.getElementById('modalMessage');
+                modalMsg.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}" style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);"></i><br>${message}`;
+                modal.classList.add('active');
+                const exitBtn = document.getElementById('modalExitBtn');
+                const confirmBtn = document.getElementById('modalConfirmBtn');
+                const closeModal = () => modal.classList.remove('active');
+                exitBtn.onclick = closeModal;
+                confirmBtn.onclick = closeModal;
+                setTimeout(() => { if(modal.classList.contains('active')) closeModal(); }, 3000);
+            }
+
+            applyButtonCustomizations() {
+                const btns = {
+                    navRegisterStock: this.settings.buttonTexts.register,
+                    navSales: this.settings.buttonTexts.sales,
+                    navCurrentStock: this.settings.buttonTexts.inventory,
+                    navReduceStock: this.settings.buttonTexts.deduct,
+                    navReview: this.settings.buttonTexts.review,
+                    navAudit: this.settings.buttonTexts.audit
+                };
+                for (const [id, text] of Object.entries(btns)) {
+                    const btn = document.getElementById(id);
+                    if (btn) {
+                        const span = btn.querySelector('.btn-text');
+                        if (span) span.textContent = text;
+                    }
+                }
             }
 
             updateTextEdits() {
@@ -2408,10 +2148,7 @@
             }
 
             saveToLocalStorage() {
-                const stockData = {
-                    stockItems: this.stockItems,
-                    currentId: this.currentId
-                };
+                const stockData = { stockItems: this.stockItems, currentId: this.currentId };
                 localStorage.setItem('bp-sms-stock', JSON.stringify(stockData));
                 localStorage.setItem('bp-sms-sales', JSON.stringify(this.salesData));
                 localStorage.setItem('bp-sms-audit', JSON.stringify(this.auditTrail));
@@ -2421,17 +2158,11 @@
 
             setupUnitLists() {
                 const baseList = document.getElementById('baseUnitList');
-                if (baseList) {
-                    baseList.innerHTML = this.settings.baseUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
-                }
+                if (baseList) baseList.innerHTML = this.settings.baseUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
                 const displayList = document.getElementById('displayUnitList');
-                if (displayList) {
-                    displayList.innerHTML = this.settings.displayUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
-                }
+                if (displayList) displayList.innerHTML = this.settings.displayUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
                 const registeredList = document.getElementById('registeredUnitList');
-                if (registeredList) {
-                    registeredList.innerHTML = this.settings.registeredUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
-                }
+                if (registeredList) registeredList.innerHTML = this.settings.registeredUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
             }
 
             setupAutoSync() {
@@ -2455,7 +2186,6 @@
                             document.getElementById('minStockDisplay').value = existing.minStockDisplay || 10;
                             document.getElementById('maxStockDisplay').value = existing.maxStockDisplay || 100;
                             document.getElementById('reorderLevelDisplay').value = existing.reorderLevelDisplay || 20;
-                            
                             this.showToast('Auto-filled from existing item', 'info');
                         }
                     });
@@ -2512,77 +2242,20 @@
                     const displayQty = item.quantityBase / item.displayToBaseFactor;
 
                     if (diffDays < 0 && this.settings.notifyExpiry) {
-                        notifications.push({
-                            type: 'critical',
-                            title: 'Item Expired',
-                            message: `${item.name} (${item.batchNumber}) has expired`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'expired',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'critical', title: 'Item Expired', message: `${item.name} (${item.batchNumber}) has expired`, itemId: item.id, page: 'stockInventoryPage', filter: 'expired', reviewed: false });
                     } else if (diffDays <= this.settings.expiryWarningDays && diffDays > 0 && this.settings.notifyExpiry) {
-                        notifications.push({
-                            type: 'critical',
-                            title: 'Urgent: Expiring Soon',
-                            message: `${item.name} expires in ${diffDays} days`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'expiry',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'critical', title: 'Urgent: Expiring Soon', message: `${item.name} expires in ${diffDays} days`, itemId: item.id, page: 'stockInventoryPage', filter: 'expiry', reviewed: false });
                     } else if (diffDays <= this.settings.expiryWarningDays60 && diffDays > 0 && this.settings.notifyExpiry) {
-                        notifications.push({
-                            type: 'warning',
-                            title: 'Near Expiry',
-                            message: `${item.name} expires in ${diffDays} days`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'expiry',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'warning', title: 'Near Expiry', message: `${item.name} expires in ${diffDays} days`, itemId: item.id, page: 'stockInventoryPage', filter: 'expiry', reviewed: false });
                     }
-
                     if (displayQty <= 0 && this.settings.notifyReorder) {
-                        notifications.push({
-                            type: 'critical',
-                            title: 'Stock Out',
-                            message: `${item.name} is out of stock`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'stockout',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'critical', title: 'Stock Out', message: `${item.name} is out of stock`, itemId: item.id, page: 'stockInventoryPage', filter: 'stockout', reviewed: false });
                     } else if (displayQty <= item.reorderLevelDisplay && displayQty > 0 && this.settings.notifyReorder) {
-                        notifications.push({
-                            type: 'critical',
-                            title: 'Reorder Now',
-                            message: `${item.name} at reorder level (${displayQty.toFixed(2)} ${item.displayUnit})`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'reorder',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'critical', title: 'Reorder Now', message: `${item.name} at reorder level (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'reorder', reviewed: false });
                     } else if (displayQty < item.minStockDisplay && displayQty > 0 && this.settings.notifyLowStock) {
-                        notifications.push({
-                            type: 'warning',
-                            title: 'Low Stock',
-                            message: `${item.name} is below minimum (${displayQty.toFixed(2)} ${item.displayUnit})`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'low',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'warning', title: 'Low Stock', message: `${item.name} is below minimum (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'low', reviewed: false });
                     } else if (displayQty > item.maxStockDisplay && this.settings.notifyOverstock) {
-                        notifications.push({
-                            type: 'info',
-                            title: 'Overstock',
-                            message: `${item.name} exceeds maximum (${displayQty.toFixed(2)} ${item.displayUnit})`,
-                            itemId: item.id,
-                            page: 'stockInventoryPage',
-                            filter: 'over',
-                            reviewed: false
-                        });
+                        notifications.push({ type: 'info', title: 'Overstock', message: `${item.name} exceeds maximum (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'over', reviewed: false });
                     }
                 });
 
@@ -2596,17 +2269,13 @@
                 const critical = notifications.filter(n => n.type === 'critical').length;
                 const warning = notifications.filter(n => n.type === 'warning').length;
                 const info = notifications.filter(n => n.type === 'info').length;
-
                 document.getElementById('criticalCounter').querySelector('.count').textContent = critical;
                 document.getElementById('warningCounter').querySelector('.count').textContent = warning;
                 document.getElementById('infoCounter').querySelector('.count').textContent = info;
             }
 
             showNewNotifications(notifications) {
-                notifications.slice(0, 3).forEach(n => {
-                    this.showToast(n.message, n.type);
-                });
-
+                notifications.slice(0, 3).forEach(n => { this.showToast(n.message, n.type); });
                 if (this.settings.notifySound && notifications.length > 0) {
                     document.getElementById('notificationSound').play().catch(() => {});
                 }
@@ -2616,55 +2285,35 @@
                 const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <i class="fas fa-${type === 'critical' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                    ${message}
-                    <button class="notification-close" onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: var(--light); cursor: pointer;">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
+                toast.innerHTML = `<i class="fas fa-${type === 'critical' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>${message}<button class="notification-close" onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: var(--light); cursor: pointer;"><i class="fas fa-times"></i></button>`;
                 container.appendChild(toast);
                 setTimeout(() => toast.remove(), 5000);
             }
 
             openNotificationPanel(type) {
-                if (this.currentUserType !== 'admin') {
-                    this.showToast('Admin only', 'warning');
-                    return;
-                }
+                if (this.currentUserType !== 'admin') { this.showToast('Admin only', 'warning'); return; }
                 const panel = document.getElementById('notificationPanel');
                 const list = document.getElementById('notificationList');
                 const title = document.getElementById('notificationPanelTitle');
-
                 const filtered = this.notifications.filter(n => n.type === type);
                 title.textContent = type === 'critical' ? 'Urgent Alerts' : type === 'warning' ? 'Warnings' : 'Updates';
-
-                list.innerHTML = filtered.map(n => `
-                    <div class="notification-list-item ${n.type}" onclick="window.ultraStock.goToNotification(${JSON.stringify(n).replace(/"/g, '&quot;')})">
-                        <div class="title">${n.title}</div>
-                        <div class="message">${n.message}</div>
-                        <div class="time">${new Date().toLocaleTimeString()}</div>
-                    </div>
-                `).join('') || '<div style="text-align: center; padding: 1rem; color: var(--gray);">No notifications</div>';
-
+                list.innerHTML = filtered.map(n => `<div class="notification-list-item ${n.type}" onclick="window.ultraStock.goToNotification(${JSON.stringify(n).replace(/"/g, '&quot;')})"><div class="title">${n.title}</div><div class="message">${n.message}</div><div class="time">${new Date().toLocaleTimeString()}</div></div>`).join('') || '<div style="text-align: center; padding: 1rem; color: var(--gray);">No notifications</div>';
                 panel.classList.add('active');
+            }
+
+            closeNotificationPanel() {
+                document.getElementById('notificationPanel').classList.remove('active');
             }
 
             goToNotification(notification) {
                 if (notification.page) {
                     this.openPage(notification.page);
                     if (notification.filter) {
-                        setTimeout(() => {
-                            const filter = document.getElementById('statusFilter');
-                            if (filter) {
-                                filter.value = notification.filter;
-                                this.renderTable();
-                            }
-                        }, 100);
+                        setTimeout(() => { const filter = document.getElementById('statusFilter'); if (filter) { filter.value = notification.filter; this.renderTable(); } }, 100);
                     }
                 }
                 notification.reviewed = true;
-                document.getElementById('notificationPanel').classList.remove('active');
+                this.closeNotificationPanel();
                 this.notifications = this.notifications.filter(n => n !== notification);
                 this.updateNotificationCounters(this.notifications);
                 this.showToast('Notification reviewed and cleared', 'success');
@@ -2672,19 +2321,15 @@
 
             setupEventListeners() {
                 document.getElementById('loginBtn').addEventListener('click', () => this.handleLogin());
-
                 document.getElementById('criticalCounter').addEventListener('click', () => this.openNotificationPanel('critical'));
                 document.getElementById('warningCounter').addEventListener('click', () => this.openNotificationPanel('warning'));
                 document.getElementById('infoCounter').addEventListener('click', () => this.openNotificationPanel('info'));
-
                 document.getElementById('settingsIcon').addEventListener('click', () => {
                     if (this.currentUserType !== 'admin') { this.showToast('Admin only', 'warning'); return; }
                     document.getElementById('settingsPanel').classList.add('active');
                     this.loadSettings();
                 });
-                document.getElementById('closeSettings').addEventListener('click', () => {
-                    document.getElementById('settingsPanel').classList.remove('active');
-                });
+                document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsPanel').classList.remove('active'));
                 document.getElementById('saveSettings').addEventListener('click', () => this.saveSettings());
                 document.getElementById('backupData').addEventListener('click', () => this.backupData());
                 document.getElementById('restoreData').addEventListener('click', () => this.restoreData());
@@ -2692,59 +2337,34 @@
                 document.getElementById('balanceVerificationBtn').addEventListener('click', () => this.verifyAllBalances());
                 document.getElementById('updateAuditFindings')?.addEventListener('click', () => this.updateAuditFindingsManual());
                 document.getElementById('exportAuditReport')?.addEventListener('click', () => this.exportAuditReport());
-
                 document.getElementById('navRegisterStock').addEventListener('click', () => this.openPage('registerStockPage'));
                 document.getElementById('navSales').addEventListener('click', () => this.openPage('salesPage'));
                 document.getElementById('navCurrentStock').addEventListener('click', () => this.openPage('stockInventoryPage'));
                 document.getElementById('navReduceStock').addEventListener('click', () => this.openPage('reduceStockPage'));
                 document.getElementById('navReview').addEventListener('click', () => this.openPage('reviewPage'));
                 document.getElementById('navAudit').addEventListener('click', () => this.openPage('auditPage'));
-
                 document.querySelectorAll('.close-full-screen').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const pageId = btn.dataset.close || btn.closest('.full-screen-mode').id;
-                        document.getElementById(pageId).classList.remove('active');
-                    });
+                    btn.addEventListener('click', (e) => { const pageId = btn.dataset.close || btn.closest('.full-screen-mode').id; document.getElementById(pageId).classList.remove('active'); });
                 });
-
                 document.querySelectorAll('.dashboard-card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        const page = card.dataset.page;
-                        const filter = card.dataset.filter;
-                        if (page) this.openPage(page, filter);
-                    });
+                    card.addEventListener('click', (e) => { const page = card.dataset.page; const filter = card.dataset.filter; if (page) this.openPage(page, filter); });
                 });
-
-                document.getElementById('stockForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.saveItem();
-                });
+                document.getElementById('stockForm').addEventListener('submit', (e) => { e.preventDefault(); this.saveItem(); });
                 document.getElementById('clearForm').addEventListener('click', () => this.clearRegisterForm());
-
-                document.getElementById('salesForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.processSale();
-                });
+                document.getElementById('salesForm').addEventListener('submit', (e) => { e.preventDefault(); this.processSale(); });
                 document.getElementById('addSalesRow').addEventListener('click', () => this.addSalesRow());
                 document.getElementById('clearSalesForm').addEventListener('click', () => this.clearSalesForm());
-
-                document.getElementById('reduceStockForm').addEventListener('submit', (e) => {
-                    e.preventDefault();
-                    this.reduceStock();
-                });
+                document.getElementById('reduceStockForm').addEventListener('submit', (e) => { e.preventDefault(); this.reduceStock(); });
                 document.getElementById('clearReduceForm').addEventListener('click', () => this.clearReduceForm());
                 document.getElementById('reduceItemSelect').addEventListener('change', () => this.updateReduceDetails());
-
                 document.getElementById('searchInput')?.addEventListener('input', () => this.renderTable());
                 document.getElementById('categoryFilter')?.addEventListener('change', () => this.renderTable());
                 document.getElementById('branchFilter')?.addEventListener('change', () => this.renderTable());
                 document.getElementById('statusFilter')?.addEventListener('change', () => this.renderTable());
                 document.getElementById('clearFilters')?.addEventListener('click', () => this.clearFilters());
-
                 ['salesPeriodFilter', 'inventoryPeriodFilter', 'deductPeriodFilter', 'reviewPeriodFilter', 'auditPeriodFilter'].forEach(id => {
                     document.getElementById(id)?.addEventListener('change', () => this.refreshActivePage());
                 });
-
                 document.getElementById('searchAudit')?.addEventListener('input', () => this.renderAuditTable());
                 document.getElementById('auditTypeFilter')?.addEventListener('change', () => this.renderAuditTable());
                 document.getElementById('auditDateFilter')?.addEventListener('change', () => this.renderAuditTable());
@@ -2754,87 +2374,33 @@
                 const type = document.getElementById('loginType').value;
                 const password = document.getElementById('password').value;
                 const expectedPassword = type === 'user' ? this.settings.userPassword : this.settings.adminPassword;
-
-                if (!type) {
-                    this.showToast('Select login type', 'warning');
-                    return;
-                }
-
+                if (!type) { this.showToast('Select login type', 'warning'); return; }
                 if (password === expectedPassword) {
                     this.isLoggedIn = true;
                     this.currentUserType = type;
-                    
-                    document.querySelectorAll('.admin-only').forEach(el => {
-                        el.style.display = type === 'admin' ? 'flex' : 'none';
-                    });
-                    document.querySelectorAll('.editable-text').forEach(el => {
-                        if (type === 'admin') el.classList.add('admin-mode');
-                        else el.classList.remove('admin-mode');
-                    });
-
+                    document.querySelectorAll('.admin-only').forEach(el => { el.style.display = type === 'admin' ? 'flex' : 'none'; });
+                    document.querySelectorAll('.editable-text').forEach(el => { if (type === 'admin') el.classList.add('admin-mode'); else el.classList.remove('admin-mode'); });
                     document.getElementById('welcomePage').style.opacity = '0';
-                    setTimeout(() => {
-                        document.getElementById('welcomePage').style.display = 'none';
-                        document.getElementById('mainContainer').style.display = 'block';
-                        this.showToast('Login successful!', 'success');
-                    }, 300);
-                } else {
-                    this.showToast('Invalid password', 'warning');
-                }
+                    setTimeout(() => { document.getElementById('welcomePage').style.display = 'none'; document.getElementById('mainContainer').style.display = 'block'; this.showToast('Login successful!', 'success'); }, 300);
+                } else { this.showToast('Invalid password', 'warning'); }
             }
 
             openPage(pageId, filter = null) {
-                if (!this.isLoggedIn) {
-                    this.showToast('Please login first', 'warning');
-                    return;
-                }
-                if ((pageId === 'reviewPage' || pageId === 'auditPage') && this.currentUserType !== 'admin') {
-                    this.showToast('Admin access only', 'warning');
-                    return;
-                }
-
+                if (!this.isLoggedIn) { this.showToast('Please login first', 'warning'); return; }
+                if ((pageId === 'reviewPage' || pageId === 'auditPage') && this.currentUserType !== 'admin') { this.showToast('Admin access only', 'warning'); return; }
                 document.querySelectorAll('.full-screen-mode').forEach(p => p.classList.remove('active'));
                 document.getElementById(pageId).classList.add('active');
-                
                 const branchSpan = document.getElementById(pageId + 'BranchLabel') || document.getElementById(pageId.replace('Page','') + 'BranchLabel');
                 if (branchSpan) branchSpan.textContent = this.currentBranch === 'pharmacy' ? 'Pharmacy' : 'Wholesaler';
-
                 const branchSelect = document.getElementById('branch') || document.getElementById('salesBranch') || document.getElementById('reduceBranch');
                 if (branchSelect) branchSelect.value = this.currentBranch;
-
                 switch(pageId) {
-                    case 'registerStockPage':
-                        document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0];
-                        document.getElementById('markup').value = this.settings.defaultMarkup;
-                        this.applyMarkup();
-                        break;
-                    case 'salesPage':
-                        document.getElementById('salesDate').value = new Date().toISOString().split('T')[0];
-                        document.getElementById('salesInvoiceNumber').value = `INV-${Date.now()}`;
-                        this.clearSalesForm();
-                        break;
-                    case 'stockInventoryPage':
-                        this.renderTable();
-                        if (filter) {
-                            setTimeout(() => {
-                                const filterEl = document.getElementById('statusFilter');
-                                if (filterEl) {
-                                    filterEl.value = filter;
-                                    this.renderTable();
-                                }
-                            }, 100);
-                        }
-                        break;
-                    case 'reduceStockPage':
-                        this.initReducePage();
-                        break;
-                    case 'reviewPage':
-                        this.updateReviewDashboard();
-                        break;
-                    case 'auditPage':
-                        this.renderAuditTable();
-                        this.updateAuditSummary();
-                        break;
+                    case 'registerStockPage': document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; document.getElementById('markup').value = this.settings.defaultMarkup; this.applyMarkup(); break;
+                    case 'salesPage': document.getElementById('salesDate').value = new Date().toISOString().split('T')[0]; if(!document.getElementById('salesInvoiceNumber').value) document.getElementById('salesInvoiceNumber').value = `INV-${Date.now()}`; this.clearSalesForm(); break;
+                    case 'stockInventoryPage': this.renderTable(); if(filter){ setTimeout(()=>{const f=document.getElementById('statusFilter'); if(f){ f.value=filter; this.renderTable();}},100);} break;
+                    case 'reduceStockPage': this.initReducePage(); break;
+                    case 'reviewPage': this.updateReviewDashboard(); break;
+                    case 'auditPage': this.renderAuditTable(); this.updateAuditSummary(); break;
                 }
             }
 
@@ -2853,28 +2419,12 @@
                 const initialQty = parseFloat(document.getElementById('initialQuantity').value) || 0;
                 const displayToBase = parseFloat(document.getElementById('displayToBaseFactor').value) || 1;
                 const regToBase = parseFloat(document.getElementById('registeredToBaseFactor').value) || 1;
-                
-                let baseQty = 0;
-                let displayQty = 0;
-                let regQty = 0;
-
+                let baseQty = 0, displayQty = 0, regQty = 0;
                 switch(initialType) {
-                    case 'registered':
-                        regQty = initialQty;
-                        baseQty = regQty * regToBase;
-                        displayQty = baseQty / displayToBase;
-                        break;
-                    case 'display':
-                        displayQty = initialQty;
-                        baseQty = displayQty * displayToBase;
-                        regQty = baseQty / regToBase;
-                        break;
-                    default:
-                        baseQty = initialQty;
-                        displayQty = baseQty / displayToBase;
-                        regQty = baseQty / regToBase;
+                    case 'registered': regQty = initialQty; baseQty = regQty * regToBase; displayQty = baseQty / displayToBase; break;
+                    case 'display': displayQty = initialQty; baseQty = displayQty * displayToBase; regQty = baseQty / regToBase; break;
+                    default: baseQty = initialQty; displayQty = baseQty / displayToBase; regQty = baseQty / regToBase;
                 }
-
                 const item = {
                     id: this.isEditing ? this.editingId : this.currentId++,
                     customId: document.getElementById('itemIdInput').value.trim() || `ITEM-${Date.now()}`,
@@ -2919,22 +2469,9 @@
                     createdAt: new Date().toISOString(),
                     movementHistory: []
                 };
-
-                if (!item.name || !item.baseUnit || !item.registeredUnit || !item.displayUnit) {
-                    this.showToast('Fill all required fields', 'warning');
-                    return;
-                }
-
-                if (this.isEditing) {
-                    const index = this.stockItems.findIndex(i => i.id === item.id);
-                    this.stockItems[index] = item;
-                    this.showToast('Item updated', 'success');
-                } else {
-                    this.stockItems.push(item);
-                    this.recordAudit('purchase', item.id, item.name, displayQty, 'stock_in', item.branch, item.registrant, { value: displayQty * item.purchasePricePerDisplay });
-                    this.showToast('Item registered', 'success');
-                }
-
+                if (!item.name || !item.baseUnit || !item.registeredUnit || !item.displayUnit) { this.showToast('Fill all required fields', 'warning'); return; }
+                if (this.isEditing) { const index = this.stockItems.findIndex(i => i.id === item.id); this.stockItems[index] = item; this.showToast('Item updated', 'success'); }
+                else { this.stockItems.push(item); this.recordAudit('purchase', item.id, item.name, displayQty, 'stock_in', item.branch, item.registrant, { value: displayQty * item.purchasePricePerDisplay }); this.showToast('Item registered', 'success'); }
                 this.saveToLocalStorage();
                 this.clearRegisterForm();
                 this.updateItemNameList();
@@ -2961,62 +2498,52 @@
                 const row = document.createElement('tr');
                 row.setAttribute('data-id', rowId);
                 row.innerHTML = `
-                    <td><input type="text" class="sales-item" list="salesItemsList" placeholder="Search item..." style="width:100%;"></td>
-                    <td><input type="text" class="sales-category" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-type" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-base-unit" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-reg-unit" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-display-unit" readonly style="width:100%;"></td>
-                    <td><input type="number" class="sales-qty-base" readonly style="width:100%;"></td>
-                    <td><input type="number" class="sales-qty-reg" readonly style="width:100%;"></td>
-                    <td><input type="number" class="sales-qty" min="0.01" step="0.01" style="width:100%;"></td>
-                    <td><input type="number" class="sales-price" readonly style="width:100%;"></td>
-                    <td><input type="number" class="sales-markup-val" min="0" step="0.1" value="0" style="width:100%;"></td>
-                    <td><input type="number" class="sales-discount-val" min="0" step="0.1" value="0" style="width:100%;"></td>
-                    <td><input type="number" class="sales-total" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-batch" readonly style="width:100%;"></td>
-                    <td><input type="text" class="sales-expiry" readonly style="width:100%;"></td>
+                    <td><input type="text" class="sales-item" list="salesItemsList" placeholder="Search item..." style="width:120px;"></td>
+                    <td><input type="text" class="sales-category" readonly style="width:80px;"></td>
+                    <td><input type="text" class="sales-type" readonly style="width:80px;"></td>
+                    <td><input type="text" class="sales-base-unit" readonly style="width:70px;"></td>
+                    <td><input type="text" class="sales-reg-unit" readonly style="width:70px;"></td>
+                    <td><input type="text" class="sales-display-unit" readonly style="width:70px;"></td>
+                    <td><input type="number" class="sales-qty-base" readonly style="width:80px;"></td>
+                    <td><input type="number" class="sales-qty-reg" readonly style="width:80px;"></td>
+                    <td><input type="number" class="sales-qty" min="0.01" step="0.01" style="width:80px;"></td>
+                    <td><input type="number" class="sales-base-price" step="0.01" style="width:80px;"></td>
+                    <td><input type="number" class="sales-reg-price" step="0.01" style="width:80px;"></td>
+                    <td><input type="number" class="sales-disp-price" step="0.01" style="width:80px;"></td>
+                    <td><input type="number" class="sales-base-total" readonly style="width:80px;"></td>
+                    <td><input type="number" class="sales-reg-total" readonly style="width:80px;"></td>
+                    <td><input type="number" class="sales-disp-total" readonly style="width:80px;"></td>
+                    <td><input type="number" class="sales-markup-val" min="0" step="0.1" value="0" style="width:70px;"></td>
+                    <td><input type="number" class="sales-discount-val" min="0" step="0.1" value="0" style="width:70px;"></td>
+                    <td><input type="number" class="sales-vat-rate" readonly value="${this.settings.defaultVAT}" style="width:60px;"></td>
+                    <td><input type="number" class="sales-grand-total" readonly style="width:90px;"></td>
+                    <td><input type="text" class="sales-batch" readonly style="width:80px;"></td>
+                    <td><input type="text" class="sales-expiry" readonly style="width:90px;"></td>
                     <td><button type="button" class="action-btn" onclick="this.closest('tr').remove(); window.ultraStock.updateSalesTotals()"><i class="fas fa-times"></i></button></td>
                 `;
                 tbody.appendChild(row);
-
                 const itemInput = row.querySelector('.sales-item');
                 itemInput.addEventListener('input', () => this.updateSalesRow(rowId));
-                row.querySelectorAll('.sales-qty, .sales-markup-val, .sales-discount-val').forEach(input => {
+                row.querySelectorAll('.sales-qty, .sales-markup-val, .sales-discount-val, .sales-base-price, .sales-reg-price, .sales-disp-price').forEach(input => {
                     input.addEventListener('input', () => this.calcSalesRow(rowId));
                 });
-
                 this.updateSalesItemsList();
             }
 
             updateSalesItemsList() {
-                const datalist = document.getElementById('salesItemsList');
-                if (!datalist) {
-                    const dl = document.createElement('datalist');
-                    dl.id = 'salesItemsList';
-                    document.body.appendChild(dl);
-                }
-                const list = document.getElementById('salesItemsList');
-                if (list) {
-                    list.innerHTML = this.stockItems
-                        .filter(i => i.branch === this.currentBranch && i.quantityDisplay > 0)
-                        .sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate))
-                        .map(i => `<option value="${i.name}">${i.name} (${i.quantityDisplay.toFixed(2)} ${i.displayUnit}) - Exp: ${i.expiryDate}</option>`)
-                        .join('');
-                }
+                let datalist = document.getElementById('salesItemsList');
+                if (!datalist) { const dl = document.createElement('datalist'); dl.id = 'salesItemsList'; document.body.appendChild(dl); datalist = dl; }
+                datalist.innerHTML = this.stockItems.filter(i => i.branch === this.currentBranch && i.quantityDisplay > 0).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).map(i => `<option value="${i.name}">${i.name} (${i.quantityDisplay.toFixed(2)} ${i.displayUnit}) - Exp: ${i.expiryDate}</option>`).join('');
             }
 
             updateSalesRow(rowId) {
                 const row = document.querySelector(`tr[data-id="${rowId}"]`);
                 const itemName = row.querySelector('.sales-item').value.trim();
                 if (!itemName) return;
-
                 const items = this.stockItems.filter(i => i.name.toLowerCase() === itemName.toLowerCase() && i.branch === this.currentBranch && i.quantityDisplay > 0);
                 if (items.length === 0) return;
-                
-                items.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+                items.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
                 const item = items[0];
-
                 row.querySelector('.sales-category').value = item.category || '';
                 row.querySelector('.sales-type').value = item.type || '';
                 row.querySelector('.sales-base-unit').value = item.baseUnit;
@@ -3024,34 +2551,40 @@
                 row.querySelector('.sales-display-unit').value = item.displayUnit;
                 row.querySelector('.sales-qty-base').value = item.quantityBase.toFixed(2);
                 row.querySelector('.sales-qty-reg').value = item.quantityRegistered.toFixed(2);
-                row.querySelector('.sales-price').value = item.sellingPricePerDisplay.toFixed(2);
+                row.querySelector('.sales-base-price').value = (item.purchasePricePerDisplay / item.displayToBaseFactor).toFixed(4);
+                row.querySelector('.sales-reg-price').value = (item.purchasePricePerDisplay * (item.registeredToBaseFactor / item.displayToBaseFactor)).toFixed(4);
+                row.querySelector('.sales-disp-price').value = item.sellingPricePerDisplay;
                 row.querySelector('.sales-qty').max = item.quantityDisplay;
                 row.querySelector('.sales-batch').value = item.batchNumber || '';
                 row.querySelector('.sales-expiry').value = item.expiryDate || '';
                 row.setAttribute('data-item-id', item.id);
                 row.setAttribute('data-purchase-price', item.purchasePricePerDisplay);
                 row.setAttribute('data-display-factor', item.displayToBaseFactor);
+                row.setAttribute('data-reg-factor', item.registeredToBaseFactor);
                 this.calcSalesRow(rowId);
             }
 
             calcSalesRow(rowId) {
                 const row = document.querySelector(`tr[data-id="${rowId}"]`);
                 const qty = parseFloat(row.querySelector('.sales-qty').value) || 0;
-                const price = parseFloat(row.querySelector('.sales-price').value) || 0;
+                const basePrice = parseFloat(row.querySelector('.sales-base-price').value) || 0;
+                const regPrice = parseFloat(row.querySelector('.sales-reg-price').value) || 0;
+                const dispPrice = parseFloat(row.querySelector('.sales-disp-price').value) || 0;
                 const markupVal = parseFloat(row.querySelector('.sales-markup-val').value) || 0;
                 const discountVal = parseFloat(row.querySelector('.sales-discount-val').value) || 0;
                 const vatRate = this.settings.defaultVAT;
-
-                let finalPrice = price + markupVal;
-                finalPrice = finalPrice - discountVal;
-                if (finalPrice < 0) finalPrice = 0;
-                row.querySelector('.sales-price').value = finalPrice.toFixed(2);
-                
-                const subtotal = qty * finalPrice;
-                const vatAmount = subtotal * (vatRate / 100);
-                const total = subtotal + vatAmount;
-                row.querySelector('.sales-total').value = total.toFixed(2);
-
+                let finalDispPrice = dispPrice + markupVal - discountVal;
+                if (finalDispPrice < 0) finalDispPrice = 0;
+                row.querySelector('.sales-disp-price').value = finalDispPrice.toFixed(2);
+                const baseTotal = qty * (finalDispPrice / (parseFloat(row.getAttribute('data-display-factor')) || 1));
+                const regTotal = qty * (finalDispPrice * ((parseFloat(row.getAttribute('data-reg-factor')) || 1) / (parseFloat(row.getAttribute('data-display-factor')) || 1)));
+                const dispTotal = qty * finalDispPrice;
+                row.querySelector('.sales-base-total').value = baseTotal.toFixed(2);
+                row.querySelector('.sales-reg-total').value = regTotal.toFixed(2);
+                row.querySelector('.sales-disp-total').value = dispTotal.toFixed(2);
+                const vatAmount = dispTotal * (vatRate / 100);
+                const grandTotal = dispTotal + vatAmount;
+                row.querySelector('.sales-grand-total').value = grandTotal.toFixed(2);
                 this.updateSalesTotals();
             }
 
@@ -3059,25 +2592,16 @@
                 let subtotal = 0, discount = 0, vat = 0, cogs = 0;
                 document.querySelectorAll('#salesItemsBody tr').forEach(row => {
                     const qty = parseFloat(row.querySelector('.sales-qty').value) || 0;
-                    const price = parseFloat(row.querySelector('.sales-price').value) || 0;
+                    const dispTotal = parseFloat(row.querySelector('.sales-disp-total').value) || 0;
                     const itemId = row.getAttribute('data-item-id');
-                    
                     const item = this.stockItems.find(i => i.id == itemId);
-                    if (item) {
-                        const baseQty = qty * item.displayToBaseFactor;
-                        const costPerBase = item.purchasePricePerDisplay / item.displayToBaseFactor;
-                        cogs += baseQty * costPerBase;
-                    }
-
-                    const sub = qty * price;
-                    subtotal += sub;
-                    vat += sub * (this.settings.defaultVAT / 100);
+                    if (item) { const baseQty = qty * item.displayToBaseFactor; const costPerBase = item.purchasePricePerDisplay / item.displayToBaseFactor; cogs += baseQty * costPerBase; }
+                    subtotal += dispTotal;
+                    vat += dispTotal * (this.settings.defaultVAT / 100);
                 });
-
                 const total = subtotal + vat;
                 const profit = total - cogs;
                 const margin = total > 0 ? (profit / total * 100) : 0;
-
                 document.getElementById('salesSubtotal').textContent = `ETB ${subtotal.toFixed(2)}`;
                 document.getElementById('salesTotalDiscount').textContent = `ETB ${discount.toFixed(2)}`;
                 document.getElementById('salesTotalVAT').textContent = `ETB ${vat.toFixed(2)}`;
@@ -3090,67 +2614,35 @@
             processSale() {
                 const items = [];
                 let valid = true;
-
                 document.querySelectorAll('#salesItemsBody tr').forEach(row => {
                     const itemId = row.getAttribute('data-item-id');
                     const qty = parseFloat(row.querySelector('.sales-qty').value) || 0;
                     if (!itemId || qty <= 0) return;
-
                     const item = this.stockItems.find(i => i.id == itemId);
-                    if (!item) {
-                        valid = false;
-                        return;
-                    }
-
-                    if (qty > item.quantityDisplay) {
-                        this.showToast(`Insufficient stock for ${item.name}`, 'warning');
-                        valid = false;
-                        return;
-                    }
-
+                    if (!item) { valid = false; return; }
+                    if (qty > item.quantityDisplay) { this.showToast(`Insufficient stock for ${item.name}`, 'warning'); valid = false; return; }
                     const baseQty = qty * item.displayToBaseFactor;
                     const regQty = baseQty / item.registeredToBaseFactor;
-
                     items.push({
-                        itemId: item.id,
-                        name: item.name,
-                        category: item.category,
-                        type: item.type,
-                        baseUnit: item.baseUnit,
-                        registeredUnit: item.registeredUnit,
-                        displayUnit: item.displayUnit,
-                        quantity: qty,
-                        quantityBase: baseQty,
-                        quantityRegistered: regQty,
-                        unitPrice: parseFloat(row.querySelector('.sales-price').value),
-                        discountPercent: 0,
-                        vat: this.settings.defaultVAT,
-                        subtotal: qty * parseFloat(row.querySelector('.sales-price').value),
-                        netAmount: parseFloat(row.querySelector('.sales-total').value) || 0,
-                        batch: item.batchNumber,
-                        expiry: item.expiryDate,
-                        profit: (qty * parseFloat(row.querySelector('.sales-price').value)) - (baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor))
+                        itemId: item.id, name: item.name, category: item.category, type: item.type,
+                        baseUnit: item.baseUnit, registeredUnit: item.registeredUnit, displayUnit: item.displayUnit,
+                        quantity: qty, quantityBase: baseQty, quantityRegistered: regQty,
+                        unitPrice: parseFloat(row.querySelector('.sales-disp-price').value),
+                        discountPercent: 0, vat: this.settings.defaultVAT,
+                        subtotal: qty * parseFloat(row.querySelector('.sales-disp-price').value),
+                        netAmount: parseFloat(row.querySelector('.sales-grand-total').value) || 0,
+                        batch: item.batchNumber, expiry: item.expiryDate,
+                        profit: (qty * parseFloat(row.querySelector('.sales-disp-price').value)) - (baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor))
                     });
                 });
-
-                if (!valid || items.length === 0) {
-                    this.showToast('Add valid items', 'warning');
-                    return;
-                }
-
+                if (!valid || items.length === 0) { this.showToast('Add valid items', 'warning'); return; }
                 const sale = {
-                    id: this.salesCounter++,
-                    invoiceNumber: document.getElementById('salesInvoiceNumber').value || `INV-${Date.now()}`,
-                    date: document.getElementById('salesDate').value,
-                    branch: this.currentBranch,
-                    warehouse: document.getElementById('salesWarehouse').value,
-                    storageCondition: document.getElementById('salesStorageCondition').value,
-                    shelfBin: document.getElementById('salesShelfBin').value,
-                    paymentMethod: document.getElementById('salesPaymentMethod').value,
-                    customerName: document.getElementById('customerName').value.trim(),
-                    customerType: document.getElementById('customerType').value,
-                    salesperson: document.getElementById('salesperson').value,
-                    items: items,
+                    id: this.salesCounter++, invoiceNumber: document.getElementById('salesInvoiceNumber').value || `INV-${Date.now()}`,
+                    date: document.getElementById('salesDate').value, branch: this.currentBranch,
+                    warehouse: document.getElementById('salesWarehouse').value, storageCondition: document.getElementById('salesStorageCondition').value,
+                    shelfBin: document.getElementById('salesShelfBin').value, paymentMethod: document.getElementById('salesPaymentMethod').value,
+                    customerName: document.getElementById('customerName').value.trim(), customerType: document.getElementById('customerType').value,
+                    salesperson: document.getElementById('salesperson').value, items: items,
                     subtotal: parseFloat(document.getElementById('salesSubtotal').textContent.replace('ETB ', '')),
                     discount: parseFloat(document.getElementById('salesTotalDiscount').textContent.replace('ETB ', '')),
                     vat: parseFloat(document.getElementById('salesTotalVAT').textContent.replace('ETB ', '')),
@@ -3160,7 +2652,6 @@
                     profitMargin: parseFloat(document.getElementById('salesProfitMargin').textContent.replace('%', '')),
                     timestamp: new Date().toISOString()
                 };
-
                 items.forEach(item => {
                     const stockItem = this.stockItems.find(i => i.id === item.itemId);
                     stockItem.quantityDisplay -= item.quantity;
@@ -3170,13 +2661,8 @@
                     stockItem.endingBalance = stockItem.quantityDisplay;
                     stockItem.variance = (stockItem.physicalCount || stockItem.quantityDisplay) - stockItem.endingBalance;
                     this.updateItemMovement(stockItem.id, item.quantity);
-                    this.recordAudit('sale', stockItem.id, stockItem.name, item.quantity, 'sale_out', sale.branch, sale.salesperson, { 
-                        value: item.netAmount,
-                        invoice: sale.invoiceNumber,
-                        customer: sale.customerName 
-                    });
+                    this.recordAudit('sale', stockItem.id, stockItem.name, item.quantity, 'sale_out', sale.branch, sale.salesperson, { value: item.netAmount, invoice: sale.invoiceNumber, customer: sale.customerName });
                 });
-
                 this.salesData.push(sale);
                 this.saveToLocalStorage();
                 this.showToast(`Sale saved: ${sale.invoiceNumber}`, 'success');
@@ -3195,25 +2681,17 @@
             initReducePage() {
                 const select = document.getElementById('reduceItemSelect');
                 select.innerHTML = '<option value="">Choose item...</option>';
-                this.stockItems.filter(i => i.branch === this.currentBranch).forEach(item => {
-                    const opt = document.createElement('option');
-                    opt.value = item.id;
-                    opt.textContent = `${item.name} (${item.quantityDisplay.toFixed(2)} ${item.displayUnit}) - Exp: ${item.expiryDate}`;
-                    select.appendChild(opt);
-                });
+                this.stockItems.filter(i => i.branch === this.currentBranch).forEach(item => { const opt = document.createElement('option'); opt.value = item.id; opt.textContent = `${item.name} (${item.quantityDisplay.toFixed(2)} ${item.displayUnit}) - Exp: ${item.expiryDate}`; select.appendChild(opt); });
                 this.clearReduceForm();
                 this.renderDeductionHistory();
             }
 
             updateReduceDetails() {
-                const select = document.getElementById('reduceItemSelect');
-                const id = select.value;
+                const id = document.getElementById('reduceItemSelect').value;
                 if (!id) return;
-
                 const item = this.stockItems.find(i => i.id == id);
                 if (item) {
-                    const avail = item.quantityDisplay.toFixed(2);
-                    document.getElementById('reduceAvailable').value = `${avail} ${item.displayUnit}`;
+                    document.getElementById('reduceAvailable').value = `${item.quantityDisplay.toFixed(2)} ${item.displayUnit}`;
                     document.getElementById('reduceCategory').value = item.category || '';
                     document.getElementById('reduceType').value = item.type || '';
                     document.getElementById('reduceBaseUnit').value = item.baseUnit || '';
@@ -3230,28 +2708,15 @@
 
             reduceStock() {
                 const id = document.getElementById('reduceItemSelect').value;
-                if (!id) {
-                    this.showToast('Select item', 'warning');
-                    return;
-                }
-
+                if (!id) { this.showToast('Select item', 'warning'); return; }
                 const item = this.stockItems.find(i => i.id == id);
                 const qty = parseFloat(document.getElementById('reduceQuantity').value) || 0;
                 const baseQty = qty * item.displayToBaseFactor;
                 const regQty = baseQty / item.registeredToBaseFactor;
-
-                if (qty <= 0 || baseQty > item.quantityBase) {
-                    this.showToast('Invalid quantity', 'warning');
-                    return;
-                }
-
+                if (qty <= 0 || baseQty > item.quantityBase) { this.showToast('Invalid quantity', 'warning'); return; }
                 const reason = document.getElementById('reduceReason').value;
                 const whom = document.getElementById('whom').value.trim();
-                if (!whom) {
-                    this.showToast('Enter responsible person', 'warning');
-                    return;
-                }
-
+                if (!whom) { this.showToast('Enter responsible person', 'warning'); return; }
                 const oldQty = item.quantityDisplay;
                 item.quantityDisplay -= qty;
                 item.quantityBase -= baseQty;
@@ -3259,39 +2724,9 @@
                 item.quantityIssued = (item.quantityIssued || 0) + qty;
                 item.endingBalance = item.quantityDisplay;
                 item.variance = (item.physicalCount || item.quantityDisplay) - item.endingBalance;
-
-                const transaction = {
-                    id: Date.now(),
-                    date: new Date().toISOString().split('T')[0],
-                    itemId: item.id,
-                    itemName: item.name,
-                    category: item.category,
-                    type: item.type,
-                    quantity: qty,
-                    quantityBase: baseQty,
-                    unit: item.displayUnit,
-                    batch: item.batchNumber,
-                    expiry: item.expiryDate,
-                    oldQuantity: oldQty,
-                    newQuantity: item.quantityDisplay,
-                    reason: reason,
-                    branch: this.currentBranch,
-                    warehouse: document.getElementById('reduceWarehouse').value,
-                    storageCondition: document.getElementById('reduceStorageCondition').value,
-                    shelfBin: document.getElementById('reduceShelfBin').value,
-                    responsible: whom,
-                    notes: document.getElementById('reduceNotes').value,
-                    valueLost: baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor)
-                };
-
+                const transaction = { id: Date.now(), date: new Date().toISOString().split('T')[0], itemId: item.id, itemName: item.name, category: item.category, type: item.type, quantity: qty, quantityBase: baseQty, unit: item.displayUnit, batch: item.batchNumber, expiry: item.expiryDate, oldQuantity: oldQty, newQuantity: item.quantityDisplay, reason: reason, branch: this.currentBranch, warehouse: document.getElementById('reduceWarehouse').value, storageCondition: document.getElementById('reduceStorageCondition').value, shelfBin: document.getElementById('reduceShelfBin').value, responsible: whom, notes: document.getElementById('reduceNotes').value, valueLost: baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor) };
                 this.transactions.unshift(transaction);
-                this.recordAudit(reason, item.id, item.name, qty, 'stock_deduct', transaction.branch, whom, { 
-                    oldQty, 
-                    newQty: item.quantityDisplay,
-                    value: transaction.valueLost,
-                    reason: reason
-                });
-
+                this.recordAudit(reason, item.id, item.name, qty, 'stock_deduct', transaction.branch, whom, { oldQty, newQty: item.quantityDisplay, value: transaction.valueLost, reason: reason });
                 this.saveToLocalStorage();
                 this.showToast(`Deducted ${qty} ${item.displayUnit}`, 'success');
                 this.clearReduceForm();
@@ -3322,66 +2757,27 @@
             renderDeductionHistory() {
                 const tbody = document.getElementById('deductionHistoryBody');
                 if (!tbody) return;
-
                 const period = document.getElementById('deductPeriodFilter')?.value || 'all';
                 const { start, end } = this.getPeriodFilterDateRange(period);
-
-                const filtered = this.transactions
-                    .filter(t => t.branch === this.currentBranch && new Date(t.date) >= start && new Date(t.date) <= end)
-                    .sort((a, b) => new Date(b.date) - new Date(a.date))
-                    .slice(0, 20);
-
-                if (filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">No deductions</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = filtered.map(t => `
-                    <tr>
-                        <td>${t.date}</td>
-                        <td>${t.itemName}</td>
-                        <td>${t.category || ''}</td>
-                        <td>${t.type || ''}</td>
-                        <td>${t.quantity}</td>
-                        <td>${t.unit || ''}</td>
-                        <td>${t.batch || ''}</td>
-                        <td>${t.expiry || ''}</td>
-                        <td>${t.reason}</td>
-                        <td>${t.branch}</td>
-                        <td>${t.warehouse || ''}</td>
-                        <td>${t.storageCondition || ''}</td>
-                        <td>${t.shelfBin || ''}</td>
-                        <td>${t.responsible}</td>
-                        <td>ETB ${t.valueLost?.toFixed(2) || '0.00'}</td>
-                    </tr>
-                `).join('');
+                const filtered = this.transactions.filter(t => t.branch === this.currentBranch && new Date(t.date) >= start && new Date(t.date) <= end).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,20);
+                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">No deductions</td></tr>'; return; }
+                tbody.innerHTML = filtered.map(t => `<tr><td>${t.date}</td><td>${t.itemName}</td><td>${t.category || ''}</td><td>${t.type || ''}</td><td>${t.quantity}</td><td>${t.unit || ''}</td><td>${t.batch || ''}</td><td>${t.expiry || ''}</td><td>${t.reason}</td><td>${t.branch}</td><td>${t.warehouse || ''}</td><td>${t.storageCondition || ''}</td><td>${t.shelfBin || ''}</td><td>${t.responsible}</td><td>ETB ${t.valueLost?.toFixed(2) || '0.00'}</td></tr>`).join('');
             }
 
             renderTable() {
                 const tbody = document.getElementById('stockTableBody');
                 if (!tbody) return;
-
                 let items = this.stockItems.filter(i => i.branch === this.currentBranch);
-
                 const search = document.getElementById('searchInput')?.value.toLowerCase() || '';
-                if (search) {
-                    items = items.filter(i => i.name.toLowerCase().includes(search) || i.batchNumber?.toLowerCase().includes(search));
-                }
-
+                if (search) items = items.filter(i => i.name.toLowerCase().includes(search) || i.batchNumber?.toLowerCase().includes(search));
                 const category = document.getElementById('categoryFilter')?.value;
                 if (category) items = items.filter(i => i.category === category);
-
                 const branch = document.getElementById('branchFilter')?.value;
                 if (branch) items = items.filter(i => i.branch === branch);
-
                 const status = document.getElementById('statusFilter')?.value;
                 if (status) {
                     items = items.filter(i => {
-                        const today = new Date();
-                        const expiry = new Date(i.expiryDate);
-                        const diff = Math.ceil((expiry - today) / (1000*60*60*24));
-                        const displayQty = i.quantityDisplay;
-
+                        const today = new Date(); const expiry = new Date(i.expiryDate); const diff = Math.ceil((expiry - today) / (1000*60*60*24)); const displayQty = i.quantityDisplay;
                         switch(status) {
                             case 'low': return displayQty > 0 && displayQty < i.minStockDisplay;
                             case 'over': return displayQty > i.maxStockDisplay;
@@ -3395,30 +2791,16 @@
                         }
                     });
                 }
-
                 const period = document.getElementById('inventoryPeriodFilter')?.value || 'all';
                 const { start, end } = this.getPeriodFilterDateRange(period);
                 items = items.filter(i => new Date(i.createdAt) >= start && new Date(i.createdAt) <= end);
-
-                items.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-
+                items.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
                 this.updateCategoryFilter();
-
-                if (items.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;">No items found</td></tr>';
-                    return;
-                }
-
-                let totalValueAll = 0;
-                let totalQtyAll = 0;
-                let totalCostAll = 0;
-                items.forEach(i => {
-                    totalValueAll += i.quantityDisplay * i.sellingPricePerDisplay;
-                    totalQtyAll += i.quantityDisplay;
-                    totalCostAll += i.quantityBase * (i.purchasePricePerDisplay / i.displayToBaseFactor);
-                });
+                if (items.length === 0) { tbody.innerHTML = '<tr><td colspan="24" style="text-align:center;">No items found</td></tr>'; return; }
+                let totalValueAll = 0, totalQtyAll = 0, totalCostAll = 0;
+                items.forEach(i => { totalValueAll += i.quantityDisplay * i.sellingPricePerDisplay; totalQtyAll += i.quantityDisplay; totalCostAll += i.quantityBase * (i.purchasePricePerDisplay / i.displayToBaseFactor); });
                 tbody.innerHTML = items.map(i => this.createStockRow(i)).join('');
-                tbody.innerHTML += `<tr style="background: rgba(0,255,136,0.2); font-weight: bold;"><td colspan="9" style="text-align: right;">TOTAL:</td><td colspan="1">${totalQtyAll.toFixed(2)}</td><td colspan="10">ETB ${totalValueAll.toFixed(2)} (Cost: ETB ${totalCostAll.toFixed(2)})</td><td></td><td></td></tr>`;
+                tbody.innerHTML += `<tr style="background: rgba(0,255,136,0.2); font-weight: bold;"><td colspan="9" style="text-align: right;">TOTAL:</td><td colspan="1">${totalQtyAll.toFixed(2)}</td><td colspan="10">ETB ${totalValueAll.toFixed(2)} (Cost: ETB ${totalCostAll.toFixed(2)})</td><td></td><td></td><td></td></tr>`;
                 this.attachRowEvents();
             }
 
@@ -3429,79 +2811,19 @@
                 const expiry = new Date(item.expiryDate);
                 const diff = Math.ceil((expiry - new Date()) / (1000*60*60*24));
                 const expiryClass = diff < 0 ? 'status-expired' : diff <= 30 ? 'status-critical' : diff <= 90 ? 'status-warning' : 'status-ok';
-                
                 const expectedEnding = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
                 const physicalCount = item.physicalCount !== undefined ? item.physicalCount : item.quantityDisplay;
                 const variance = physicalCount - expectedEnding;
                 const varianceClass = variance >= 0 ? 'variance-positive' : 'variance-negative';
                 const varianceSymbol = variance >= 0 ? '+' : '';
-
-                return `
-                    <tr data-id="${item.id}">
-                        <td>${item.name}</td>
-                        <td>${item.category}</td>
-                        <td>${item.type || ''}</td>
-                        <td>${item.baseUnit}</td>
-                        <td>${item.registeredUnit}</td>
-                        <td>${item.displayUnit}</td>
-                        <td>${item.quantityBase.toFixed(2)}</td>
-                        <td>${item.quantityRegistered?.toFixed(2) || '0.00'}</td>
-                        <td><strong>${item.quantityDisplay.toFixed(2)}</strong></td>
-                        <td>${(item.beginningBalance || item.quantityDisplay).toFixed(2)}</td>
-                        <td>${(item.quantityReceived || item.quantityDisplay).toFixed(2)}</td>
-                        <td>${(item.quantityIssued || 0).toFixed(2)}</td>
-                        <td>${expectedEnding.toFixed(2)}</td>
-                        <td><input type="number" class="physical-count-input" data-id="${item.id}" value="${physicalCount.toFixed(2)}" style="width:80px; padding:4px;"></td>
-                        <td class="${varianceClass}">${varianceSymbol}${variance.toFixed(2)}</td>
-                        <td>${item.minStockDisplay}/${item.reorderLevelDisplay}/${item.maxStockDisplay}</td>
-                        <td>ETB ${item.purchasePricePerDisplay.toFixed(2)}</td>
-                        <td>ETB ${item.sellingPricePerDisplay.toFixed(2)}</td>
-                        <td style="color:${margin>=0?'var(--success)':'var(--danger)'};">${margin.toFixed(1)}%</td>
-                        <td><strong>ETB ${total.toFixed(2)}</strong></td>
-                        <td>${item.batchNumber}</td>
-                        <td><span class="status-indicator ${expiryClass}"></span>${expiry.toLocaleDateString()}</td>
-                        <td>${diff > 0 ? diff + ' days' : 'EXPIRED'}</td>
-                        <td>
-                            <div class="action-buttons">
-                                <button class="action-btn edit-item" data-tooltip="Edit item"><i class="fas fa-edit"></i></button>
-                                <button class="action-btn reduce-item" data-tooltip="Deduct stock"><i class="fas fa-minus"></i></button>
-                                <button class="action-btn verify-item" data-tooltip="Verify stock"><i class="fas fa-check-double"></i></button>
-                            </div>
-                           </td>
-                       </tr>
-                `;
+                return `<tr data-id="${item.id}"><td>${item.name}</td><td>${item.category}</td><td>${item.type || ''}</td><td>${item.baseUnit}</td><td>${item.registeredUnit}</td><td>${item.displayUnit}</td><td>${item.quantityBase.toFixed(2)}</td><td>${item.quantityRegistered?.toFixed(2) || '0.00'}</td><td><strong>${item.quantityDisplay.toFixed(2)}</strong></td><td>${(item.beginningBalance || item.quantityDisplay).toFixed(2)}</td><td>${(item.quantityReceived || item.quantityDisplay).toFixed(2)}</td><td>${(item.quantityIssued || 0).toFixed(2)}</td><td>${expectedEnding.toFixed(2)}</td><td><input type="number" class="physical-count-input" data-id="${item.id}" value="${physicalCount.toFixed(2)}" style="width:80px; padding:4px;"></td><td class="${varianceClass}">${varianceSymbol}${variance.toFixed(2)}</td><td>${item.minStockDisplay}/${item.reorderLevelDisplay}/${item.maxStockDisplay}</td><td>ETB ${item.purchasePricePerDisplay.toFixed(2)}</td><td>ETB ${item.sellingPricePerDisplay.toFixed(2)}</td><td style="color:${margin>=0?'var(--success)':'var(--danger)'};">${margin.toFixed(1)}%</td><td><strong>ETB ${total.toFixed(2)}</strong></td><td>${item.batchNumber}</td><td><span class="status-indicator ${expiryClass}"></span>${expiry.toLocaleDateString()}</td><td>${diff > 0 ? diff + ' days' : 'EXPIRED'}</td><td><div class="action-buttons"><button class="action-btn edit-item" data-tooltip="Edit item"><i class="fas fa-edit"></i></button><button class="action-btn reduce-item" data-tooltip="Deduct stock"><i class="fas fa-minus"></i></button><button class="action-btn verify-item" data-tooltip="Verify stock"><i class="fas fa-check-double"></i></button></div></td></tr>`;
             }
 
             attachRowEvents() {
-                document.querySelectorAll('.edit-item').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = e.target.closest('tr').dataset.id;
-                        this.editItem(parseInt(id));
-                    });
-                });
-                document.querySelectorAll('.reduce-item').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = e.target.closest('tr').dataset.id;
-                        this.openPage('reduceStockPage');
-                        setTimeout(() => {
-                            document.getElementById('reduceItemSelect').value = id;
-                            this.updateReduceDetails();
-                        }, 50);
-                    });
-                });
-                document.querySelectorAll('.verify-item').forEach(btn => {
-                    btn.addEventListener('click', (e) => {
-                        const id = e.target.closest('tr').dataset.id;
-                        this.verifyStock(parseInt(id));
-                    });
-                });
-                document.querySelectorAll('.physical-count-input').forEach(inp => {
-                    inp.addEventListener('change', (e) => {
-                        const id = parseInt(e.target.dataset.id);
-                        const newCount = parseFloat(e.target.value);
-                        this.updatePhysicalCount(id, newCount);
-                    });
-                });
+                document.querySelectorAll('.edit-item').forEach(btn => { btn.addEventListener('click', (e) => { const id = e.target.closest('tr').dataset.id; this.editItem(parseInt(id)); }); });
+                document.querySelectorAll('.reduce-item').forEach(btn => { btn.addEventListener('click', (e) => { const id = e.target.closest('tr').dataset.id; this.openPage('reduceStockPage'); setTimeout(() => { document.getElementById('reduceItemSelect').value = id; this.updateReduceDetails(); }, 50); }); });
+                document.querySelectorAll('.verify-item').forEach(btn => { btn.addEventListener('click', (e) => { const id = e.target.closest('tr').dataset.id; this.verifyStock(parseInt(id)); }); });
+                document.querySelectorAll('.physical-count-input').forEach(inp => { inp.addEventListener('change', (e) => { const id = parseInt(e.target.dataset.id); const newCount = parseFloat(e.target.value); this.updatePhysicalCount(id, newCount); }); });
             }
 
             updatePhysicalCount(id, newCount) {
@@ -3510,11 +2832,7 @@
                     const expectedEnding = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
                     item.physicalCount = newCount;
                     item.variance = newCount - expectedEnding;
-                    this.recordAudit('verification', item.id, item.name, Math.abs(item.variance), 'stock_verify', this.currentBranch, 'System', { 
-                        expected: expectedEnding, 
-                        physical: newCount, 
-                        variance: item.variance 
-                    });
+                    this.recordAudit('verification', item.id, item.name, Math.abs(item.variance), 'stock_verify', this.currentBranch, 'System', { expected: expectedEnding, physical: newCount, variance: item.variance });
                     this.saveToLocalStorage();
                     this.renderTable();
                     this.showToast(`${item.name}: Variance ${item.variance >= 0 ? '+' : ''}${item.variance.toFixed(2)} ${item.displayUnit}`, item.variance === 0 ? 'success' : 'warning');
@@ -3522,33 +2840,20 @@
             }
 
             verifyStock(id) {
-                if (this.currentUserType !== 'admin') {
-                    this.showToast('Admin access required', 'warning');
-                    return;
-                }
+                if (this.currentUserType !== 'admin') { this.showToast('Admin access required', 'warning'); return; }
                 const item = this.stockItems.find(i => i.id === id);
                 if (!item) return;
                 const expectedEnding = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
                 const physical = prompt(`Verify ${item.name}\nExpected Balance: ${expectedEnding.toFixed(2)} ${item.displayUnit}\nCurrent System Balance: ${item.quantityDisplay.toFixed(2)} ${item.displayUnit}\n\nEnter Physical Count:`, item.quantityDisplay);
-                if (physical !== null) {
-                    this.updatePhysicalCount(id, parseFloat(physical));
-                }
+                if (physical !== null) this.updatePhysicalCount(id, parseFloat(physical));
             }
 
             verifyAllBalances() {
-                if (this.currentUserType !== 'admin') {
-                    this.showToast('Admin access required', 'warning');
-                    return;
-                }
-                let verified = 0;
-                let discrepancies = 0;
+                if (this.currentUserType !== 'admin') { this.showToast('Admin access required', 'warning'); return; }
+                let verified = 0, discrepancies = 0;
                 this.stockItems.forEach(item => {
                     const expectedEnding = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
-                    if (Math.abs(item.physicalCount - expectedEnding) > 0.01) {
-                        discrepancies++;
-                    } else {
-                        verified++;
-                    }
+                    if (Math.abs(item.physicalCount - expectedEnding) > 0.01) discrepancies++; else verified++;
                 });
                 this.showToast(`Verification complete: ${verified} accurate, ${discrepancies} discrepancies`, discrepancies > 0 ? 'warning' : 'success');
                 this.renderTable();
@@ -3557,7 +2862,6 @@
             editItem(id) {
                 const item = this.stockItems.find(i => i.id === id);
                 if (!item) return;
-
                 this.openPage('registerStockPage');
                 setTimeout(() => {
                     document.getElementById('itemIdInput').value = item.customId || '';
@@ -3587,110 +2891,56 @@
                     document.getElementById('minStockDisplay').value = item.minStockDisplay;
                     document.getElementById('maxStockDisplay').value = item.maxStockDisplay;
                     document.getElementById('reorderLevelDisplay').value = item.reorderLevelDisplay;
-
                     this.isEditing = true;
                     this.editingId = id;
                     document.getElementById('saveBtn').innerHTML = '<i class="fas fa-sync-alt"></i> Update Item';
                 }, 50);
             }
 
-            clearFilters() {
-                document.getElementById('searchInput').value = '';
-                document.getElementById('categoryFilter').value = '';
-                document.getElementById('branchFilter').value = '';
-                document.getElementById('statusFilter').value = '';
-                this.renderTable();
-            }
+            clearFilters() { document.getElementById('searchInput').value = ''; document.getElementById('categoryFilter').value = ''; document.getElementById('branchFilter').value = ''; document.getElementById('statusFilter').value = ''; this.renderTable(); }
 
             updateCategoryFilter() {
                 const filter = document.getElementById('categoryFilter');
                 if (!filter) return;
                 const cats = [...new Set(this.stockItems.map(i => i.category).filter(Boolean))];
-                filter.innerHTML = '<option value="">All Categories</option>' + 
-                    cats.map(c => `<option value="${c}">${c}</option>`).join('');
+                filter.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
             }
 
             updateDashboardFromCards() {
                 const branchItems = this.stockItems.filter(i => i.branch === this.currentBranch);
                 document.getElementById('totalStockItems').textContent = branchItems.length;
-                
-                const low = branchItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length;
-                document.getElementById('lowStockItems').textContent = low;
-
-                const reorder = branchItems.filter(i => i.quantityDisplay <= i.reorderLevelDisplay).length;
-                document.getElementById('reorderItems').textContent = reorder;
-
-                const nearExpiry = branchItems.filter(i => {
-                    const diff = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000*60*60*24));
-                    return diff > 0 && diff <= 90;
-                }).length;
-                document.getElementById('nearExpiryItems').textContent = nearExpiry;
-
-                const expired = branchItems.filter(i => new Date(i.expiryDate) < new Date()).length;
-                document.getElementById('expiredItems').textContent = expired;
-
-                const totalValue = branchItems.reduce((sum, i) => {
-                    return sum + (i.quantityDisplay * i.sellingPricePerDisplay);
-                }, 0);
-                document.getElementById('totalInventoryValue').textContent = `ETB ${totalValue.toFixed(2)}`;
+                document.getElementById('lowStockItems').textContent = branchItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length;
+                document.getElementById('reorderItems').textContent = branchItems.filter(i => i.quantityDisplay <= i.reorderLevelDisplay).length;
+                document.getElementById('nearExpiryItems').textContent = branchItems.filter(i => { const diff = Math.ceil((new Date(i.expiryDate) - new Date()) / (1000*60*60*24)); return diff > 0 && diff <= 90; }).length;
+                document.getElementById('expiredItems').textContent = branchItems.filter(i => new Date(i.expiryDate) < new Date()).length;
+                document.getElementById('totalInventoryValue').textContent = `ETB ${branchItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0).toFixed(2)}`;
             }
 
             updateReviewDashboard() {
                 const period = document.getElementById('reviewPeriodFilter')?.value || 'all';
                 const { start, end } = this.getPeriodFilterDateRange(period);
-                
                 const branchItems = this.stockItems.filter(i => i.branch === this.currentBranch);
-                
                 this.updateDashboardFromCards();
-
-                const periodSales = this.salesData
-                    .filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end)
-                    .reduce((sum, s) => sum + s.grandTotal, 0);
+                const periodSales = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end).reduce((sum, s) => sum + s.grandTotal, 0);
                 document.getElementById('totalSales').textContent = `ETB ${periodSales.toFixed(2)}`;
-
-                const fast = this.stockItems.filter(i => i.branch === this.currentBranch && i.movement === 'fast').length;
-                document.getElementById('fastMovingItems').textContent = fast;
-
-                const slow = this.stockItems.filter(i => i.branch === this.currentBranch && i.movement === 'slow').length;
-                document.getElementById('slowMovingItems').textContent = slow;
-
-                const loss = this.transactions
-                    .filter(t => t.branch === this.currentBranch && ['damaged','expired'].includes(t.reason) && new Date(t.date) >= start && new Date(t.date) <= end)
-                    .reduce((sum, t) => sum + (t.valueLost || 0), 0);
+                document.getElementById('fastMovingItems').textContent = branchItems.filter(i => i.movement === 'fast').length;
+                document.getElementById('slowMovingItems').textContent = branchItems.filter(i => i.movement === 'slow').length;
+                const loss = this.transactions.filter(t => t.branch === this.currentBranch && ['damaged','expired'].includes(t.reason) && new Date(t.date) >= start && new Date(t.date) <= end).reduce((sum, t) => sum + (t.valueLost || 0), 0);
                 document.getElementById('periodLoss').textContent = `ETB ${loss.toFixed(2)}`;
-
-                const cogs = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end)
-                    .reduce((sum, s) => sum + s.cogs, 0);
+                const cogs = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end).reduce((sum, s) => sum + s.cogs, 0);
                 const avgInventory = branchItems.reduce((sum, i) => sum + (i.quantityDisplay * i.purchasePricePerDisplay), 0) / (branchItems.length || 1);
-                const turnover = avgInventory > 0 ? cogs / avgInventory : 0;
-                document.getElementById('inventoryTurnover').textContent = turnover.toFixed(2);
-
+                document.getElementById('inventoryTurnover').textContent = avgInventory > 0 ? (cogs / avgInventory).toFixed(2) : '0';
                 const accurateItems = branchItems.filter(i => Math.abs(i.variance || 0) < 0.01).length;
-                const accuracy = branchItems.length ? (accurateItems / branchItems.length * 100) : 100;
-                document.getElementById('stockAccuracy').textContent = `${accuracy.toFixed(1)}%`;
-
-                // Advanced Demand Forecasting
+                document.getElementById('stockAccuracy').textContent = branchItems.length ? ((accurateItems / branchItems.length) * 100).toFixed(1) + '%' : '100%';
                 let totalSales30 = 0;
-                const last30Days = new Date();
-                last30Days.setDate(last30Days.getDate() - 30);
+                const last30Days = new Date(); last30Days.setDate(last30Days.getDate() - 30);
                 this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= last30Days).forEach(s => totalSales30 += s.grandTotal);
                 const avgDailySales = totalSales30 / 30;
                 const totalValue = branchItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0);
-                const forecast = avgDailySales * 30;
-                document.getElementById('demandForecast').innerHTML = `ETB ${forecast.toFixed(2)} (${(forecast / (totalValue || 1)).toFixed(1)}x current inventory) | Daily Avg: ETB ${avgDailySales.toFixed(2)}`;
-
-                // Reorder Recommendations with Safety Stock
+                document.getElementById('demandForecast').innerHTML = `ETB ${(avgDailySales * 30).toFixed(2)} (${((avgDailySales * 30) / (totalValue || 1)).toFixed(1)}x current inventory) | Daily Avg: ETB ${avgDailySales.toFixed(2)}`;
                 const reorderItems = branchItems.filter(i => i.quantityDisplay <= i.reorderLevelDisplay && i.quantityDisplay > 0);
-                const reorderText = reorderItems.length ? reorderItems.map(i => {
-                    const dailyDemand = avgDailySales > 0 ? (i.quantityIssued || 0) / 30 : 0;
-                    const leadTime = 7;
-                    const safetyStock = dailyDemand * 3;
-                    const reorderPoint = dailyDemand * leadTime + safetyStock;
-                    const suggestedQty = Math.max(i.reorderLevelDisplay, reorderPoint) - i.quantityDisplay;
-                    return `${i.name}: ${i.quantityDisplay.toFixed(0)} left, Reorder ${suggestedQty.toFixed(0)} ${i.displayUnit} (ROP: ${reorderPoint.toFixed(0)})`;
-                }).join('; ') : 'All items above reorder level';
+                const reorderText = reorderItems.length ? reorderItems.map(i => { const dailyDemand = avgDailySales > 0 ? (i.quantityIssued || 0) / 30 : 0; const leadTime = 7; const safetyStock = dailyDemand * 3; const reorderPoint = dailyDemand * leadTime + safetyStock; const suggestedQty = Math.max(i.reorderLevelDisplay, reorderPoint) - i.quantityDisplay; return `${i.name}: ${i.quantityDisplay.toFixed(0)} left, Reorder ${suggestedQty.toFixed(0)} ${i.displayUnit}`; }).join('; ') : 'All items above reorder level';
                 document.getElementById('reorderRecommendations').innerHTML = reorderText;
-
                 this.renderExpiryWastageReport();
                 this.updateCharts();
                 this.updateTopItems();
@@ -3699,244 +2949,74 @@
             renderExpiryWastageReport() {
                 const tbody = document.getElementById('expiryWastageBody');
                 if (!tbody) return;
-                
                 const now = new Date();
-                const expiringItems = this.stockItems.filter(i => i.branch === this.currentBranch);
-                expiringItems.sort((a, b) => new Date(a.expiryDate) - new Date(b.expiryDate));
-                
-                tbody.innerHTML = expiringItems.slice(0, 20).map(i => {
-                    const daysToExpiry = Math.ceil((new Date(i.expiryDate) - now) / (86400000));
-                    const potentialLoss = i.quantityDisplay * i.purchasePricePerDisplay;
-                    let status = '';
-                    let statusClass = '';
-                    if (daysToExpiry < 0) {
-                        status = 'EXPIRED';
-                        statusClass = 'status-expired';
-                    } else if (daysToExpiry <= 30) {
-                        status = 'Critical';
-                        statusClass = 'status-critical';
-                    } else if (daysToExpiry <= 90) {
-                        status = 'Warning';
-                        statusClass = 'status-warning';
-                    } else {
-                        status = 'OK';
-                        statusClass = 'status-ok';
-                    }
-                    
-                    return `
-                        <tr>
-                            <td>${i.name}</td>
-                            <td>${i.batchNumber}</td>
-                            <td>${i.expiryDate}</td>
-                            <td>${daysToExpiry > 0 ? daysToExpiry : 'Expired'}</td>
-                            <td>${i.quantityDisplay.toFixed(2)} ${i.displayUnit}</td>
-                            <td>ETB ${potentialLoss.toFixed(2)}</td>
-                            <td><span class="status-indicator ${statusClass}"></span> ${status}</td>
-                         </tr>
-                    `;
-                }).join('') || '<tr><td colspan="7">No items found</td></tr>';
+                const expiringItems = this.stockItems.filter(i => i.branch === this.currentBranch).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).slice(0,20);
+                tbody.innerHTML = expiringItems.map(i => { const daysToExpiry = Math.ceil((new Date(i.expiryDate) - now) / (86400000)); const potentialLoss = i.quantityDisplay * i.purchasePricePerDisplay; let status = ''; let statusClass = ''; if (daysToExpiry < 0) { status = 'EXPIRED'; statusClass = 'status-expired'; } else if (daysToExpiry <= 30) { status = 'Critical'; statusClass = 'status-critical'; } else if (daysToExpiry <= 90) { status = 'Warning'; statusClass = 'status-warning'; } else { status = 'OK'; statusClass = 'status-ok'; } return `<tr><td>${i.name}</td><td>${i.batchNumber}</td><td>${i.expiryDate}</td><td>${daysToExpiry > 0 ? daysToExpiry : 'Expired'}</td><td>${i.quantityDisplay.toFixed(2)} ${i.displayUnit}</td><td>ETB ${potentialLoss.toFixed(2)}</td><td><span class="status-indicator ${statusClass}"></span> ${status}</td></tr>`; }).join('') || '<tr><td colspan="7">No items found</td></tr>';
             }
 
             getPeriodFilterDateRange(period) {
                 const now = new Date();
                 let start = new Date();
-
                 switch(period) {
-                    case 'daily':
-                        start = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-                        break;
-                    case 'weekly':
-                        start.setDate(now.getDate() - 7);
-                        break;
-                    case 'monthly':
-                        start.setMonth(now.getMonth() - 1);
-                        break;
-                    default:
-                        start = new Date(0);
+                    case 'daily': start = new Date(now.getFullYear(), now.getMonth(), now.getDate()); break;
+                    case 'weekly': start.setDate(now.getDate() - 7); break;
+                    case 'monthly': start.setMonth(now.getMonth() - 1); break;
+                    default: start = new Date(0);
                 }
                 return { start, end: now };
             }
 
             updateCharts() {
-                Object.values(this.charts).forEach(chart => {
-                    if (chart) chart.destroy();
-                });
-
+                Object.values(this.charts).forEach(chart => { if (chart) chart.destroy(); });
                 const movementCtx = document.getElementById('stockMovementChart');
                 if (movementCtx) {
-                    const thirtyDaysAgo = new Date();
-                    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-                    
+                    const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                     const purchases = this.auditTrail.filter(a => a.action === 'purchase' && new Date(a.timestamp) >= thirtyDaysAgo && a.branch === this.currentBranch).length;
                     const sales = this.auditTrail.filter(a => a.action === 'sale' && new Date(a.timestamp) >= thirtyDaysAgo && a.branch === this.currentBranch).length;
                     const deductions = this.auditTrail.filter(a => ['damaged','expired'].includes(a.action) && new Date(a.timestamp) >= thirtyDaysAgo && a.branch === this.currentBranch).length;
-
-                    this.charts.movement = new Chart(movementCtx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Purchases', 'Sales', 'Losses'],
-                            datasets: [{
-                                label: 'Transactions',
-                                data: [purchases, sales, deductions],
-                                borderColor: 'var(--success)',
-                                backgroundColor: 'rgba(0,255,136,0.1)'
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    this.charts.movement = new Chart(movementCtx, { type: 'line', data: { labels: ['Purchases', 'Sales', 'Losses'], datasets: [{ label: 'Transactions', data: [purchases, sales, deductions], borderColor: 'var(--success)', backgroundColor: 'rgba(0,255,136,0.1)' }] }, options: { responsive: true, maintainAspectRatio: false } });
                 }
-
                 const trendCtx = document.getElementById('salesTrendChart');
                 if (trendCtx) {
-                    const months = [];
-                    const salesData = [];
-                    for (let i = 5; i >= 0; i--) {
-                        const d = new Date();
-                        d.setMonth(d.getMonth() - i);
-                        months.push(d.toLocaleString('default', { month: 'short' }));
-                        
-                        const start = new Date(d.getFullYear(), d.getMonth(), 1);
-                        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-                        
-                        const total = this.salesData
-                            .filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end)
-                            .reduce((sum, s) => sum + s.grandTotal, 0);
-                        salesData.push(total);
-                    }
-
-                    this.charts.trend = new Chart(trendCtx, {
-                        type: 'bar',
-                        data: {
-                            labels: months,
-                            datasets: [{
-                                label: 'Sales (ETB)',
-                                data: salesData,
-                                backgroundColor: 'rgba(255,215,0,0.6)'
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    const months = []; const salesData = [];
+                    for (let i = 5; i >= 0; i--) { const d = new Date(); d.setMonth(d.getMonth() - i); months.push(d.toLocaleString('default', { month: 'short' })); const start = new Date(d.getFullYear(), d.getMonth(), 1); const end = new Date(d.getFullYear(), d.getMonth() + 1, 0); const total = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end).reduce((sum, s) => sum + s.grandTotal, 0); salesData.push(total); }
+                    this.charts.trend = new Chart(trendCtx, { type: 'bar', data: { labels: months, datasets: [{ label: 'Sales (ETB)', data: salesData, backgroundColor: 'rgba(255,215,0,0.6)' }] }, options: { responsive: true, maintainAspectRatio: false } });
                 }
-
                 const profitCtx = document.getElementById('profitChart');
                 if (profitCtx) {
-                    const months = [];
-                    const revenue = [];
-                    const profit = [];
-                    for (let i = 5; i >= 0; i--) {
-                        const d = new Date();
-                        d.setMonth(d.getMonth() - i);
-                        months.push(d.toLocaleString('default', { month: 'short' }));
-                        
-                        const start = new Date(d.getFullYear(), d.getMonth(), 1);
-                        const end = new Date(d.getFullYear(), d.getMonth() + 1, 0);
-                        
-                        const monthSales = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end);
-                        const rev = monthSales.reduce((sum, s) => sum + s.grandTotal, 0);
-                        const prof = monthSales.reduce((sum, s) => sum + s.grossProfit, 0);
-                        
-                        revenue.push(rev);
-                        profit.push(prof);
-                    }
-
-                    this.charts.profit = new Chart(profitCtx, {
-                        type: 'line',
-                        data: {
-                            labels: months,
-                            datasets: [{
-                                label: 'Revenue',
-                                data: revenue,
-                                borderColor: 'var(--accent)',
-                                backgroundColor: 'rgba(255,215,0,0.1)'
-                            }, {
-                                label: 'Profit',
-                                data: profit,
-                                borderColor: 'var(--success)',
-                                backgroundColor: 'rgba(0,255,136,0.1)'
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    const months = [], revenue = [], profit = [];
+                    for (let i = 5; i >= 0; i--) { const d = new Date(); d.setMonth(d.getMonth() - i); months.push(d.toLocaleString('default', { month: 'short' })); const start = new Date(d.getFullYear(), d.getMonth(), 1); const end = new Date(d.getFullYear(), d.getMonth() + 1, 0); const monthSales = this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= start && new Date(s.date) <= end); revenue.push(monthSales.reduce((sum, s) => sum + s.grandTotal, 0)); profit.push(monthSales.reduce((sum, s) => sum + s.grossProfit, 0)); }
+                    this.charts.profit = new Chart(profitCtx, { type: 'line', data: { labels: months, datasets: [{ label: 'Revenue', data: revenue, borderColor: 'var(--accent)', backgroundColor: 'rgba(255,215,0,0.1)' }, { label: 'Profit', data: profit, borderColor: 'var(--success)', backgroundColor: 'rgba(0,255,136,0.1)' }] }, options: { responsive: true, maintainAspectRatio: false } });
                 }
-
                 const moveCtx = document.getElementById('movementChart');
                 if (moveCtx) {
                     const fast = this.stockItems.filter(i => i.branch === this.currentBranch && i.movement === 'fast').length;
                     const slow = this.stockItems.filter(i => i.branch === this.currentBranch && i.movement === 'slow').length;
                     const normal = this.stockItems.filter(i => i.branch === this.currentBranch && (!i.movement || i.movement === 'normal')).length;
-
-                    this.charts.movementChart = new Chart(moveCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Fast Moving', 'Slow Moving', 'Normal'],
-                            datasets: [{
-                                data: [fast, slow, normal],
-                                backgroundColor: ['var(--success)', 'var(--warning)', 'var(--accent)']
-                            }]
-                        },
-                        options: { responsive: true, maintainAspectRatio: false }
-                    });
+                    this.charts.movementChart = new Chart(moveCtx, { type: 'doughnut', data: { labels: ['Fast Moving', 'Slow Moving', 'Normal'], datasets: [{ data: [fast, slow, normal], backgroundColor: ['var(--success)', 'var(--warning)', 'var(--accent)'] }] }, options: { responsive: true, maintainAspectRatio: false } });
                 }
             }
 
             updateTopItems() {
                 const tbody = document.getElementById('topItemsBody');
                 if (!tbody) return;
-
-                const thirtyDaysAgo = new Date();
-                thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
+                const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
                 const salesMap = {};
-                this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= thirtyDaysAgo).forEach(s => {
-                    s.items.forEach(item => {
-                        if (!salesMap[item.itemId]) {
-                            const stockItem = this.stockItems.find(i => i.id === item.itemId);
-                            salesMap[item.itemId] = {
-                                name: stockItem?.name || 'Unknown',
-                                category: stockItem?.category || 'N/A',
-                                type: stockItem?.type || 'N/A',
-                                quantity: 0,
-                                revenue: 0,
-                                profit: 0
-                            };
-                        }
-                        salesMap[item.itemId].quantity += item.quantity;
-                        salesMap[item.itemId].revenue += item.netAmount;
-                        salesMap[item.itemId].profit += item.profit;
-                    });
-                });
-
-                const top = Object.values(salesMap).sort((a,b) => b.revenue - a.revenue).slice(0, 10);
-                
-                tbody.innerHTML = top.map(t => `
-                    <tr>
-                        <td>${t.name}</td>
-                        <td>${t.category}</td>
-                        <td>${t.type}</td>
-                        <td>${t.quantity.toFixed(2)}</td>
-                        <td>ETB ${t.revenue.toFixed(2)}</td>
-                        <td style="color:${t.profit>=0?'var(--success)':'var(--danger)'};">ETB ${t.profit.toFixed(2)}</td>
-                        <td>${t.revenue>0?((t.profit/t.revenue)*100).toFixed(1):0}%</td>
-                     </tr>
-                `).join('') || '<tr><td colspan="7" style="text-align:center;">No sales data</td></tr>';
+                this.salesData.filter(s => s.branch === this.currentBranch && new Date(s.date) >= thirtyDaysAgo).forEach(s => { s.items.forEach(item => { if (!salesMap[item.itemId]) { const stockItem = this.stockItems.find(i => i.id === item.itemId); salesMap[item.itemId] = { name: stockItem?.name || 'Unknown', category: stockItem?.category || 'N/A', type: stockItem?.type || 'N/A', quantity: 0, revenue: 0, profit: 0 }; } salesMap[item.itemId].quantity += item.quantity; salesMap[item.itemId].revenue += item.netAmount; salesMap[item.itemId].profit += item.profit; }); });
+                const top = Object.values(salesMap).sort((a,b) => b.revenue - a.revenue).slice(0,10);
+                tbody.innerHTML = top.map(t => `<tr><td>${t.name}</td><td>${t.category}</td><td>${t.type}</td><td>${t.quantity.toFixed(2)}</td><td>ETB ${t.revenue.toFixed(2)}</td><td style="color:${t.profit>=0?'var(--success)':'var(--danger)'};">ETB ${t.profit.toFixed(2)}</td><td>${t.revenue>0?((t.profit/t.revenue)*100).toFixed(1):0}%</td></tr>`).join('') || '<tr><td colspan="7" style="text-align:center;">No sales data</td></tr>';
             }
 
             updateItemMovement(itemId, qty) {
                 const item = this.stockItems.find(i => i.id === itemId);
                 if (!item) return;
-
                 const now = Date.now();
                 const thirtyDays = 30 * 24 * 60 * 60 * 1000;
                 item.movementHistory = item.movementHistory || [];
                 item.movementHistory.push({ date: new Date().toISOString(), quantity: qty });
-
-                const recent = item.movementHistory
-                    .filter(m => (now - new Date(m.date).getTime()) <= thirtyDays)
-                    .reduce((sum, m) => sum + m.quantity, 0);
-
+                const recent = item.movementHistory.filter(m => (now - new Date(m.date).getTime()) <= thirtyDays).reduce((sum, m) => sum + m.quantity, 0);
                 const avg = recent / 30;
                 const min = item.minStockDisplay || 10;
-
                 if (avg > min * 2) item.movement = 'fast';
                 else if (avg < min * 0.5) item.movement = 'slow';
                 else item.movement = 'normal';
@@ -3945,95 +3025,33 @@
             renderAuditTable() {
                 const tbody = document.getElementById('auditTableBody');
                 if (!tbody) return;
-
                 const period = document.getElementById('auditPeriodFilter')?.value || 'all';
                 const { start, end } = this.getPeriodFilterDateRange(period);
                 const search = document.getElementById('searchAudit')?.value.toLowerCase() || '';
                 const type = document.getElementById('auditTypeFilter')?.value || '';
-                const dateFilter = document.getElementById('auditDateFilter')?.value || 'all';
-
-                let filtered = this.auditTrail
-                    .filter(a => a.branch === this.currentBranch && new Date(a.timestamp) >= start && new Date(a.timestamp) <= end)
-                    .filter(a => !search || a.itemName?.toLowerCase().includes(search) || a.user?.toLowerCase().includes(search))
-                    .filter(a => !type || a.action === type)
-                    .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-                if (filtered.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">No audit records</td></tr>';
-                    return;
-                }
-
-                tbody.innerHTML = filtered.slice(0, 50).map(a => {
-                    const item = this.stockItems.find(i => i.id === a.itemId);
-                    return `
-                    <tr>
-                        <td>${new Date(a.timestamp).toLocaleString()}</td>
-                        <td>${a.action}</td>
-                        <td>${a.itemName || 'System'}</td>
-                        <td>${item?.category || ''}</td>
-                        <td>${item?.type || ''}</td>
-                        <td>${item?.baseUnit || ''}</td>
-                        <td>${item?.registeredUnit || ''}</td>
-                        <td>${item?.displayUnit || ''}</td>
-                        <td>${a.user || 'System'}</td>
-                        <td>${a.quantity || 0}</td>
-                        <td>${a.details?.value ? `ETB ${a.details.value.toFixed(2)}` : 'N/A'}</td>
-                        <td>${item?.batchNumber || ''}</td>
-                        <td>${item?.expiryDate || ''}</td>
-                        <td>${item?.invoiceNumber || ''}</td>
-                        <td>${a.branch || 'N/A'}</td>
-                        <td>${a.details?.oldQty ? `Before: ${a.details.oldQty}, After: ${a.details.newQty}` : a.action}</td>
-                     </tr>
-                `}).join('');
+                let filtered = this.auditTrail.filter(a => a.branch === this.currentBranch && new Date(a.timestamp) >= start && new Date(a.timestamp) <= end).filter(a => !search || a.itemName?.toLowerCase().includes(search) || a.user?.toLowerCase().includes(search)).filter(a => !type || a.action === type).sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
+                if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="16" style="text-align:center;">No audit records</td></tr>'; return; }
+                tbody.innerHTML = filtered.slice(0,50).map(a => { const item = this.stockItems.find(i => i.id === a.itemId); return `<tr><td>${new Date(a.timestamp).toLocaleString()}</td><td>${a.action}</td><td>${a.itemName || 'System'}</td><td>${item?.category || ''}</td><td>${item?.type || ''}</td><td>${item?.baseUnit || ''}</td><td>${item?.registeredUnit || ''}</td><td>${item?.displayUnit || ''}</td><td>${a.user || 'System'}</td><td>${a.quantity || 0}</td><td>${a.details?.value ? `ETB ${a.details.value.toFixed(2)}` : 'N/A'}</td><td>${item?.batchNumber || ''}</td><td>${item?.expiryDate || ''}</td><td>${item?.invoiceNumber || ''}</td><td>${a.branch || 'N/A'}</td><td>${a.details?.oldQty ? `Before: ${a.details.oldQty}, After: ${a.details.newQty}` : a.action}</td></tr>`; }).join('');
             }
 
             updateAuditSummary() {
                 const branchItems = this.stockItems.filter(i => i.branch === this.currentBranch);
-                let beginningBalanceValue = 0;
-                let endingBalanceValue = 0;
-                let posVarItems = 0, negVarItems = 0;
-                let posVarCost = 0, negVarCost = 0;
-                let totalLoss = 0, totalGain = 0;
-                let itemDiffCount = 0;
-
+                let beginningBalanceValue = 0, endingBalanceValue = 0, posVarItems = 0, negVarItems = 0, posVarCost = 0, negVarCost = 0, totalLoss = 0, totalGain = 0, itemDiffCount = 0;
                 branchItems.forEach(item => {
                     const value = item.quantityDisplay * item.sellingPricePerDisplay;
                     const begVal = (item.beginningBalance || item.quantityDisplay) * item.sellingPricePerDisplay;
                     const endVal = (item.endingBalance || item.quantityDisplay) * item.sellingPricePerDisplay;
-                    beginningBalanceValue += begVal;
-                    endingBalanceValue += endVal;
-                    if (item.variance > 0.01) { 
-                        posVarItems++; 
-                        const gain = item.variance * item.sellingPricePerDisplay;
-                        posVarCost += gain;
-                        totalGain += gain;
-                        itemDiffCount++;
-                    }
-                    else if (item.variance < -0.01) { 
-                        negVarItems++; 
-                        const loss = Math.abs(item.variance) * item.sellingPricePerDisplay;
-                        negVarCost += loss;
-                        totalLoss += loss;
-                        itemDiffCount++;
-                    }
+                    beginningBalanceValue += begVal; endingBalanceValue += endVal;
+                    if (item.variance > 0.01) { posVarItems++; const gain = item.variance * item.sellingPricePerDisplay; posVarCost += gain; totalGain += gain; itemDiffCount++; }
+                    else if (item.variance < -0.01) { negVarItems++; const loss = Math.abs(item.variance) * item.sellingPricePerDisplay; negVarCost += loss; totalLoss += loss; itemDiffCount++; }
                 });
-                
                 const stockOnHand = branchItems.reduce((s,i) => s + (i.quantityDisplay * i.sellingPricePerDisplay), 0);
                 const netVariance = totalGain - totalLoss;
                 const accuracy = branchItems.length ? ((branchItems.length - itemDiffCount) / branchItems.length * 100) : 100;
-                let recommendation = '';
-                let auditStatus = '';
-                if (Math.abs(netVariance) < 100) {
-                    recommendation = 'No adjustment needed';
-                    auditStatus = 'Approved';
-                } else if (netVariance > 0) {
-                    recommendation = 'Investigate overages, consider write-in';
-                    auditStatus = 'Needs Review';
-                } else {
-                    recommendation = 'Investigate shortages, consider write-off';
-                    auditStatus = 'Needs Adjustment';
-                }
-                
+                let recommendation = '', auditStatus = '';
+                if (Math.abs(netVariance) < 100) { recommendation = 'No adjustment needed'; auditStatus = 'Approved'; }
+                else if (netVariance > 0) { recommendation = 'Investigate overages, consider write-in'; auditStatus = 'Needs Review'; }
+                else { recommendation = 'Investigate shortages, consider write-off'; auditStatus = 'Needs Adjustment'; }
                 document.getElementById('auditBeginningBalance').innerHTML = `ETB ${beginningBalanceValue.toFixed(2)}`;
                 document.getElementById('auditStockOnHandValue').innerHTML = `ETB ${stockOnHand.toFixed(2)}`;
                 document.getElementById('auditEndingBalance').innerHTML = `ETB ${endingBalanceValue.toFixed(2)}`;
@@ -4049,12 +3067,6 @@
                 document.getElementById('auditAccuracy').innerHTML = `${accuracy.toFixed(1)}%`;
                 document.getElementById('auditItemDiff').innerHTML = itemDiffCount;
                 document.getElementById('auditFinancialImpact').innerHTML = `ETB ${Math.abs(netVariance).toFixed(2)}`;
-                
-                const lastVariance = this.auditTrail.find(a => a.eventType === 'stock_verify');
-                if (lastVariance) {
-                    document.getElementById('auditReasonField').value = lastVariance.details?.variance ? `Variance detected: ${lastVariance.details.variance.toFixed(2)}` : 'Periodic verification';
-                    document.getElementById('auditResponsibleField').value = lastVariance.user || 'System';
-                }
             }
 
             updateAuditFindingsManual() {
@@ -4063,21 +3075,15 @@
                 const resolution = document.getElementById('auditResolutionField').value;
                 const comment = document.getElementById('auditCommentField').value;
                 const approval = document.getElementById('auditApprovalField').value;
-                this.recordAudit('audit_finding', 0, 'Audit Summary', 0, 'system', this.currentBranch, this.currentUserType, {
-                    reason, responsible, resolution, comment, approval
-                });
-                this.showToast('Audit findings updated', 'success');
+                this.recordAudit('audit_finding', 0, 'Audit Summary', 0, 'system', this.currentBranch, this.currentUserType, { reason, responsible, resolution, comment, approval });
+                this.showFullscreenModal('Audit findings updated successfully', 'success');
             }
 
             exportAuditReport() {
                 const branchItems = this.stockItems.filter(i => i.branch === this.currentBranch);
                 let report = `AUDIT REPORT\nDate: ${new Date().toLocaleString()}\nBranch: ${this.currentBranch}\n`;
-                report += `Beginning Balance: ${document.getElementById('auditBeginningBalance').innerText}\n`;
-                report += `Stock on Hand: ${document.getElementById('auditStockOnHandValue').innerText}\n`;
-                report += `Ending Balance: ${document.getElementById('auditEndingBalance').innerText}\n`;
-                report += `Net Variance: ${document.getElementById('auditNetVariance').innerText}\n`;
-                report += `Recommendation: ${document.getElementById('auditRecommendation').innerText}\n`;
-                report += `Status: ${document.getElementById('auditStatus').innerText}\n`;
+                report += `Beginning Balance: ${document.getElementById('auditBeginningBalance').innerText}\nStock on Hand: ${document.getElementById('auditStockOnHandValue').innerText}\nEnding Balance: ${document.getElementById('auditEndingBalance').innerText}\n`;
+                report += `Net Variance: ${document.getElementById('auditNetVariance').innerText}\nRecommendation: ${document.getElementById('auditRecommendation').innerText}\nStatus: ${document.getElementById('auditStatus').innerText}\n`;
                 const blob = new Blob([report], { type: 'text/plain' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -4089,18 +3095,7 @@
             }
 
             recordAudit(action, itemId, itemName, quantity, eventType, branch, user, details = {}) {
-                const audit = {
-                    id: this.auditCounter++,
-                    action,
-                    itemId,
-                    itemName,
-                    quantity,
-                    eventType,
-                    branch,
-                    user,
-                    details,
-                    timestamp: new Date().toISOString()
-                };
+                const audit = { id: this.auditCounter++, action, itemId, itemName, quantity, eventType, branch, user, details, timestamp: new Date().toISOString() };
                 this.auditTrail.unshift(audit);
                 if (this.auditTrail.length > 1000) this.auditTrail.pop();
                 this.saveToLocalStorage();
@@ -4122,7 +3117,12 @@
                 document.getElementById('adminPassword').value = this.settings.adminPassword;
                 document.getElementById('editPharmacyName').value = this.settings.pharmacyName;
                 document.getElementById('editBrandName').value = this.settings.brandName;
-                
+                document.getElementById('btnRegisterText').value = this.settings.buttonTexts.register;
+                document.getElementById('btnSalesText').value = this.settings.buttonTexts.sales;
+                document.getElementById('btnInventoryText').value = this.settings.buttonTexts.inventory;
+                document.getElementById('btnDeductText').value = this.settings.buttonTexts.deduct;
+                document.getElementById('btnReviewText').value = this.settings.buttonTexts.review;
+                document.getElementById('btnAuditText').value = this.settings.buttonTexts.audit;
                 document.getElementById('notifyLowStock').checked = this.settings.notifyLowStock;
                 document.getElementById('notifyExpiry').checked = this.settings.notifyExpiry;
                 document.getElementById('notifyOverstock').checked = this.settings.notifyOverstock;
@@ -4148,7 +3148,14 @@
                 this.settings.adminPassword = document.getElementById('adminPassword').value || "Dr. -----2123";
                 this.settings.pharmacyName = document.getElementById('editPharmacyName').value || "BETE‑MARKOSE PHARMACEUTICALS";
                 this.settings.brandName = document.getElementById('editBrandName').value || "BP‑SMS";
-                
+                this.settings.buttonTexts = {
+                    register: document.getElementById('btnRegisterText').value || "Register",
+                    sales: document.getElementById('btnSalesText').value || "Sales",
+                    inventory: document.getElementById('btnInventoryText').value || "Inventory",
+                    deduct: document.getElementById('btnDeductText').value || "Deduct",
+                    review: document.getElementById('btnReviewText').value || "Review",
+                    audit: document.getElementById('btnAuditText').value || "Audit"
+                };
                 this.settings.notifyLowStock = document.getElementById('notifyLowStock').checked;
                 this.settings.notifyExpiry = document.getElementById('notifyExpiry').checked;
                 this.settings.notifyOverstock = document.getElementById('notifyOverstock').checked;
@@ -4156,27 +3163,16 @@
                 this.settings.notifyNegativeProfit = document.getElementById('notifyNegativeProfit').checked;
                 this.settings.notifyFastSlow = document.getElementById('notifyFastSlow').checked;
                 this.settings.notifySound = document.getElementById('notifySound').checked;
-
                 this.setupUnitLists();
                 this.saveToLocalStorage();
                 this.updateTextEdits();
-                this.showToast('Settings saved', 'success');
+                this.applyButtonCustomizations();
+                this.showFullscreenModal('Settings saved successfully', 'success');
                 document.getElementById('settingsPanel').classList.remove('active');
             }
 
             backupData() {
-                const data = {
-                    stockItems: this.stockItems,
-                    salesData: this.salesData,
-                    transactions: this.transactions,
-                    auditTrail: this.auditTrail,
-                    settings: this.settings,
-                    currentId: this.currentId,
-                    salesCounter: this.salesCounter,
-                    auditCounter: this.auditCounter,
-                    backupDate: new Date().toISOString()
-                };
-
+                const data = { stockItems: this.stockItems, salesData: this.salesData, transactions: this.transactions, auditTrail: this.auditTrail, settings: this.settings, currentId: this.currentId, salesCounter: this.salesCounter, auditCounter: this.auditCounter, backupDate: new Date().toISOString() };
                 const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
@@ -4191,11 +3187,9 @@
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = '.json';
-                
                 input.onchange = (e) => {
                     const file = e.target.files[0];
                     if (!file) return;
-
                     const reader = new FileReader();
                     reader.onload = (event) => {
                         try {
@@ -4213,9 +3207,7 @@
                                 this.showToast('Data restored', 'success');
                                 location.reload();
                             }
-                        } catch (error) {
-                            this.showToast('Invalid backup file', 'danger');
-                        }
+                        } catch (error) { this.showToast('Invalid backup file', 'danger'); }
                     };
                     reader.readAsText(file);
                 };
@@ -4223,17 +3215,11 @@
             }
 
             clearAllData() {
-                if (prompt('Type "DELETE ALL" to confirm:') === 'DELETE ALL') {
-                    localStorage.clear();
-                    this.showToast('All data cleared', 'info');
-                    location.reload();
-                }
+                if (prompt('Type "DELETE ALL" to confirm:') === 'DELETE ALL') { localStorage.clear(); this.showToast('All data cleared', 'info'); location.reload(); }
             }
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.ultraStock = new UltraStockSystem();
-        });
+        document.addEventListener('DOMContentLoaded', () => { window.ultraStock = new UltraStockSystem(); });
     </script>
 </body>
 </html>
