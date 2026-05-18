@@ -8,6 +8,8 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Supabase JS CDN - Fixed version for stability -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.49.8"></script>
     <style>
         * {
             margin: 0;
@@ -2371,8 +2373,6 @@
         <button class="btn btn-primary" id="modalConfirmBtn" style="margin-top: 20px;">OK</button>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
 // Helper function to toggle detail views
 function toggleDetail(detailId) {
@@ -2423,12 +2423,274 @@ function toggleDetail(detailId) {
     passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyMaster(); });
 })();
 
-// Initialize Supabase
-const supabaseClient = window.supabase.createClient(
-    "https://nvebvmqsnonghmavivwu.supabase.co",
-    "sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF"
-);
+// Initialize Supabase - Frontend only configuration
+// Project URL: https://nvebvmqsnonghmavivwu.supabase.co
+// Anon Key: sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF
+const SUPABASE_URL = "https://nvebvmqsnonghmavivwu.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF";
 
+let supabaseClient = null;
+let realtimeSubscriptions = [];
+
+try {
+    // Initialize Supabase client with realtime enabled
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false
+        },
+        realtime: {
+            params: {
+                eventsPerSecond: 10
+            }
+        }
+    });
+    console.log("Supabase client initialized successfully");
+} catch (error) {
+    console.error("Supabase initialization failed:", error);
+    supabaseClient = null;
+}
+
+// IndexedDB Service for offline storage and sync
+class IndexedDBService {
+    constructor(dbName = "BP_SMS_DB", version = 1) {
+        this.dbName = dbName;
+        this.version = version;
+        this.db = null;
+        this.stores = ['stockItems', 'salesData', 'transactions', 'auditTrail', 'syncQueue', 'shareHistory'];
+    }
+    
+    async init() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) {
+                console.warn("IndexedDB not supported, falling back to localStorage");
+                resolve(false);
+                return;
+            }
+            
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => {
+                console.error("IndexedDB error:", request.error);
+                resolve(false);
+            };
+            
+            request.onsuccess = () => {
+                this.db = request.result;
+                resolve(true);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                this.stores.forEach(storeName => {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        const store = db.createObjectStore(storeName, { keyPath: 'id' });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                });
+            };
+        });
+    }
+    
+    async save(storeName, data) {
+        if (!this.db) return false;
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.put(data);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    }
+    
+    async getAll(storeName) {
+        if (!this.db) return [];
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => resolve([]);
+        });
+    }
+    
+    async deleteAll(storeName) {
+        if (!this.db) return false;
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    }
+}
+
+// Supabase Sync Service - Handles CRUD operations with Supabase
+class SupabaseSyncService {
+    constructor(supabase, indexedDBService) {
+        this.supabase = supabase;
+        this.indexedDB = indexedDBService;
+        this.isOnline = navigator.onLine;
+        this.syncInProgress = false;
+        this.tables = ['stock_items', 'sales', 'audit_logs', 'transactions', 'share_history'];
+    }
+    
+    setupRealtimeSubscriptions(onChange) {
+        if (!this.supabase) return;
+        
+        this.tables.forEach(table => {
+            const subscription = this.supabase
+                .channel(`public:${table}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: table }, (payload) => {
+                    if (onChange) onChange(payload);
+                })
+                .subscribe();
+            realtimeSubscriptions.push(subscription);
+        });
+    }
+    
+    async syncStockItem(item) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('stock_items')
+                .upsert(item, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync stock item failed:", error);
+            // Queue for later sync
+            await this.queueForSync('stock_items', item);
+            return false;
+        }
+    }
+    
+    async syncSale(sale) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('sales')
+                .upsert(sale, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync sale failed:", error);
+            await this.queueForSync('sales', sale);
+            return false;
+        }
+    }
+    
+    async syncAuditLog(audit) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('audit_logs')
+                .upsert(audit, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync audit log failed:", error);
+            await this.queueForSync('audit_logs', audit);
+            return false;
+        }
+    }
+    
+    async queueForSync(table, data) {
+        const queueItem = {
+            id: `${Date.now()}_${Math.random()}`,
+            table: table,
+            data: data,
+            timestamp: new Date().toISOString(),
+            retries: 0
+        };
+        await this.indexedDB.save('syncQueue', queueItem);
+    }
+    
+    async processSyncQueue() {
+        if (this.syncInProgress || !this.isOnline || !this.supabase) return;
+        this.syncInProgress = true;
+        
+        try {
+            const queue = await this.indexedDB.getAll('syncQueue');
+            for (const item of queue) {
+                let success = false;
+                switch(item.table) {
+                    case 'stock_items':
+                        success = await this.syncStockItem(item.data);
+                        break;
+                    case 'sales':
+                        success = await this.syncSale(item.data);
+                        break;
+                    case 'audit_logs':
+                        success = await this.syncAuditLog(item.data);
+                        break;
+                    default:
+                        success = true;
+                }
+                if (success) {
+                    await this.indexedDB.save('syncQueue', { ...item, _deleted: true });
+                } else if (item.retries < 5) {
+                    item.retries++;
+                    await this.indexedDB.save('syncQueue', item);
+                }
+            }
+        } catch (error) {
+            console.error("Process sync queue error:", error);
+        }
+        
+        this.syncInProgress = false;
+    }
+    
+    async fetchAllStockItems() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('stock_items')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch stock items failed:", error);
+            return [];
+        }
+    }
+    
+    async fetchAllSales() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('sales')
+                .select('*')
+                .order('date', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch sales failed:", error);
+            return [];
+        }
+    }
+    
+    async fetchAllAuditLogs() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('audit_logs')
+                .select('*')
+                .order('timestamp', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch audit logs failed:", error);
+            return [];
+        }
+    }
+}
 class UltraStockSystem {
     constructor() {
         this.stockItems = [];
@@ -2450,6 +2712,8 @@ class UltraStockSystem {
         this.syncQueue = [];
         this.isOnline = navigator.onLine;
         this.lastSyncTime = null;
+        this.indexedDB = new IndexedDBService();
+        this.supabaseSync = null;
         this.settings = {
             lowStockThreshold: 20, expiryWarningDays: 30, expiryWarningDays60: 60, expiryWarningDays90: 90,
             defaultMarkup: 50.0, defaultVAT: 15.0, overstockAlert: 150, profitMarginAlert: 10,
@@ -2469,7 +2733,22 @@ class UltraStockSystem {
     }
     
     async init() {
+        // Initialize IndexedDB
+        await this.indexedDB.init();
+        
+        // Initialize Supabase Sync Service
+        if (supabaseClient) {
+            this.supabaseSync = new SupabaseSyncService(supabaseClient, this.indexedDB);
+            this.supabaseSync.setupRealtimeSubscriptions((payload) => this.handleRealtimeUpdate(payload));
+        }
+        
         await this.loadFromLocalStorage();
+        
+        // Try to sync with Supabase
+        if (this.supabaseSync) {
+            await this.syncWithSupabase();
+        }
+        
         this.setupEventListeners();
         this.setupUnitLists();
         this.setupFullscreen();
@@ -2486,9 +2765,116 @@ class UltraStockSystem {
         this.loadShareHistory();
     }
     
+    async syncWithSupabase() {
+        if (!this.supabaseSync) return;
+        
+        this.showToast("Syncing with cloud...", "info");
+        document.getElementById('syncStatusDot')?.classList.add('sync-syncing');
+        
+        try {
+            // Fetch data from Supabase
+            const [stockData, salesData, auditData] = await Promise.all([
+                this.supabaseSync.fetchAllStockItems(),
+                this.supabaseSync.fetchAllSales(),
+                this.supabaseSync.fetchAllAuditLogs()
+            ]);
+            
+            // Merge with local data (local takes precedence for conflicts)
+            if (stockData.length > 0) {
+                const localIds = new Set(this.stockItems.map(i => i.id));
+                const newItems = stockData.filter(s => !localIds.has(s.id));
+                this.stockItems = [...newItems, ...this.stockItems];
+                // Update currentId to be higher than any existing
+                const maxId = Math.max(...this.stockItems.map(i => i.id), 0);
+                if (maxId >= this.currentId) this.currentId = maxId + 1;
+            }
+            
+            if (salesData.length > 0) {
+                const localSaleIds = new Set(this.salesData.map(s => s.id));
+                const newSales = salesData.filter(s => !localSaleIds.has(s.id));
+                this.salesData = [...newSales, ...this.salesData];
+                const maxSaleId = Math.max(...this.salesData.map(s => s.id), 1000);
+                if (maxSaleId >= this.salesCounter) this.salesCounter = maxSaleId + 1;
+            }
+            
+            if (auditData.length > 0) {
+                const localAuditIds = new Set(this.auditTrail.map(a => a.id));
+                const newAudits = auditData.filter(a => !localAuditIds.has(a.id));
+                this.auditTrail = [...newAudits, ...this.auditTrail];
+                const maxAuditId = Math.max(...this.auditTrail.map(a => a.id), 0);
+                if (maxAuditId >= this.auditCounter) this.auditCounter = maxAuditId + 1;
+            }
+            
+            // Process sync queue
+            await this.supabaseSync.processSyncQueue();
+            
+            this.saveToLocalStorage();
+            this.showToast("Sync completed successfully", "success");
+        } catch (error) {
+            console.error("Sync failed:", error);
+            this.showToast("Sync failed, will retry later", "warning");
+        } finally {
+            document.getElementById('syncStatusDot')?.classList.remove('sync-syncing');
+            this.updateSyncStatus();
+        }
+    }
+    
+    handleRealtimeUpdate(payload) {
+        if (!payload) return;
+        
+        const { event, table, new: newRecord } = payload;
+        
+        if (table === 'stock_items') {
+            if (event === 'INSERT' || event === 'UPDATE') {
+                const existingIndex = this.stockItems.findIndex(i => i.id === newRecord.id);
+                if (existingIndex >= 0) {
+                    this.stockItems[existingIndex] = { ...this.stockItems[existingIndex], ...newRecord };
+                } else {
+                    this.stockItems.unshift(newRecord);
+                }
+                this.saveToLocalStorage();
+                this.renderTable();
+                this.updateReviewDashboard();
+            } else if (event === 'DELETE') {
+                this.stockItems = this.stockItems.filter(i => i.id !== newRecord.id);
+                this.saveToLocalStorage();
+                this.renderTable();
+            }
+        } else if (table === 'sales') {
+            if (event === 'INSERT' || event === 'UPDATE') {
+                const existingIndex = this.salesData.findIndex(s => s.id === newRecord.id);
+                if (existingIndex >= 0) {
+                    this.salesData[existingIndex] = newRecord;
+                } else {
+                    this.salesData.unshift(newRecord);
+                }
+                this.saveToLocalStorage();
+                this.renderSalesHistory();
+                this.updateReviewDashboard();
+            }
+        } else if (table === 'audit_logs') {
+            if (event === 'INSERT') {
+                this.auditTrail.unshift(newRecord);
+                this.saveToLocalStorage();
+            }
+        }
+        
+        this.showToast(`Real-time update: ${event} on ${table}`, "info");
+    }
+    
     setupOnlineOfflineListeners() {
-        window.addEventListener('online', () => { this.isOnline = true; this.updateSyncStatus(); this.processSyncQueue(); this.showToast('Back online. Syncing...', 'success'); });
-        window.addEventListener('offline', () => { this.isOnline = false; this.updateSyncStatus(); this.showToast('You are offline. Changes will sync when back online.', 'warning'); });
+        window.addEventListener('online', () => { 
+            this.isOnline = true; 
+            this.updateSyncStatus(); 
+            this.syncWithSupabase();
+            this.processSyncQueue(); 
+            this.showToast('Back online. Syncing...', 'success'); 
+        });
+        window.addEventListener('offline', () => { 
+            this.isOnline = false; 
+            this.updateSyncStatus(); 
+            this.showToast('You are offline. Changes will sync when back online.', 'warning'); 
+        });
     }
     
     updateSyncStatus() {
@@ -2503,31 +2889,19 @@ class UltraStockSystem {
     }
     
     async processSyncQueue() {
-        if (!this.isOnline || this.syncQueue.length === 0) return;
-        this.showToast(`Syncing ${this.syncQueue.length} pending operations...`, 'info');
-        const queueCopy = [...this.syncQueue];
-        this.syncQueue = [];
-        for (const op of queueCopy) {
-            try {
-                if (op.type === 'sale') await supabaseClient.from('sales_backup').insert([op.data]);
-                else if (op.type === 'stock') await supabaseClient.from('stock_backup').insert([op.data]);
-                else if (op.type === 'audit') await supabaseClient.from('audit_backup').insert([op.data]);
-                else if (op.type === 'share') await supabaseClient.from('share_backup').insert([op.data]);
-            } catch (e) { console.warn('Sync failed for op', op); this.syncQueue.push(op); }
-        }
-        this.lastSyncTime = new Date();
-        const lastSyncSpan = document.getElementById('lastSyncTime');
-        if (lastSyncSpan) lastSyncSpan.textContent = this.lastSyncTime.toLocaleString();
+        if (!this.isOnline || !this.supabaseSync) return;
+        await this.supabaseSync.processSyncQueue();
         this.updateSyncStatus();
-        this.showToast('Sync completed!', 'success');
     }
-    
-    startPeriodicSync() { setInterval(() => this.processSyncQueue(), 30000); }
     
     queueForSync(type, data) {
         this.syncQueue.push({ type, data, timestamp: new Date().toISOString() });
         this.updateSyncStatus();
-        if (this.isOnline) this.processSyncQueue();
+        if (this.isOnline && this.supabaseSync) {
+            this.processSyncQueue();
+        }
+        // Also store in IndexedDB for offline persistence
+        this.indexedDB.save('syncQueue', { id: Date.now(), type, data, timestamp: new Date().toISOString() });
     }
     
     setupEditableText() {
@@ -2627,6 +3001,11 @@ class UltraStockSystem {
         localStorage.setItem('bp-sms-transactions', JSON.stringify(this.transactions));
         localStorage.setItem('bp-sms-settings', JSON.stringify(this.settings));
         localStorage.setItem('bp-sms-share-history', JSON.stringify(this.shareHistory));
+        
+        // Also save to IndexedDB for offline backup
+        this.indexedDB.save('stockItems', { id: 'stock', data: this.stockItems, timestamp: Date.now() });
+        this.indexedDB.save('salesData', { id: 'sales', data: this.salesData, timestamp: Date.now() });
+        this.indexedDB.save('auditTrail', { id: 'audit', data: this.auditTrail, timestamp: Date.now() });
     }
     
     setupUnitLists() {
@@ -2960,7 +3339,7 @@ class UltraStockSystem {
                 <td>***</td>
                 <td><span class="status-indicator ${statusClass}"></span> ${expiry.toLocaleDateString()}</td>
                 <td><span class="status-indicator ${statusClass}"></span> ${statusText}</td>
-            </tr>`;
+             </tr>`;
         }).join('') || '<tr><td colspan="15" style="text-align:center;">No items found</td></tr>';
         
         // Attach checkbox event listeners
@@ -3348,25 +3727,1424 @@ class UltraStockSystem {
             </tr>
         `).join('');
     }
+<script>
+// Helper function to toggle detail views
+function toggleDetail(detailId) {
+    const element = document.getElementById(detailId);
+    if (element) {
+        element.classList.toggle('hidden-detail');
+    }
+}
+
+// MASTER PASSWORD HANDLER
+(function() {
+    const MASTER_PASSWORD = "asse19maki23elishi13";
+    const STORAGE_KEY = "bp-sms-master-authenticated";
+    const SESSION_KEY = "bp-sms-master-session";
     
-    // Reorder Detail
-    renderReorderDetail() {
-        const tbody = document.getElementById('reorderDetailTableBody');
+    if (sessionStorage.getItem(SESSION_KEY) === "true" || localStorage.getItem(STORAGE_KEY) === "true") {
+        sessionStorage.setItem(SESSION_KEY, "true");
+        const overlay = document.getElementById('masterOverlay');
+        if (overlay) overlay.style.display = 'none';
+        return;
+    }
+    
+    const overlay = document.getElementById('masterOverlay');
+    const verifyBtn = document.getElementById('verifyMasterBtn');
+    const passwordInput = document.getElementById('masterPasswordInput');
+    const errorDiv = document.getElementById('masterError');
+    if (overlay) overlay.style.display = 'flex';
+    
+    function verifyMaster() {
+        if (passwordInput.value === MASTER_PASSWORD) {
+            localStorage.setItem(STORAGE_KEY, "true");
+            sessionStorage.setItem(SESSION_KEY, "true");
+            overlay.style.display = 'none';
+            errorDiv.innerHTML = '';
+            passwordInput.value = '';
+            const toast = document.createElement('div');
+            toast.className = 'toast success';
+            toast.innerHTML = '<i class="fas fa-check-circle"></i> Master access granted!';
+            document.getElementById('toastContainer').appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        } else {
+            errorDiv.innerHTML = '❌ Invalid master password! Access denied.';
+            passwordInput.value = '';
+            passwordInput.focus();
+        }
+    }
+    verifyBtn.addEventListener('click', verifyMaster);
+    passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyMaster(); });
+})();
+
+// ============================================================
+// SUPABASE CONFIGURATION - Frontend Only
+// ============================================================
+const SUPABASE_URL = "https://nvebvmqsnonghmavivwu.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF";
+
+let supabaseClient = null;
+let realtimeSubscriptions = [];
+
+try {
+    supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+            persistSession: true,
+            autoRefreshToken: true,
+            detectSessionInUrl: false
+        },
+        realtime: {
+            params: {
+                eventsPerSecond: 10
+            }
+        }
+    });
+    console.log("Supabase client initialized successfully");
+} catch (error) {
+    console.error("Supabase initialization failed:", error);
+    supabaseClient = null;
+}
+
+// ============================================================
+// INDEXEDDB SERVICE - Offline Storage
+// ============================================================
+class IndexedDBService {
+    constructor(dbName = "BP_SMS_DB", version = 1) {
+        this.dbName = dbName;
+        this.version = version;
+        this.db = null;
+        this.stores = ['stockItems', 'salesData', 'transactions', 'auditTrail', 'syncQueue', 'shareHistory'];
+    }
+    
+    async init() {
+        return new Promise((resolve, reject) => {
+            if (!window.indexedDB) {
+                console.warn("IndexedDB not supported, falling back to localStorage");
+                resolve(false);
+                return;
+            }
+            
+            const request = indexedDB.open(this.dbName, this.version);
+            
+            request.onerror = () => {
+                console.error("IndexedDB error:", request.error);
+                resolve(false);
+            };
+            
+            request.onsuccess = () => {
+                this.db = request.result;
+                resolve(true);
+            };
+            
+            request.onupgradeneeded = (event) => {
+                const db = event.target.result;
+                this.stores.forEach(storeName => {
+                    if (!db.objectStoreNames.contains(storeName)) {
+                        const store = db.createObjectStore(storeName, { keyPath: 'id' });
+                        store.createIndex('timestamp', 'timestamp', { unique: false });
+                    }
+                });
+            };
+        });
+    }
+    
+    async save(storeName, data) {
+        if (!this.db) return false;
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.put(data);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    }
+    
+    async getAll(storeName) {
+        if (!this.db) return [];
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readonly');
+            const store = transaction.objectStore(storeName);
+            const request = store.getAll();
+            request.onsuccess = () => resolve(request.result || []);
+            request.onerror = () => resolve([]);
+        });
+    }
+    
+    async deleteAll(storeName) {
+        if (!this.db) return false;
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.clear();
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    }
+    
+    async deleteByKey(storeName, key) {
+        if (!this.db) return false;
+        return new Promise((resolve) => {
+            const transaction = this.db.transaction([storeName], 'readwrite');
+            const store = transaction.objectStore(storeName);
+            const request = store.delete(key);
+            request.onsuccess = () => resolve(true);
+            request.onerror = () => resolve(false);
+        });
+    }
+}
+
+// ============================================================
+// SUPABASE SYNC SERVICE - Cloud Synchronization
+// ============================================================
+class SupabaseSyncService {
+    constructor(supabase, indexedDBService) {
+        this.supabase = supabase;
+        this.indexedDB = indexedDBService;
+        this.isOnline = navigator.onLine;
+        this.syncInProgress = false;
+        this.tables = ['stock_items', 'sales', 'audit_logs', 'transactions', 'share_history'];
+    }
+    
+    setupRealtimeSubscriptions(onChange) {
+        if (!this.supabase) return;
+        
+        this.tables.forEach(table => {
+            const subscription = this.supabase
+                .channel(`public:${table}`)
+                .on('postgres_changes', { event: '*', schema: 'public', table: table }, (payload) => {
+                    if (onChange) onChange(payload);
+                })
+                .subscribe();
+            realtimeSubscriptions.push(subscription);
+        });
+    }
+    
+    async syncStockItem(item) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('stock_items')
+                .upsert(item, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync stock item failed:", error);
+            await this.queueForSync('stock_items', item);
+            return false;
+        }
+    }
+    
+    async syncSale(sale) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('sales')
+                .upsert(sale, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync sale failed:", error);
+            await this.queueForSync('sales', sale);
+            return false;
+        }
+    }
+    
+    async syncAuditLog(audit) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('audit_logs')
+                .upsert(audit, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync audit log failed:", error);
+            await this.queueForSync('audit_logs', audit);
+            return false;
+        }
+    }
+    
+    async syncTransaction(transaction) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('transactions')
+                .upsert(transaction, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync transaction failed:", error);
+            await this.queueForSync('transactions', transaction);
+            return false;
+        }
+    }
+    
+    async syncShareHistory(share) {
+        if (!this.isOnline || !this.supabase) return false;
+        try {
+            const { data, error } = await this.supabase
+                .from('share_history')
+                .upsert(share, { onConflict: 'id' })
+                .select();
+            if (error) throw error;
+            return true;
+        } catch (error) {
+            console.warn("Sync share history failed:", error);
+            await this.queueForSync('share_history', share);
+            return false;
+        }
+    }
+    
+    async queueForSync(table, data) {
+        const queueItem = {
+            id: `${Date.now()}_${Math.random().toString(36).substring(2, 8)}`,
+            table: table,
+            data: data,
+            timestamp: new Date().toISOString(),
+            retries: 0
+        };
+        await this.indexedDB.save('syncQueue', queueItem);
+    }
+    
+    async processSyncQueue() {
+        if (this.syncInProgress || !this.isOnline || !this.supabase) return;
+        this.syncInProgress = true;
+        
+        try {
+            const queue = await this.indexedDB.getAll('syncQueue');
+            const validQueue = queue.filter(item => !item._deleted);
+            
+            for (const item of validQueue) {
+                let success = false;
+                switch(item.table) {
+                    case 'stock_items':
+                        success = await this.syncStockItem(item.data);
+                        break;
+                    case 'sales':
+                        success = await this.syncSale(item.data);
+                        break;
+                    case 'audit_logs':
+                        success = await this.syncAuditLog(item.data);
+                        break;
+                    case 'transactions':
+                        success = await this.syncTransaction(item.data);
+                        break;
+                    case 'share_history':
+                        success = await this.syncShareHistory(item.data);
+                        break;
+                    default:
+                        success = true;
+                }
+                if (success) {
+                    await this.indexedDB.deleteByKey('syncQueue', item.id);
+                } else if (item.retries < 5) {
+                    item.retries++;
+                    await this.indexedDB.save('syncQueue', item);
+                } else {
+                    await this.indexedDB.deleteByKey('syncQueue', item.id);
+                }
+            }
+        } catch (error) {
+            console.error("Process sync queue error:", error);
+        }
+        
+        this.syncInProgress = false;
+    }
+    
+    async fetchAllStockItems() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('stock_items')
+                .select('*')
+                .order('created_at', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch stock items failed:", error);
+            return [];
+        }
+    }
+    
+    async fetchAllSales() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('sales')
+                .select('*')
+                .order('date', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch sales failed:", error);
+            return [];
+        }
+    }
+    
+    async fetchAllAuditLogs() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('audit_logs')
+                .select('*')
+                .order('timestamp', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch audit logs failed:", error);
+            return [];
+        }
+    }
+    
+    async fetchAllTransactions() {
+        if (!this.isOnline || !this.supabase) return [];
+        try {
+            const { data, error } = await this.supabase
+                .from('transactions')
+                .select('*')
+                .order('date', { ascending: false });
+            if (error) throw error;
+            return data || [];
+        } catch (error) {
+            console.warn("Fetch transactions failed:", error);
+            return [];
+        }
+    }
+}
+
+// ============================================================
+// ULTRA STOCK SYSTEM - Main Application Class
+// ============================================================
+class UltraStockSystem {
+    constructor() {
+        this.stockItems = [];
+        this.salesData = [];
+        this.transactions = [];
+        this.auditTrail = [];
+        this.notifications = [];
+        this.shareHistory = [];
+        this.currentId = 1;
+        this.salesCounter = 1001;
+        this.auditCounter = 1;
+        this.isEditing = false;
+        this.editingId = null;
+        this.isLoggedIn = false;
+        this.currentUserType = null;
+        this.currentBranch = 'pharmacy';
+        this.salesHistoryPage = 1;
+        this.salesHistoryRowsPerPage = 20;
+        this.syncQueue = [];
+        this.isOnline = navigator.onLine;
+        this.lastSyncTime = null;
+        this.indexedDB = new IndexedDBService();
+        this.supabaseSync = null;
+        this.settings = {
+            lowStockThreshold: 20, expiryWarningDays: 30, expiryWarningDays60: 60, expiryWarningDays90: 90,
+            defaultMarkup: 50.0, defaultVAT: 15.0, overstockAlert: 150, profitMarginAlert: 10,
+            notifyLowStock: true, notifyExpiry: true, notifyOverstock: true, notifyReorder: true,
+            notifyNegativeProfit: true, notifyFastSlow: true, notifySound: true,
+            baseUnitsList: "tablet,capsule,ml,mg,g,piece,unit,dose,injection,patch",
+            displayUnitsList: "tablet,capsule,piece,strip,bottle,pack,sachet,vial,ampoule",
+            registeredUnitsList: "box,strip,bottle,pack,carton,jar,tube,sachet,vial,ampoule",
+            userPassword: "123456", adminPassword: "Dr. -----2123", masterPassword: "asse19maki23elishi13",
+            pharmacyName: "BETE‑MARKOSE PHARMACEUTICALS", brandName: "BP‑SMS",
+            buttonTexts: { register: "Register", sales: "Sales", inventory: "Inventory", deduct: "Deduct", review: "Review", audit: "Audit" }
+        };
+        this.charts = {};
+        this.notificationInterval = null;
+        this.selectedShareItems = new Set();
+        this.init();
+    }
+    
+    async init() {
+        await this.indexedDB.init();
+        
+        if (supabaseClient) {
+            this.supabaseSync = new SupabaseSyncService(supabaseClient, this.indexedDB);
+            this.supabaseSync.setupRealtimeSubscriptions((payload) => this.handleRealtimeUpdate(payload));
+        }
+        
+        await this.loadFromLocalStorage();
+        
+        if (this.supabaseSync) {
+            await this.syncWithSupabase();
+        }
+        
+        this.setupEventListeners();
+        this.setupUnitLists();
+        this.setupFullscreen();
+        this.setupOnlineOfflineListeners();
+        this.startNotificationSystem();
+        this.updateDashboardFromCards();
+        this.updateTextEdits();
+        this.setupEditableText();
+        this.applyButtonCustomizations();
+        this.addSalesRow();
+        this.startPeriodicSync();
+        this.renderSalesHistory();
+        this.updateSyncStatus();
+        this.loadShareHistory();
+    }
+    
+    async syncWithSupabase() {
+        if (!this.supabaseSync) return;
+        
+        this.showToast("Syncing with cloud...", "info");
+        const dot = document.getElementById('syncStatusDot');
+        if (dot) dot.classList.add('sync-syncing');
+        
+        try {
+            const [stockData, salesData, auditData, transactionData] = await Promise.all([
+                this.supabaseSync.fetchAllStockItems(),
+                this.supabaseSync.fetchAllSales(),
+                this.supabaseSync.fetchAllAuditLogs(),
+                this.supabaseSync.fetchAllTransactions()
+            ]);
+            
+            if (stockData.length > 0) {
+                const localIds = new Set(this.stockItems.map(i => i.id));
+                const newItems = stockData.filter(s => !localIds.has(s.id));
+                this.stockItems = [...newItems, ...this.stockItems];
+                const maxId = Math.max(...this.stockItems.map(i => i.id), 0);
+                if (maxId >= this.currentId) this.currentId = maxId + 1;
+            }
+            
+            if (salesData.length > 0) {
+                const localSaleIds = new Set(this.salesData.map(s => s.id));
+                const newSales = salesData.filter(s => !localSaleIds.has(s.id));
+                this.salesData = [...newSales, ...this.salesData];
+                const maxSaleId = Math.max(...this.salesData.map(s => s.id), 1000);
+                if (maxSaleId >= this.salesCounter) this.salesCounter = maxSaleId + 1;
+            }
+            
+            if (auditData.length > 0) {
+                const localAuditIds = new Set(this.auditTrail.map(a => a.id));
+                const newAudits = auditData.filter(a => !localAuditIds.has(a.id));
+                this.auditTrail = [...newAudits, ...this.auditTrail];
+                const maxAuditId = Math.max(...this.auditTrail.map(a => a.id), 0);
+                if (maxAuditId >= this.auditCounter) this.auditCounter = maxAuditId + 1;
+            }
+            
+            if (transactionData.length > 0) {
+                const localTransIds = new Set(this.transactions.map(t => t.id));
+                const newTrans = transactionData.filter(t => !localTransIds.has(t.id));
+                this.transactions = [...newTrans, ...this.transactions];
+            }
+            
+            await this.supabaseSync.processSyncQueue();
+            
+            this.saveToLocalStorage();
+            this.showToast("Sync completed successfully", "success");
+            this.lastSyncTime = new Date();
+            const lastSyncSpan = document.getElementById('lastSyncTime');
+            if (lastSyncSpan) lastSyncSpan.textContent = this.lastSyncTime.toLocaleString();
+        } catch (error) {
+            console.error("Sync failed:", error);
+            this.showToast("Sync failed, will retry later", "warning");
+        } finally {
+            if (dot) dot.classList.remove('sync-syncing');
+            this.updateSyncStatus();
+        }
+    }
+    
+    handleRealtimeUpdate(payload) {
+        if (!payload) return;
+        
+        const { event, table, new: newRecord } = payload;
+        
+        if (table === 'stock_items') {
+            if (event === 'INSERT' || event === 'UPDATE') {
+                const existingIndex = this.stockItems.findIndex(i => i.id === newRecord.id);
+                if (existingIndex >= 0) {
+                    this.stockItems[existingIndex] = { ...this.stockItems[existingIndex], ...newRecord };
+                } else {
+                    this.stockItems.unshift(newRecord);
+                }
+                this.saveToLocalStorage();
+                this.renderTable();
+                this.updateReviewDashboard();
+                this.showToast(`Real-time: ${newRecord.name} updated`, "info");
+            } else if (event === 'DELETE') {
+                this.stockItems = this.stockItems.filter(i => i.id !== newRecord.id);
+                this.saveToLocalStorage();
+                this.renderTable();
+                this.showToast(`Real-time: Item removed`, "info");
+            }
+        } else if (table === 'sales') {
+            if (event === 'INSERT' || event === 'UPDATE') {
+                const existingIndex = this.salesData.findIndex(s => s.id === newRecord.id);
+                if (existingIndex >= 0) {
+                    this.salesData[existingIndex] = newRecord;
+                } else {
+                    this.salesData.unshift(newRecord);
+                }
+                this.saveToLocalStorage();
+                this.renderSalesHistory();
+                this.updateReviewDashboard();
+                this.showToast(`Real-time: New sale recorded`, "info");
+            }
+        } else if (table === 'audit_logs') {
+            if (event === 'INSERT') {
+                this.auditTrail.unshift(newRecord);
+                this.saveToLocalStorage();
+            }
+        }
+    }
+    
+    setupOnlineOfflineListeners() {
+        window.addEventListener('online', () => { 
+            this.isOnline = true; 
+            this.updateSyncStatus(); 
+            this.syncWithSupabase();
+            this.showToast('Back online. Syncing with cloud...', 'success'); 
+        });
+        window.addEventListener('offline', () => { 
+            this.isOnline = false; 
+            this.updateSyncStatus(); 
+            this.showToast('You are offline. Changes will sync when back online.', 'warning'); 
+        });
+    }
+    
+    updateSyncStatus() {
+        const dot = document.getElementById('syncStatusDot');
+        const text = document.getElementById('syncStatusText');
+        if (dot) {
+            dot.className = `sync-status ${this.isOnline ? 'sync-online' : 'sync-offline'}`;
+            if (text) text.textContent = this.isOnline ? 'Online' : 'Offline';
+        }
+        const pending = document.getElementById('pendingOps');
+        if (pending) {
+            const queueLength = this.syncQueue.length;
+            pending.textContent = queueLength;
+        }
+    }
+    
+    startPeriodicSync() {
+        setInterval(() => {
+            if (this.isOnline && this.supabaseSync) {
+                this.supabaseSync.processSyncQueue();
+            }
+        }, 30000);
+    }
+    
+    queueForSync(type, data) {
+        this.syncQueue.push({ type, data, timestamp: new Date().toISOString() });
+        this.updateSyncStatus();
+        if (this.isOnline && this.supabaseSync) {
+            this.supabaseSync.processSyncQueue();
+        }
+        this.indexedDB.save('syncQueue', { id: Date.now(), type, data, timestamp: new Date().toISOString() });
+    }
+    setupEditableText() {
+        document.querySelectorAll('.editable-text').forEach(el => {
+            el.addEventListener('click', (e) => {
+                if (this.currentUserType !== 'admin') { 
+                    this.showFullscreenModal('Admin access required', 'warning'); 
+                    return; 
+                }
+                const newText = prompt('Edit text:', el.innerText);
+                if (newText && newText !== el.innerText) {
+                    el.innerText = newText;
+                    if (el.id === 'pharmacyHeaderName') this.settings.pharmacyName = newText;
+                    if (el.id === 'pharmacyOwnerName') this.settings.brandName = newText;
+                    if (el.id === 'mainHeaderTitle') this.settings.pharmacyName = newText.split(' ')[0];
+                    this.saveToLocalStorage();
+                    this.showFullscreenModal('Text updated!', 'success');
+                }
+            });
+        });
+    }
+    
+    showFullscreenModal(message, type = 'info') {
+        const modal = document.getElementById('fullscreenModal');
+        const modalMsg = document.getElementById('modalMessage');
+        modalMsg.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}" style="font-size: 2rem; margin-bottom: 1rem; color: var(--accent);"></i><br>${message}`;
+        modal.classList.add('active');
+        const exitBtn = document.getElementById('modalExitBtn');
+        const confirmBtn = document.getElementById('modalConfirmBtn');
+        const closeModal = () => modal.classList.remove('active');
+        exitBtn.onclick = closeModal;
+        confirmBtn.onclick = closeModal;
+        setTimeout(() => { if(modal.classList.contains('active')) closeModal(); }, 3000);
+    }
+    
+    applyButtonCustomizations() {
+        const btns = { 
+            navRegisterStock: this.settings.buttonTexts.register, 
+            navSales: this.settings.buttonTexts.sales,
+            navCurrentStock: this.settings.buttonTexts.inventory, 
+            navReduceStock: this.settings.buttonTexts.deduct,
+            navReview: this.settings.buttonTexts.review, 
+            navAudit: this.settings.buttonTexts.audit 
+        };
+        for (const [id, text] of Object.entries(btns)) {
+            const btn = document.getElementById(id);
+            if (btn) { 
+                const span = btn.querySelector('.btn-text'); 
+                if (span) span.textContent = text; 
+            }
+        }
+    }
+    
+    updateTextEdits() {
+        const headerTitle = document.getElementById('mainHeaderTitle');
+        const pharmacyHeader = document.getElementById('pharmacyHeaderName');
+        const ownerName = document.getElementById('pharmacyOwnerName');
+        const welcomeTitle = document.getElementById('editableTitle');
+        const welcomeOwner = document.getElementById('editableOwner');
+        if (headerTitle) headerTitle.innerText = `${this.settings.pharmacyName} Stock Management System (${this.settings.brandName})`;
+        if (pharmacyHeader) pharmacyHeader.innerText = this.settings.pharmacyName;
+        if (ownerName) ownerName.innerText = this.settings.brandName;
+        if (welcomeTitle) welcomeTitle.innerText = `${this.settings.pharmacyName} Stock Management System (${this.settings.brandName})`;
+        if (welcomeOwner) welcomeOwner.innerText = this.settings.brandName;
+        document.querySelectorAll('.pharmacy-info-container .owner-name').forEach(el => el.innerText = this.settings.brandName);
+    }
+    
+    async loadFromLocalStorage() {
+        return new Promise((resolve) => {
+            try {
+                const savedStock = localStorage.getItem('bp-sms-stock');
+                const savedSales = localStorage.getItem('bp-sms-sales');
+                const savedAudit = localStorage.getItem('bp-sms-audit');
+                const savedSettings = localStorage.getItem('bp-sms-settings');
+                const savedTransactions = localStorage.getItem('bp-sms-transactions');
+                const savedShareHistory = localStorage.getItem('bp-sms-share-history');
+                if (savedStock) { 
+                    const data = JSON.parse(savedStock); 
+                    this.stockItems = data.stockItems || []; 
+                    this.currentId = data.currentId || 1; 
+                }
+                if (savedSales) this.salesData = JSON.parse(savedSales);
+                if (savedAudit) this.auditTrail = JSON.parse(savedAudit);
+                if (savedTransactions) this.transactions = JSON.parse(savedTransactions);
+                if (savedSettings) this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                if (savedShareHistory) this.shareHistory = JSON.parse(savedShareHistory);
+                
+                this.stockItems.forEach(item => {
+                    if (item.beginningBalance === undefined) {
+                        const qtyDisplay = item.quantityBase / item.displayToBaseFactor;
+                        item.beginningBalance = qtyDisplay; 
+                        item.quantityReceived = qtyDisplay; 
+                        item.quantityIssued = 0;
+                        item.endingBalance = qtyDisplay; 
+                        item.physicalCount = qtyDisplay; 
+                        item.variance = 0;
+                    }
+                    if (item.minStockDisplay === undefined) {
+                        item.minStockDisplay = item.minStockBase / item.displayToBaseFactor;
+                        item.maxStockDisplay = item.maxStockBase / item.displayToBaseFactor;
+                        item.reorderLevelDisplay = item.reorderLevelBase / item.displayToBaseFactor;
+                    }
+                    if (item.customId === undefined) item.customId = item.id;
+                    if (item.brandName === undefined) item.brandName = '';
+                });
+                this.auditCounter = this.auditTrail.length > 0 ? Math.max(...this.auditTrail.map(a => a.id)) + 1 : 1;
+                resolve();
+            } catch (error) { 
+                resolve(); 
+            }
+        });
+    }
+    
+    saveToLocalStorage() {
+        const stockData = { stockItems: this.stockItems, currentId: this.currentId };
+        localStorage.setItem('bp-sms-stock', JSON.stringify(stockData));
+        localStorage.setItem('bp-sms-sales', JSON.stringify(this.salesData));
+        localStorage.setItem('bp-sms-audit', JSON.stringify(this.auditTrail));
+        localStorage.setItem('bp-sms-transactions', JSON.stringify(this.transactions));
+        localStorage.setItem('bp-sms-settings', JSON.stringify(this.settings));
+        localStorage.setItem('bp-sms-share-history', JSON.stringify(this.shareHistory));
+        
+        this.indexedDB.save('stockItems', { id: 'stock', data: this.stockItems, timestamp: Date.now() });
+        this.indexedDB.save('salesData', { id: 'sales', data: this.salesData, timestamp: Date.now() });
+        this.indexedDB.save('auditTrail', { id: 'audit', data: this.auditTrail, timestamp: Date.now() });
+    }
+    
+    setupUnitLists() {
+        const baseList = document.getElementById('baseUnitList');
+        if (baseList) baseList.innerHTML = this.settings.baseUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
+        const displayList = document.getElementById('displayUnitList');
+        if (displayList) displayList.innerHTML = this.settings.displayUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
+        const registeredList = document.getElementById('registeredUnitList');
+        if (registeredList) registeredList.innerHTML = this.settings.registeredUnitsList.split(',').map(u => `<option value="${u.trim()}">`).join('');
+    }
+    
+    setupFullscreen() {
+        document.getElementById('fullscreenToggle').addEventListener('click', () => {
+            if (!document.fullscreenElement) { 
+                document.documentElement.requestFullscreen(); 
+                document.getElementById('fullscreenToggle').innerHTML = '<i class="fas fa-compress"></i>'; 
+            } else { 
+                if (document.exitFullscreen) { 
+                    document.exitFullscreen(); 
+                    document.getElementById('fullscreenToggle').innerHTML = '<i class="fas fa-expand"></i>'; 
+                } 
+            }
+        });
+    }
+    
+    startNotificationSystem() { 
+        this.checkNotifications(); 
+        this.notificationInterval = setInterval(() => this.checkNotifications(), 60000); 
+    }
+    
+    checkNotifications() {
+        const notifications = [];
+        const now = new Date();
+        this.stockItems.forEach(item => {
+            const expiryDate = new Date(item.expiryDate);
+            const diffDays = Math.ceil((expiryDate - now) / (1000 * 60 * 60 * 24));
+            const displayQty = item.quantityBase / item.displayToBaseFactor;
+            if (diffDays < 0 && this.settings.notifyExpiry) 
+                notifications.push({ type: 'critical', title: 'Item Expired', message: `${item.name} (${item.batchNumber}) has expired`, itemId: item.id, page: 'stockInventoryPage', filter: 'expired', reviewed: false });
+            else if (diffDays <= this.settings.expiryWarningDays && diffDays > 0 && this.settings.notifyExpiry) 
+                notifications.push({ type: 'critical', title: 'Urgent: Expiring Soon', message: `${item.name} expires in ${diffDays} days`, itemId: item.id, page: 'stockInventoryPage', filter: 'expiry', reviewed: false });
+            else if (diffDays <= this.settings.expiryWarningDays60 && diffDays > 0 && this.settings.notifyExpiry) 
+                notifications.push({ type: 'warning', title: 'Near Expiry', message: `${item.name} expires in ${diffDays} days`, itemId: item.id, page: 'stockInventoryPage', filter: 'expiry', reviewed: false });
+            if (displayQty <= 0 && this.settings.notifyReorder) 
+                notifications.push({ type: 'critical', title: 'Stock Out', message: `${item.name} is out of stock`, itemId: item.id, page: 'stockInventoryPage', filter: 'stockout', reviewed: false });
+            else if (displayQty <= item.reorderLevelDisplay && displayQty > 0 && this.settings.notifyReorder) 
+                notifications.push({ type: 'critical', title: 'Reorder Now', message: `${item.name} at reorder level (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'reorder', reviewed: false });
+            else if (displayQty < item.minStockDisplay && displayQty > 0 && this.settings.notifyLowStock) 
+                notifications.push({ type: 'warning', title: 'Low Stock', message: `${item.name} is below minimum (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'low', reviewed: false });
+            else if (displayQty > item.maxStockDisplay && this.settings.notifyOverstock) 
+                notifications.push({ type: 'info', title: 'Overstock', message: `${item.name} exceeds maximum (${displayQty.toFixed(2)} ${item.displayUnit})`, itemId: item.id, page: 'stockInventoryPage', filter: 'over', reviewed: false });
+        });
+        const unreadNotifs = notifications.filter(n => !n.reviewed);
+        this.updateNotificationCounters(unreadNotifs);
+        this.showNewNotifications(unreadNotifs);
+        this.notifications = [...unreadNotifs];
+    }
+    
+    updateNotificationCounters(notifications) {
+        const critical = notifications.filter(n => n.type === 'critical').length;
+        const warning = notifications.filter(n => n.type === 'warning').length;
+        const info = notifications.filter(n => n.type === 'info').length;
+        const criticalSpan = document.getElementById('criticalCounter')?.querySelector('.count');
+        const warningSpan = document.getElementById('warningCounter')?.querySelector('.count');
+        const infoSpan = document.getElementById('infoCounter')?.querySelector('.count');
+        if (criticalSpan) criticalSpan.textContent = critical;
+        if (warningSpan) warningSpan.textContent = warning;
+        if (infoSpan) infoSpan.textContent = info;
+    }
+    
+    showNewNotifications(notifications) {
+        notifications.slice(0, 3).forEach(n => this.showToast(n.message, n.type));
+        if (this.settings.notifySound && notifications.length > 0) 
+            document.getElementById('notificationSound').play().catch(() => {});
+    }
+    
+    showToast(message, type = 'info') {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `<i class="fas fa-${type === 'critical' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>${message}<button class="notification-close" onclick="this.parentElement.remove()" style="margin-left: auto; background: none; border: none; color: var(--light); cursor: pointer;"><i class="fas fa-times"></i></button>`;
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 5000);
+    }
+    
+    openNotificationPanel(type) {
+        if (this.currentUserType !== 'admin') { this.showToast('Admin only', 'warning'); return; }
+        const panel = document.getElementById('notificationPanel');
+        const list = document.getElementById('notificationList');
+        const title = document.getElementById('notificationPanelTitle');
+        const filtered = this.notifications.filter(n => n.type === type);
+        title.textContent = type === 'critical' ? 'Urgent Alerts' : type === 'warning' ? 'Warnings' : 'Updates';
+        list.innerHTML = filtered.map(n => `<div class="notification-list-item ${n.type}" onclick="window.ultraStock.goToNotification(${JSON.stringify(n).replace(/"/g, '&quot;')})"><div class="title">${n.title}</div><div class="message">${n.message}</div><div class="time">${new Date().toLocaleTimeString()}</div></div>`).join('') || '<div style="text-align: center; padding: 1rem; color: var(--gray);">No notifications</div>';
+        panel.classList.add('active');
+    }
+    
+    closeNotificationPanel() { document.getElementById('notificationPanel').classList.remove('active'); }
+    
+    goToNotification(notification) {
+        if (notification.page) { 
+            this.openPage(notification.page); 
+            if (notification.filter) { 
+                setTimeout(() => { 
+                    const filter = document.getElementById('statusFilter'); 
+                    if (filter) { 
+                        filter.value = notification.filter; 
+                        this.renderTable(); 
+                    } 
+                }, 100); 
+            } 
+        }
+        notification.reviewed = true;
+        this.closeNotificationPanel();
+        this.notifications = this.notifications.filter(n => n !== notification);
+        this.updateNotificationCounters(this.notifications);
+        this.showToast('Notification reviewed and cleared', 'success');
+    }
+    
+    setupEventListeners() {
+        document.getElementById('loginBtn').addEventListener('click', () => this.handleLogin());
+        document.getElementById('criticalCounter').addEventListener('click', () => this.openNotificationPanel('critical'));
+        document.getElementById('warningCounter').addEventListener('click', () => this.openNotificationPanel('warning'));
+        document.getElementById('infoCounter').addEventListener('click', () => this.openNotificationPanel('info'));
+        document.getElementById('settingsIcon').addEventListener('click', () => { 
+            if (this.currentUserType !== 'admin') { this.showToast('Admin only', 'warning'); return; } 
+            document.getElementById('settingsPanel').classList.add('active'); 
+            this.loadSettings(); 
+        });
+        document.getElementById('closeSettings').addEventListener('click', () => document.getElementById('settingsPanel').classList.remove('active'));
+        document.getElementById('saveSettings').addEventListener('click', () => this.saveSettings());
+        document.getElementById('backupData').addEventListener('click', () => this.backupData());
+        document.getElementById('restoreData').addEventListener('click', () => this.restoreData());
+        document.getElementById('clearAllData').addEventListener('click', () => this.clearAllData());
+        document.getElementById('balanceVerificationBtn').addEventListener('click', () => this.verifyAllBalances());
+        document.getElementById('updateAuditFindings')?.addEventListener('click', () => this.updateAuditFindingsManual());
+        document.getElementById('exportAuditReport')?.addEventListener('click', () => this.exportAuditReport());
+        document.getElementById('navRegisterStock').addEventListener('click', () => this.openPage('registerStockPage'));
+        document.getElementById('navSales').addEventListener('click', () => this.openPage('salesPage'));
+        document.getElementById('navCurrentStock').addEventListener('click', () => this.openPage('stockInventoryPage'));
+        document.getElementById('navReduceStock').addEventListener('click', () => this.openPage('reduceStockPage'));
+        document.getElementById('navReview').addEventListener('click', () => this.openPage('reviewPage'));
+        document.getElementById('navAudit').addEventListener('click', () => this.openPage('auditPage'));
+        
+        document.querySelectorAll('.close-full-screen').forEach(btn => { 
+            btn.addEventListener('click', (e) => { 
+                const pageId = btn.dataset.close || btn.closest('.full-screen-mode').id; 
+                document.getElementById(pageId).classList.remove('active'); 
+            }); 
+        });
+        
+        document.querySelectorAll('.dashboard-card').forEach(card => { 
+            card.addEventListener('click', (e) => { 
+                const page = card.dataset.page; 
+                const filter = card.dataset.filter; 
+                if (page) this.openPage(page, filter); 
+            }); 
+        });
+        
+        document.querySelectorAll('.audit-summary-item').forEach(item => { 
+            item.addEventListener('click', (e) => { 
+                const type = item.dataset.auditType; 
+                this.showAuditDetail(type); 
+            }); 
+        });
+        
+        document.getElementById('stockForm').addEventListener('submit', (e) => { e.preventDefault(); this.saveItem(); });
+        document.getElementById('clearForm').addEventListener('click', () => this.clearRegisterForm());
+        document.getElementById('salesForm').addEventListener('submit', (e) => { e.preventDefault(); this.processSale(); });
+        document.getElementById('addSalesRow').addEventListener('click', () => this.addSalesRow());
+        document.getElementById('clearSalesForm').addEventListener('click', () => this.clearSalesForm());
+        document.getElementById('reduceStockForm').addEventListener('submit', (e) => { e.preventDefault(); this.reduceStock(); });
+        document.getElementById('clearReduceForm').addEventListener('click', () => this.clearReduceForm());
+        document.getElementById('reduceItemSelect').addEventListener('change', () => this.updateReduceDetails());
+        document.getElementById('searchInput')?.addEventListener('input', () => this.renderTable());
+        document.getElementById('categoryFilter')?.addEventListener('change', () => this.renderTable());
+        document.getElementById('branchFilter')?.addEventListener('change', () => this.renderTable());
+        document.getElementById('statusFilter')?.addEventListener('change', () => this.renderTable());
+        document.getElementById('clearFilters')?.addEventListener('click', () => this.clearFilters());
+        
+        ['salesPeriodFilter', 'inventoryPeriodFilter', 'deductPeriodFilter', 'reviewPeriodFilter', 'auditPeriodFilter'].forEach(id => { 
+            document.getElementById(id)?.addEventListener('change', () => this.refreshActivePage()); 
+        });
+        
+        document.getElementById('searchAudit')?.addEventListener('input', () => this.renderAuditTable());
+        document.getElementById('auditTypeFilter')?.addEventListener('change', () => this.renderAuditTable());
+        document.getElementById('auditDateFilter')?.addEventListener('change', () => this.renderAuditTable());
+        document.getElementById('salesHistorySearch')?.addEventListener('input', () => this.renderSalesHistory());
+        document.getElementById('salesHistoryFilter')?.addEventListener('change', () => this.renderSalesHistory());
+        document.getElementById('exportSalesHistoryBtn')?.addEventListener('click', () => this.exportSalesHistory());
+        document.getElementById('printSalesHistoryBtn')?.addEventListener('click', () => this.printSalesHistory());
+        document.getElementById('activitySearch')?.addEventListener('input', () => this.renderActivityLog());
+        document.getElementById('activityTypeFilter')?.addEventListener('change', () => this.renderActivityLog());
+        document.getElementById('exportActivityBtn')?.addEventListener('click', () => this.exportActivityLog());
+        
+        document.getElementById('shareIcon').addEventListener('click', () => this.openShareModal());
+        document.getElementById('closeShareModal').addEventListener('click', () => this.closeShareModal());
+        document.getElementById('shareMasterCheckbox')?.addEventListener('change', (e) => this.toggleSelectAllShares(e.target.checked));
+        document.getElementById('shareSelectAllBtn')?.addEventListener('click', () => this.toggleSelectAllShares(true));
+        document.getElementById('shareClearAllBtn')?.addEventListener('click', () => this.toggleSelectAllShares(false));
+        document.getElementById('shareSearchInput')?.addEventListener('input', () => this.renderShareTable());
+        document.getElementById('shareCategoryFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareStatusFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareBranchFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareTelegramBtn')?.addEventListener('click', () => this.shareToTelegram());
+        document.getElementById('shareCopyPreviewBtn')?.addEventListener('click', () => this.copySharePreview());
+        document.getElementById('shareExportBtn')?.addEventListener('click', () => this.exportSelectedItems());
+    }
+    
+    handleLogin() {
+        const type = document.getElementById('loginType').value;
+        const password = document.getElementById('password').value;
+        const expectedPassword = type === 'user' ? this.settings.userPassword : this.settings.adminPassword;
+        if (!type) { this.showToast('Select login type', 'warning'); return; }
+        if (password === expectedPassword) {
+            this.isLoggedIn = true;
+            this.currentUserType = type;
+            document.querySelectorAll('.admin-only').forEach(el => { el.style.display = type === 'admin' ? 'flex' : 'none'; });
+            document.querySelectorAll('.editable-text').forEach(el => { if (type === 'admin') el.classList.add('admin-mode'); else el.classList.remove('admin-mode'); });
+            document.getElementById('welcomePage').style.opacity = '0';
+            this.recordAudit('login', 0, 'System', 0, 'login', this.currentBranch, this.currentUserType, { type });
+            setTimeout(() => { 
+                document.getElementById('welcomePage').style.display = 'none'; 
+                document.getElementById('mainContainer').style.display = 'block'; 
+                this.showToast('Login successful!', 'success'); 
+            }, 300);
+        } else { this.showToast('Invalid password', 'warning'); }
+    }
+    
+    openPage(pageId, filter = null) {
+        if (!this.isLoggedIn) { this.showToast('Please login first', 'warning'); return; }
+        if ((pageId === 'reviewPage' || pageId === 'auditPage') && this.currentUserType !== 'admin') { 
+            this.showToast('Admin access only', 'warning'); 
+            return; 
+        }
+        document.querySelectorAll('.full-screen-mode').forEach(p => p.classList.remove('active'));
+        document.getElementById(pageId).classList.add('active');
+        const branchSpan = document.getElementById(pageId + 'BranchLabel') || document.getElementById(pageId.replace('Page','') + 'BranchLabel');
+        if (branchSpan) branchSpan.textContent = this.currentBranch === 'pharmacy' ? 'Pharmacy' : 'Wholesaler';
+        const branchSelect = document.getElementById('branch') || document.getElementById('salesBranch') || document.getElementById('reduceBranch');
+        if (branchSelect) branchSelect.value = this.currentBranch;
+        switch(pageId) {
+            case 'registerStockPage': 
+                document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0]; 
+                document.getElementById('markup').value = this.settings.defaultMarkup; 
+                this.applyMarkup(); 
+                break;
+            case 'salesPage': 
+                document.getElementById('salesDate').value = new Date().toISOString().split('T')[0]; 
+                if(!document.getElementById('salesInvoiceNumber').value) 
+                    document.getElementById('salesInvoiceNumber').value = `INV-${Date.now()}`; 
+                this.clearSalesForm(); 
+                this.renderSalesHistory(); 
+                break;
+            case 'stockInventoryPage': 
+                this.renderTable(); 
+                if(filter){ 
+                    setTimeout(()=>{
+                        const f=document.getElementById('statusFilter'); 
+                        if(f){ f.value=filter; this.renderTable();}
+                    },100);
+                } 
+                break;
+            case 'reduceStockPage': 
+                this.initReducePage(); 
+                break;
+            case 'reviewPage': 
+                this.updateReviewDashboard(); 
+                this.renderActivityLog(); 
+                this.renderDemandForecastDetail(); 
+                this.renderReorderDetail(); 
+                break;
+            case 'auditPage': 
+                this.renderAuditTable(); 
+                this.updateAuditSummary(); 
+                this.renderAuditVarianceDetail(); 
+                break;
+        }
+    }
+    
+    refreshActivePage() {
+        const active = document.querySelector('.full-screen-mode.active');
+        if (active) {
+            if (active.id === 'stockInventoryPage') this.renderTable();
+            else if (active.id === 'reviewPage') { 
+                this.updateReviewDashboard(); 
+                this.renderActivityLog(); 
+                this.renderDemandForecastDetail(); 
+                this.renderReorderDetail(); 
+            }
+            else if (active.id === 'auditPage') { 
+                this.renderAuditTable(); 
+                this.updateAuditSummary(); 
+                this.renderAuditVarianceDetail(); 
+            }
+            else if (active.id === 'reduceStockPage') this.renderDeductionHistory();
+            else if (active.id === 'salesPage') this.renderSalesHistory();
+        }
+    }
+    
+    openShareModal() {
+        if (!this.isLoggedIn) { this.showToast('Please login first', 'warning'); return; }
+        document.getElementById('shareModal').classList.add('active');
+        this.updateShareCategoryFilter();
+        this.renderShareTable();
+        this.updateShareStats();
+    }
+    
+    closeShareModal() {
+        document.getElementById('shareModal').classList.remove('active');
+        this.selectedShareItems.clear();
+    }
+    
+    updateShareCategoryFilter() {
+        const filter = document.getElementById('shareCategoryFilter');
+        if (!filter) return;
+        const cats = [...new Set(this.stockItems.map(i => i.category).filter(Boolean))];
+        filter.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    
+    renderShareTable() {
+        const tbody = document.getElementById('shareTableBody');
         if (!tbody) return;
         
-        const thirtyDaysAgo = new Date();
-        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        let items = [...this.stockItems];
+        const branchFilter = document.getElementById('shareBranchFilter')?.value;
+        if (branchFilter && branchFilter !== 'all') {
+            items = items.filter(i => i.branch === branchFilter);
+        }
         
-        const salesByItem = {};
-        this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).forEach(sale => {
-            sale.items.forEach(item => {
-                if (!salesByItem[item.itemId]) {
-                    salesByItem[item.itemId] = { totalQty: 0 };
+        const search = document.getElementById('shareSearchInput')?.value.toLowerCase() || '';
+        if (search) {
+            items = items.filter(i => i.name.toLowerCase().includes(search) || (i.brandName && i.brandName.toLowerCase().includes(search)));
+        }
+        
+        const category = document.getElementById('shareCategoryFilter')?.value;
+        if (category) {
+            items = items.filter(i => i.category === category);
+        }
+        
+        const status = document.getElementById('shareStatusFilter')?.value;
+        if (status) {
+            const now = new Date();
+            items = items.filter(i => {
+                const expiry = new Date(i.expiryDate);
+                const diff = Math.ceil((expiry - now) / (86400000));
+                const qty = i.quantityDisplay;
+                switch(status) {
+                    case 'low': return qty > 0 && qty < i.minStockDisplay;
+                    case 'expiring': return diff > 0 && diff <= 90;
+                    case 'expired': return diff < 0;
+                    case 'overstock': return qty > i.maxStockDisplay;
+                    default: return true;
                 }
-                salesByItem[item.itemId].totalQty += item.quantity;
+            });
+        }
+        
+        items.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+        
+        document.getElementById('shareTotalCount').textContent = items.length;
+        
+        tbody.innerHTML = items.map(item => {
+            const isSelected = this.selectedShareItems.has(item.id);
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - new Date()) / (86400000));
+            let statusClass = '';
+            let statusText = '';
+            if (diff < 0) { statusClass = 'status-expired'; statusText = 'Expired'; }
+            else if (diff <= 30) { statusClass = 'status-critical'; statusText = 'Expiring Soon'; }
+            else if (diff <= 90) { statusClass = 'status-warning'; statusText = 'Near Expiry'; }
+            else { statusClass = 'status-ok'; statusText = 'Good'; }
+            
+            return `<tr class="${isSelected ? 'selected' : ''}" data-item-id="${item.id}">
+                <td class="checkbox-cell"><input type="checkbox" class="share-item-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''}></td>
+                <td>${this.escapeHtml(item.name)}</td><td>${this.escapeHtml(item.brandName || '-')}</td>
+                <td>${this.escapeHtml(item.batchNumber)}</td><td>${item.baseUnit}</td><td>${item.registeredUnit}</td>
+                <td>${item.displayUnit}</td><td>${item.quantityBase.toFixed(2)}</td>
+                <td><strong>${item.quantityDisplay.toFixed(2)}</strong></td><td>***</td><td>***</td><td>***</td><td>***</td>
+                <td><span class="status-indicator ${statusClass}"></span> ${expiry.toLocaleDateString()}</td>
+                <td><span class="status-indicator ${statusClass}"></span> ${statusText}</td>
+             </tr>`;
+        }).join('') || '<tr><td colspan="15" style="text-align:center;">No items found</td></tr>';
+        
+        document.querySelectorAll('.share-item-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                if (e.target.checked) this.selectedShareItems.add(id);
+                else this.selectedShareItems.delete(id);
+                this.updateShareStats();
+                this.updateSharePreview();
+                const masterCb = document.getElementById('shareMasterCheckbox');
+                if (masterCb) {
+                    const allBoxes = document.querySelectorAll('.share-item-checkbox');
+                    const checkedBoxes = document.querySelectorAll('.share-item-checkbox:checked');
+                    masterCb.checked = allBoxes.length === checkedBoxes.length && allBoxes.length > 0;
+                    masterCb.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+                }
+                const row = e.target.closest('tr');
+                if (row) {
+                    if (e.target.checked) row.classList.add('selected');
+                    else row.classList.remove('selected');
+                }
             });
         });
         
+        this.updateShareStats();
+        this.updateSharePreview();
+        
+        const masterCb = document.getElementById('shareMasterCheckbox');
+        if (masterCb) {
+            const allBoxes = document.querySelectorAll('.share-item-checkbox');
+            const checkedBoxes = document.querySelectorAll('.share-item-checkbox:checked');
+            masterCb.checked = allBoxes.length === checkedBoxes.length && allBoxes.length > 0;
+            masterCb.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+        }
+    }
+    
+    toggleSelectAllShares(select) {
+        document.querySelectorAll('.share-item-checkbox').forEach(cb => {
+            cb.checked = select;
+            const id = parseInt(cb.dataset.id);
+            if (select) this.selectedShareItems.add(id);
+            else this.selectedShareItems.delete(id);
+            const row = cb.closest('tr');
+            if (row) {
+                if (select) row.classList.add('selected');
+                else row.classList.remove('selected');
+            }
+        });
+        this.updateShareStats();
+        this.updateSharePreview();
+    }
+    
+    updateShareStats() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        document.getElementById('shareSelectedCount').textContent = selectedItems.length;
+        const totalValue = selectedItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0);
+        document.getElementById('shareTotalValue').innerHTML = `ETB ${totalValue.toFixed(0).replace(/\d/g, '*')}`;
+        const now = new Date();
+        const expiringCount = selectedItems.filter(i => {
+            const diff = Math.ceil((new Date(i.expiryDate) - now) / (86400000));
+            return diff > 0 && diff <= 90;
+        }).length;
+        const lowStockCount = selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length;
+        document.getElementById('shareExpiringCount').textContent = expiringCount;
+        document.getElementById('shareLowStockCount').textContent = lowStockCount;
+    }
+    
+    updateSharePreview() {
+        const previewDiv = document.getElementById('sharePreview');
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        if (selectedItems.length === 0) {
+            previewDiv.innerHTML = '<strong>Preview:</strong> Select items to see preview...';
+            return;
+        }
+        const now = new Date();
+        const pharmacyName = this.settings.pharmacyName;
+        const brandName = this.settings.brandName;
+        const dateStr = now.toLocaleString();
+        let preview = `🏥 *${pharmacyName} (${brandName})*\n📊 *INVENTORY REPORT*\n📅 ${dateStr}\n👤 Generated by: ${this.currentUserType || 'User'}\n\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 *SELECTED ITEMS (${selectedItems.length})*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        selectedItems.slice(0, 15).forEach((item, idx) => {
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - now) / (86400000));
+            let expiryStatus = diff < 0 ? '⚠️ EXPIRED' : diff <= 30 ? '🔴 Expiring Soon' : diff <= 90 ? '🟡 Near Expiry' : '🟢 Good';
+            preview += `*${idx + 1}. ${item.name}*\n`;
+            if (item.brandName) preview += `   Brand: ${item.brandName}\n`;
+            preview += `   Batch: ${item.batchNumber} | Expiry: ${item.expiryDate} (${expiryStatus})\n`;
+            preview += `   Stock: ${item.quantityDisplay.toFixed(2)} ${item.displayUnit}\n`;
+            preview += `   Unit: ${item.baseUnit} (Reg: ${item.registeredUnit}, Disp: ${item.displayUnit})\n`;
+            preview += `   ─────────────────────────────────\n`;
+        });
+        if (selectedItems.length > 15) preview += `\n   ... and ${selectedItems.length - 15} more items\n`;
+        preview += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📈 *SUMMARY*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📦 Total Items: ${selectedItems.length}\n`;
+        preview += `⚠️ Low Stock Items: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
+        preview += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
+        preview += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n*Report generated by BP-SMS v2.0*`;
+        previewDiv.innerHTML = `<strong>Preview (Telegram Format):</strong><br><pre style="background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; white-space: pre-wrap; font-family: monospace;">${this.escapeHtml(preview)}</pre>`;
+    }
+    
+    generateTelegramMessage() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        const now = new Date();
+        const pharmacyName = this.settings.pharmacyName;
+        const brandName = this.settings.brandName;
+        const dateStr = now.toLocaleString();
+        const senderName = document.getElementById('shareSenderName').value || this.currentUserType || 'User';
+        let message = `🏥 *${pharmacyName} (${brandName})*\n📊 *PHARMACEUTICAL INVENTORY REPORT*\n📅 ${dateStr}\n👤 Generated by: ${senderName}\n\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📋 *INVENTORY DETAILS*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        message += `┌─────┬──────────────────────────┬──────────────┬────────────┬──────────┐\n`;
+        message += `│ #   │ Generic Name             │ Batch/Expiry │ Qty (Disp) │ Status   │\n`;
+        message += `├─────┼──────────────────────────┼──────────────┼────────────┼──────────┤\n`;
+        selectedItems.forEach((item, idx) => {
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - now) / 86400000);
+            let status = diff < 0 ? 'EXPIRED' : diff <= 30 ? 'URGENT' : diff <= 90 ? 'WARNING' : 'OK';
+            const nameShort = item.name.length > 24 ? item.name.substring(0, 21) + '...' : item.name;
+            const batchShort = item.batchNumber.length > 12 ? item.batchNumber.substring(0, 9) + '...' : item.batchNumber;
+            message += `│ ${(idx+1).toString().padEnd(3)} │ ${nameShort.padEnd(24)} │ ${batchShort.padEnd(12)} │ ${item.quantityDisplay.toFixed(0).padStart(8)} │ ${status.padEnd(8)} │\n`;
+        });
+        message += `└─────┴──────────────────────────┴──────────────┴────────────┴──────────┘\n\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n📈 *SUMMARY STATISTICS*\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📦 Total Items Shared: ${selectedItems.length}\n`;
+        message += `📊 Total Stock Value: (masked)\n`;
+        message += `⚠️ Low Stock Alerts: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
+        message += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
+        message += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        message += `🔄 Turnover Rate: ${this.calculateTurnoverRate().toFixed(2)}%\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n🔒 *Confidential Report*\n*Report generated by Bete-Markose BP-SMS*`;
+        return message;
+    }
+    
+    calculateTurnoverRate() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const sales = this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).reduce((sum, s) => sum + s.grandTotal, 0);
+        const avgInventory = this.stockItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0) / (this.stockItems.length || 1);
+        return avgInventory > 0 ? (sales / avgInventory) * 100 : 0;
+    }
+    
+    async shareToTelegram() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        if (selectedIds.length === 0) {
+            this.showToast('Please select at least one item to share', 'warning');
+            return;
+        }
+        const recipient = document.getElementById('shareRecipient').value.trim();
+        if (!recipient) {
+            this.showToast('Please enter recipient (@assegas or phone number)', 'warning');
+            return;
+        }
+        const message = this.generateTelegramMessage();
+        const encodedMessage = encodeURIComponent(message);
+        this.recordShareHistory(recipient, selectedIds.length, 'telegram', 'sent');
+        let telegramUrl;
+        if (recipient.startsWith('@')) {
+            const username = recipient.substring(1);
+            telegramUrl = `tg://resolve?domain=${username}&text=${encodedMessage}`;
+        } else {
+            telegramUrl = `tg://msg?to=${recipient}&text=${encodedMessage}`;
+        }
+        const webUrl = `https://t.me/share/url?url=&text=${encodedMessage}`;
+        this.showFullscreenModal(`Preparing to share ${selectedIds.length} items to ${recipient}\n\nClick OK to open Telegram. If the app doesn't open, please use this link:\n${webUrl.substring(0, 80)}...`, 'info');
+        setTimeout(() => {
+            window.open(telegramUrl, '_blank');
+            setTimeout(() => {
+                if (!document.hidden) window.open(webUrl, '_blank');
+            }, 500);
+        }, 100);
+        this.showToast(`Shared ${selectedIds.length} items to ${recipient}`, 'success');
+        this.closeShareModal();
+    }
+    
+    copySharePreview() {
+        const message = this.generateTelegramMessage();
+        navigator.clipboard.writeText(message).then(() => {
+            this.showToast('Preview copied to clipboard!', 'success');
+        }).catch(() => {
+            this.showToast('Failed to copy', 'warning');
+        });
+    }
+    
+    exportSelectedItems() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        const exportType = document.getElementById('shareExportType').value;
+        const recipient = document.getElementById('shareRecipient').value || 'Unknown';
+        let data, filename, mimeType;
+        if (exportType === 'csv') {
+            let csv = "Generic Name,Brand Name,Batch Number,Standard Unit,Register Unit,Display Unit,Standard Quantity,Available Quantity,Expiry Date,Status\n";
+            selectedItems.forEach(item => {
+                const expiry = new Date(item.expiryDate);
+                const status = expiry < new Date() ? 'Expired' : 'Active';
+                csv += `"${item.name}","${item.brandName || ''}","${item.batchNumber}","${item.baseUnit}","${item.registeredUnit}","${item.displayUnit}","${item.quantityBase.toFixed(2)}","${item.quantityDisplay.toFixed(2)}","${item.expiryDate}","${status}"\n`;
+            });
+            data = csv;
+            filename = `inventory_export_${new Date().toISOString().slice(0,10)}.csv`;
+            mimeType = 'text/csv';
+        } else {
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                recipient: recipient,
+                exportedBy: this.currentUserType,
+                itemCount: selectedItems.length,
+                items: selectedItems.map(item => ({
+                    genericName: item.name,
+                    brandName: item.brandName,
+                    batchNumber: item.batchNumber,
+                    standardUnit: item.baseUnit,
+                    registerUnit: item.registeredUnit,
+                    displayUnit: item.displayUnit,
+                    standardQuantity: item.quantityBase,
+                    availableQuantity: item.quantityDisplay,
+                    expiryDate: item.expiryDate,
+                    purchasePrice: '***MASKED***',
+                    sellingPrice: '***MASKED***',
+                    totalValue: '***MASKED***'
+                }))
+            };
+            data = JSON.stringify(exportData, null, 2);
+            filename = `inventory_export_${new Date().toISOString().slice(0,10)}.json`;
+            mimeType = 'application/json';
+        }
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        this.recordShareHistory(recipient, selectedItems.length, exportType, 'exported');
+        this.showToast(`Exported ${selectedItems.length} items as ${exportType.toUpperCase()}`, 'success');
+    }
+    
+    recordShareHistory(recipient, itemCount, type, status) {
+        const record = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            recipient: recipient,
+            itemCount: itemCount,
+            type: type,
+            status: status,
+            user: this.currentUserType
+        };
+        this.shareHistory.unshift(record);
+        if (this.shareHistory.length > 100) this.shareHistory.pop();
+        this.saveToLocalStorage();
+        if (this.supabaseSync) this.supabaseSync.syncShareHistory(record);
+        this.renderShareHistory();
+    }
+    
+    loadShareHistory() { this.renderShareHistory(); }
+    
+    renderShareHistory() {
+        const tbody = document.getElementById('shareHistoryBody');
+        if (!tbody) return;
+        tbody.innerHTML = this.shareHistory.slice(0, 50).map(h => `
+            <tr><td>${new Date(h.date).toLocaleString()}</td><td>${this.escapeHtml(h.recipient)}</td><td>${h.itemCount}</td><td>${h.type}</td><td><span class="status-indicator ${h.status === 'sent' ? 'status-ok' : 'status-warning'}"></span> ${h.status}</td></tr>
+        `).join('') || '<tr><td colspan="5">No share history</td></tr>';
+    }
+    
+    renderDemandForecastDetail() {
+        const tbody = document.getElementById('demandForecastTableBody');
+        if (!tbody) return;
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const salesByItem = {};
+        this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).forEach(sale => {
+            sale.items.forEach(item => {
+                if (!salesByItem[item.itemId]) salesByItem[item.itemId] = { totalQty: 0 };
+                salesByItem[item.itemId].totalQty += item.quantity;
+            });
+        });
+        const forecasts = [];
+        this.stockItems.forEach(item => {
+            const dailyAvg = (salesByItem[item.id]?.totalQty || 0) / 30;
+            const forecast30 = dailyAvg * 30;
+            const coverageDays = dailyAvg > 0 ? item.quantityDisplay / dailyAvg : 999;
+            const recommendedOrder = Math.max(0, forecast30 - item.quantityDisplay);
+            forecasts.push({ item, dailyAvg, forecast30, coverageDays, recommendedOrder });
+        });
+        forecasts.sort((a,b) => b.recommendedOrder - a.recommendedOrder);
+        tbody.innerHTML = forecasts.slice(0, 30).map(f => `
+            <tr><td>${this.escapeHtml(f.item.name)}</td><td>${f.dailyAvg.toFixed(2)} ${f.item.displayUnit}</td><td>${f.forecast30.toFixed(2)} ${f.item.displayUnit}</td><td>${f.item.quantityDisplay.toFixed(2)} ${f.item.displayUnit}</td><td>${f.coverageDays.toFixed(1)} days</td><td class="${f.recommendedOrder > 0 ? 'variance-positive' : ''}">${f.recommendedOrder > 0 ? f.recommendedOrder.toFixed(2) : 'OK'}</td></tr>
+        `).join('');
+    }
+    
+    renderReorderDetail() {
+        const tbody = document.getElementById('reorderDetailTableBody');
+        if (!tbody) return;
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const salesByItem = {};
+        this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).forEach(sale => {
+            sale.items.forEach(item => {
+                if (!salesByItem[item.itemId]) salesByItem[item.itemId] = { totalQty: 0 };
+                salesByItem[item.itemId].totalQty += item.quantity;
+            });
+        });
         const reorderItems = [];
         this.stockItems.forEach(item => {
             if (item.quantityDisplay <= item.reorderLevelDisplay && item.quantityDisplay > 0) {
@@ -3375,89 +5153,49 @@ class UltraStockSystem {
                 let urgency = 'Normal';
                 if (item.quantityDisplay <= item.reorderLevelDisplay / 2) urgency = 'Critical';
                 else if (item.quantityDisplay <= item.reorderLevelDisplay * 0.8) urgency = 'High';
-                reorderItems.push({
-                    item: item,
-                    suggestedQty: Math.max(10, suggestedQty),
-                    urgency: urgency
-                });
+                reorderItems.push({ item, suggestedQty: Math.max(10, suggestedQty), urgency });
             }
         });
-        
         reorderItems.sort((a,b) => {
             const urgencyOrder = { 'Critical': 0, 'High': 1, 'Normal': 2 };
             return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
         });
-        
         if (reorderItems.length === 0) {
             tbody.innerHTML = '<tr><td colspan="5">No items need reorder at this time</td></tr>';
+            document.getElementById('reorderRecommendations').innerHTML = 'No items need reorder';
             return;
         }
-        
         tbody.innerHTML = reorderItems.map(r => `
-            <tr>
-                <td>${this.escapeHtml(r.item.name)}</td>
-                <td>${r.item.quantityDisplay.toFixed(2)} ${r.item.displayUnit}</td>
-                <td>${r.item.reorderLevelDisplay} ${r.item.displayUnit}</td>
-                <td class="variance-positive">${r.suggestedQty.toFixed(2)} ${r.item.displayUnit}</td>
-                <td><span class="status-indicator ${r.urgency === 'Critical' ? 'status-expired' : r.urgency === 'High' ? 'status-critical' : 'status-warning'}"></span> ${r.urgency}</td>
-            </tr>
+            <tr><td>${this.escapeHtml(r.item.name)}</td><td>${r.item.quantityDisplay.toFixed(2)} ${r.item.displayUnit}</td><td>${r.item.reorderLevelDisplay} ${r.item.displayUnit}</td><td class="variance-positive">${r.suggestedQty.toFixed(2)} ${r.item.displayUnit}</td><td><span class="status-indicator ${r.urgency === 'Critical' ? 'status-expired' : r.urgency === 'High' ? 'status-critical' : 'status-warning'}"></span> ${r.urgency}</td></tr>
         `).join('');
-        
         const reorderText = reorderItems.map(r => `${r.item.name}: ${r.item.quantityDisplay.toFixed(0)} left, Order ${r.suggestedQty.toFixed(0)} ${r.item.displayUnit} (${r.urgency})`).join('; ');
-        document.getElementById('reorderRecommendations').innerHTML = reorderText || 'No items need reorder';
+        document.getElementById('reorderRecommendations').innerHTML = reorderText;
     }
     
-    // Audit Variance Detail
     renderAuditVarianceDetail() {
         const tbody = document.getElementById('auditVarianceDetailBody');
         if (!tbody) return;
-        
         const variances = [];
         this.stockItems.forEach(item => {
             const expected = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
             const physical = item.physicalCount !== undefined ? item.physicalCount : item.quantityDisplay;
             const variance = physical - expected;
             if (Math.abs(variance) > 0.01) {
-                variances.push({
-                    item: item,
-                    expected: expected,
-                    physical: physical,
-                    variance: variance,
-                    varianceValue: variance * item.sellingPricePerDisplay
-                });
+                variances.push({ item, expected, physical, variance, varianceValue: variance * item.sellingPricePerDisplay });
             }
         });
-        
         variances.sort((a,b) => Math.abs(b.varianceValue) - Math.abs(a.varianceValue));
-        
         tbody.innerHTML = variances.slice(0, 50).map(v => `
-            <tr>
-                <td>${this.escapeHtml(v.item.name)}</td>
-                <td>${v.expected.toFixed(2)} ${v.item.displayUnit}</td>
-                <td>${v.physical.toFixed(2)} ${v.item.displayUnit}</td>
-                <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}${v.variance.toFixed(2)}</td>
-                <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}ETB ${Math.abs(v.varianceValue).toFixed(2)}</td>
-                <td><span class="status-indicator ${v.variance >= 0 ? 'status-ok' : 'status-critical'}"></span> ${v.variance >= 0 ? 'Surplus' : 'Shortage'}</td>
-            </tr>
+            <tr><td>${this.escapeHtml(v.item.name)}</td><td>${v.expected.toFixed(2)} ${v.item.displayUnit}</td><td>${v.physical.toFixed(2)} ${v.item.displayUnit}</td><td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}${v.variance.toFixed(2)}</td><td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}ETB ${Math.abs(v.varianceValue).toFixed(2)}</td><td><span class="status-indicator ${v.variance >= 0 ? 'status-ok' : 'status-critical'}"></span> ${v.variance >= 0 ? 'Surplus' : 'Shortage'}</td></tr>
         `).join('') || '<tr><td colspan="6">No variances found</td></tr>';
     }
     
     showAuditDetail(type) {
-        // Open audit page and filter based on type
         this.openPage('auditPage');
         setTimeout(() => {
-            const filterMap = {
-                'beginning': 'Beginning Balance',
-                'onhand': 'Stock on Hand',
-                'ending': 'Ending Balance',
-                'posvar': 'Positive Variance',
-                'negvar': 'Negative Variance',
-                'loss': 'Loss',
-                'gain': 'Gain'
-            };
+            const filterMap = { 'beginning': 'Beginning Balance', 'onhand': 'Stock on Hand', 'ending': 'Ending Balance', 'posvar': 'Positive Variance', 'negvar': 'Negative Variance', 'loss': 'Loss', 'gain': 'Gain' };
             const message = filterMap[type] || 'Audit Detail';
             this.showToast(`Viewing ${message} details`, 'info');
-            // Scroll to audit table
             const table = document.getElementById('auditTable');
             if (table) table.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -3520,9 +5258,17 @@ class UltraStockSystem {
             movementHistory: []
         };
         if (!item.name || !item.baseUnit || !item.registeredUnit || !item.displayUnit) { this.showToast('Fill all required fields', 'warning'); return; }
-        if (this.isEditing) { const index = this.stockItems.findIndex(i => i.id === item.id); this.stockItems[index] = item; this.showToast('Item updated', 'success'); }
-        else { this.stockItems.push(item); this.recordAudit('purchase', item.id, item.name, displayQty, 'stock_in', item.branch, item.registrant, { value: displayQty * item.purchasePricePerDisplay }); this.showToast('Item registered', 'success'); }
+        if (this.isEditing) { 
+            const index = this.stockItems.findIndex(i => i.id === item.id); 
+            this.stockItems[index] = item; 
+            this.showToast('Item updated', 'success'); 
+        } else { 
+            this.stockItems.push(item); 
+            this.recordAudit('purchase', item.id, item.name, displayQty, 'stock_in', item.branch, item.registrant, { value: displayQty * item.purchasePricePerDisplay }); 
+            this.showToast('Item registered', 'success'); 
+        }
         this.saveToLocalStorage();
+        if (this.supabaseSync) this.supabaseSync.syncStockItem(item);
         this.clearRegisterForm();
         this.updateItemNameList();
         this.isEditing = false;
@@ -3536,11 +5282,27 @@ class UltraStockSystem {
         document.getElementById('stockForm').reset();
         document.getElementById('expiryDate').value = new Date().toISOString().split('T')[0];
         document.getElementById('markup').value = this.settings.defaultMarkup;
-        document.getElementById('discountPercent').value = '0';
         this.applyMarkup();
         document.getElementById('branch').value = this.currentBranch;
         document.getElementById('itemIdInput').value = '';
         document.getElementById('brandName').value = '';
+    }
+    
+    applyMarkup() {
+        const purchase = parseFloat(document.getElementById('purchasePricePerDisplay').value) || 0;
+        const markup = parseFloat(document.getElementById('markup').value) || 0;
+        const discount = parseFloat(document.getElementById('discountPercent').value) || 0;
+        let selling = purchase * (1 + markup / 100);
+        selling = selling * (1 - discount / 100);
+        document.getElementById('sellingPricePerDisplay').value = selling.toFixed(2);
+    }
+    
+    updateItemNameList() {
+        const datalist = document.getElementById('itemNameList');
+        if (datalist) { 
+            const names = [...new Set(this.stockItems.map(i => i.name))]; 
+            datalist.innerHTML = names.map(n => `<option value="${n}">`).join(''); 
+        }
     }
     
     addSalesRow() {
@@ -3576,13 +5338,20 @@ class UltraStockSystem {
         tbody.appendChild(row);
         const itemInput = row.querySelector('.sales-item');
         itemInput.addEventListener('input', () => this.updateSalesRow(rowId));
-        row.querySelectorAll('.sales-qty, .sales-markup-val, .sales-discount-val, .sales-base-price, .sales-reg-price, .sales-disp-price').forEach(input => { input.addEventListener('input', () => this.calcSalesRow(rowId)); });
+        row.querySelectorAll('.sales-qty, .sales-markup-val, .sales-discount-val, .sales-base-price, .sales-reg-price, .sales-disp-price').forEach(input => { 
+            input.addEventListener('input', () => this.calcSalesRow(rowId)); 
+        });
         this.updateSalesItemsList();
     }
     
     updateSalesItemsList() {
         let datalist = document.getElementById('salesItemsList');
-        if (!datalist) { const dl = document.createElement('datalist'); dl.id = 'salesItemsList'; document.body.appendChild(dl); datalist = dl; }
+        if (!datalist) { 
+            const dl = document.createElement('datalist'); 
+            dl.id = 'salesItemsList'; 
+            document.body.appendChild(dl); 
+            datalist = dl; 
+        }
         datalist.innerHTML = this.stockItems.filter(i => i.branch === this.currentBranch && i.quantityDisplay > 0).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).map(i => `<option value="${i.name}">${i.name} (${i.quantityDisplay.toFixed(2)} ${i.displayUnit}) - Exp: ${i.expiryDate}</option>`).join('');
     }
     
@@ -3649,7 +5418,11 @@ class UltraStockSystem {
             const dispTotal = parseFloat(row.querySelector('.sales-disp-total').value) || 0;
             const itemId = row.getAttribute('data-item-id');
             const item = this.stockItems.find(i => i.id == itemId);
-            if (item) { const baseQty = qty * item.displayToBaseFactor; const costPerBase = item.purchasePricePerDisplay / item.displayToBaseFactor; cogs += baseQty * costPerBase; }
+            if (item) { 
+                const baseQty = qty * item.displayToBaseFactor; 
+                const costPerBase = item.purchasePricePerDisplay / item.displayToBaseFactor; 
+                cogs += baseQty * costPerBase; 
+            }
             subtotal += dispTotal;
             vat += dispTotal * (this.settings.defaultVAT / 100);
         });
@@ -3719,7 +5492,7 @@ class UltraStockSystem {
         });
         this.salesData.push(sale);
         this.saveToLocalStorage();
-        this.queueForSync('sale', sale);
+        if (this.supabaseSync) this.supabaseSync.syncSale(sale);
         this.showToast(`Sale saved: ${sale.invoiceNumber}`, 'success');
         this.clearSalesForm();
         this.renderSalesHistory();
@@ -3763,24 +5536,14 @@ class UltraStockSystem {
         else if (filter === 'month') { const monthAgo = new Date(); monthAgo.setMonth(now.getMonth() - 1); filtered = filtered.filter(s => new Date(s.date) >= monthAgo); }
         const start = (this.salesHistoryPage - 1) * this.salesHistoryRowsPerPage;
         const paginated = filtered.slice(start, start + this.salesHistoryRowsPerPage);
-        tbody.innerHTML = paginated.map(s => `<tr>
-            <td>${s.date}</td><td>${s.invoice}</td><td>${s.itemName}</td><td>${s.category}</td><td>${s.type}</td>
-            <td>${s.qtyBase.toFixed(2)}</td><td>${s.qtyReg.toFixed(2)}</td><td>${s.qtyDisp.toFixed(2)}</td>
-            <td>ETB ${s.basePrice.toFixed(2)}</td><td>ETB ${s.regPrice.toFixed(2)}</td><td>ETB ${s.dispPrice.toFixed(2)}</td>
-            <td>ETB ${s.baseTotal.toFixed(2)}</td><td>ETB ${s.regTotal.toFixed(2)}</td><td>ETB ${s.dispTotal.toFixed(2)}</td>
-            <td>${s.markup}%</td><td>${s.discount}%</td><td>${s.vat}%</td><td>ETB ${s.grandTotal.toFixed(2)}</td>
-            <td class="${s.profit >= 0 ? 'variance-positive' : 'variance-negative'}">ETB ${s.profit.toFixed(2)}</td><td>${s.margin.toFixed(1)}%</td>
-            <td>${s.customer || 'Walk-in'}</td><td>${s.payment}</td><td>${s.salesperson}</td>
-        </tr>`).join('') || '<tr><td colspan="23">No sales found</td></tr>';
+        tbody.innerHTML = paginated.map(s => `<tr><td>${s.date}</td><td>${s.invoice}</td><td>${s.itemName}</td><td>${s.category}</td><td>${s.type}</td><td>${s.qtyBase.toFixed(2)}</td><td>${s.qtyReg.toFixed(2)}</td><td>${s.qtyDisp.toFixed(2)}</td><td>ETB ${s.basePrice.toFixed(2)}</td><td>ETB ${s.regPrice.toFixed(2)}</td><td>ETB ${s.dispPrice.toFixed(2)}</td><td>ETB ${s.baseTotal.toFixed(2)}</td><td>ETB ${s.regTotal.toFixed(2)}</td><td>ETB ${s.dispTotal.toFixed(2)}</td><td>${s.markup}%</td><td>${s.discount}%</td><td>${s.vat}%</td><td>ETB ${s.grandTotal.toFixed(2)}</td><td class="${s.profit >= 0 ? 'variance-positive' : 'variance-negative'}">ETB ${s.profit.toFixed(2)}</td><td>${s.margin.toFixed(1)}%</td><td>${s.customer || 'Walk-in'}</td><td>${s.payment}</td><td>${s.salesperson}</td></tr>`).join('') || '<tr><td colspan="23">No sales found</td></tr>';
         const totals = filtered.reduce((acc, s) => {
             acc.qtyBase += s.qtyBase; acc.qtyReg += s.qtyReg; acc.qtyDisp += s.qtyDisp;
             acc.baseTotal += s.baseTotal; acc.regTotal += s.regTotal; acc.dispTotal += s.dispTotal;
             acc.grandTotal += s.grandTotal; acc.profit += s.profit;
             return acc;
         }, { qtyBase: 0, qtyReg: 0, qtyDisp: 0, baseTotal: 0, regTotal: 0, dispTotal: 0, grandTotal: 0, profit: 0 });
-        footer.innerHTML = `<tr class="total-row"><td colspan="5">TOTALS</td><td>${totals.qtyBase.toFixed(2)}</td><td>${totals.qtyReg.toFixed(2)}</td><td>${totals.qtyDisp.toFixed(2)}</td>
-            <td colspan="3"></td><td>ETB ${totals.baseTotal.toFixed(2)}</td><td>ETB ${totals.regTotal.toFixed(2)}</td><td>ETB ${totals.dispTotal.toFixed(2)}</td>
-            <td colspan="4"></td><td>ETB ${totals.grandTotal.toFixed(2)}</td><td>ETB ${totals.profit.toFixed(2)}</td><td colspan="3"></td></tr>`;
+        footer.innerHTML = `<tr class="total-row"><td colspan="5">TOTALS</td><td>${totals.qtyBase.toFixed(2)}</td><td>${totals.qtyReg.toFixed(2)}</td><td>${totals.qtyDisp.toFixed(2)}</td><td colspan="3"></td><td>ETB ${totals.baseTotal.toFixed(2)}</td><td>ETB ${totals.regTotal.toFixed(2)}</td><td>ETB ${totals.dispTotal.toFixed(2)}</td><td colspan="4"></td><td>ETB ${totals.grandTotal.toFixed(2)}</td><td>ETB ${totals.profit.toFixed(2)}</td><td colspan="3"></td></tr>`;
         const totalPages = Math.ceil(filtered.length / this.salesHistoryRowsPerPage);
         const pagination = document.getElementById('salesHistoryPagination');
         if (pagination) {
@@ -3816,7 +5579,12 @@ class UltraStockSystem {
         const select = document.getElementById('reduceItemSelect');
         if (!select) return;
         select.innerHTML = '<option value="">Choose item...</option>';
-        this.stockItems.filter(i => i.branch === this.currentBranch).forEach(item => { const opt = document.createElement('option'); opt.value = item.id; opt.textContent = `${item.name} (${item.quantityDisplay.toFixed(2)} ${item.displayUnit}) - Exp: ${item.expiryDate}`; select.appendChild(opt); });
+        this.stockItems.filter(i => i.branch === this.currentBranch).forEach(item => { 
+            const opt = document.createElement('option'); 
+            opt.value = item.id; 
+            opt.textContent = `${item.name} (${item.quantityDisplay.toFixed(2)} ${item.displayUnit}) - Exp: ${item.expiryDate}`; 
+            select.appendChild(opt); 
+        });
         this.clearReduceForm();
         this.renderDeductionHistory();
     }
@@ -3859,11 +5627,19 @@ class UltraStockSystem {
         item.quantityIssued = (item.quantityIssued || 0) + qty;
         item.endingBalance = item.quantityDisplay;
         item.variance = (item.physicalCount || item.quantityDisplay) - item.endingBalance;
-        const transaction = { id: Date.now(), date: new Date().toISOString().split('T')[0], itemId: item.id, itemName: item.name, category: item.category, type: item.type, quantity: qty, quantityBase: baseQty, unit: item.displayUnit, batch: item.batchNumber, expiry: item.expiryDate, oldQuantity: oldQty, newQuantity: item.quantityDisplay, reason: reason, branch: this.currentBranch, warehouse: document.getElementById('reduceWarehouse').value, storageCondition: document.getElementById('reduceStorageCondition').value, shelfBin: document.getElementById('reduceShelfBin').value, responsible: whom, notes: document.getElementById('reduceNotes').value, valueLost: baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor) };
+        const transaction = { 
+            id: Date.now(), date: new Date().toISOString().split('T')[0], itemId: item.id, itemName: item.name, 
+            category: item.category, type: item.type, quantity: qty, quantityBase: baseQty, unit: item.displayUnit, 
+            batch: item.batchNumber, expiry: item.expiryDate, oldQuantity: oldQty, newQuantity: item.quantityDisplay, 
+            reason: reason, branch: this.currentBranch, warehouse: document.getElementById('reduceWarehouse').value, 
+            storageCondition: document.getElementById('reduceStorageCondition').value, shelfBin: document.getElementById('reduceShelfBin').value, 
+            responsible: whom, notes: document.getElementById('reduceNotes').value, 
+            valueLost: baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor) 
+        };
         this.transactions.unshift(transaction);
         this.recordAudit(reason, item.id, item.name, qty, 'stock_deduct', transaction.branch, whom, { oldQty, newQty: item.quantityDisplay, value: transaction.valueLost, reason: reason });
         this.saveToLocalStorage();
-        this.queueForSync('stock', transaction);
+        if (this.supabaseSync) this.supabaseSync.syncTransaction(transaction);
         this.showToast(`Deducted ${qty} ${item.displayUnit}`, 'success');
         this.clearReduceForm();
         this.renderDeductionHistory();
@@ -3899,7 +5675,7 @@ class UltraStockSystem {
         const filtered = this.transactions.filter(t => t.branch === this.currentBranch && new Date(t.date) >= start && new Date(t.date) <= end).sort((a,b) => new Date(b.date) - new Date(a.date)).slice(0,20);
         if (filtered.length === 0) { tbody.innerHTML = '<tr><td colspan="15" style="text-align:center;">No deductions</td></tr>'; if(footer) footer.innerHTML = ''; return; }
         let totalLost = 0;
-        tbody.innerHTML = filtered.map(t => { totalLost += t.valueLost || 0; return `<tr><td>${t.date}</td><td>${t.itemName}</td><td>${t.category || ''}</td><td>${t.type || ''}</td><td>${t.quantity}</td><td>${t.unit || ''}</td><td>${t.batch || ''}</td><td>${t.expiry || ''}</td><td>${t.reason}</td><td>${t.branch}</td><td>${t.warehouse || ''}</td><td>${t.storageCondition || ''}</td><td>${t.shelfBin || ''}</td><td>${t.responsible}</td><td>ETB ${(t.valueLost || 0).toFixed(2)}</td></tr>`; }).join('');
+        tbody.innerHTML = filtered.map(t => { totalLost += t.valueLost || 0; return `<tr><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td><td class="variance-negative">ETB ${(t.valueLost || 0).toFixed(2)}</td></tr>`; }).join('');
         if (footer) footer.innerHTML = `<tr class="total-row"><td colspan="14">TOTAL LOSS</td><td>ETB ${totalLost.toFixed(2)}</td></tr>`;
     }
     
@@ -3956,7 +5732,8 @@ class UltraStockSystem {
         const variance = physicalCount - expectedEnding;
         const varianceClass = variance >= 0 ? 'variance-positive' : 'variance-negative';
         const varianceSymbol = variance >= 0 ? '+' : '';
-        return `<tr data-id="${item.id}"><td>${item.name}</td><td>${item.category}</td><td>${item.type || ''}</td><td>${item.baseUnit}</td><td>${item.registeredUnit}</td><td>${item.displayUnit}</td>
+        return `<tr data-id="${item.id}">
+            <td>${item.name}</td><td>${item.category}</td><td>${item.type || ''}</td><td>${item.baseUnit}</td><td>${item.registeredUnit}</td><td>${item.displayUnit}</td>
             <td>${item.quantityBase.toFixed(2)}</td><td>${(item.quantityRegistered || 0).toFixed(2)}</td><td><strong>${item.quantityDisplay.toFixed(2)}</strong></td>
             <td>${(item.beginningBalance || item.quantityDisplay).toFixed(2)}</td><td>${(item.quantityReceived || item.quantityDisplay).toFixed(2)}</td>
             <td>${(item.quantityIssued || 0).toFixed(2)}</td><td>${expectedEnding.toFixed(2)}</td>
@@ -3968,7 +5745,8 @@ class UltraStockSystem {
             <td><strong>ETB ${total.toFixed(2)}</strong></td>
             <td>${item.batchNumber}</td><td><span class="status-indicator ${expiryClass}"></span>${expiry.toLocaleDateString()}</td>
             <td>${diff > 0 ? diff + ' days' : 'EXPIRED'}</td>
-            <td><div class="action-buttons"><button class="action-btn edit-item" data-tooltip="Edit item"><i class="fas fa-edit"></i></button><button class="action-btn reduce-item" data-tooltip="Deduct stock"><i class="fas fa-minus"></i></button><button class="action-btn verify-item" data-tooltip="Verify stock"><i class="fas fa-check-double"></i></button></div></td></tr>`;
+            <td><div class="action-buttons"><button class="action-btn edit-item" data-tooltip="Edit item"><i class="fas fa-edit"></i></button><button class="action-btn reduce-item" data-tooltip="Deduct stock"><i class="fas fa-minus"></i></button><button class="action-btn verify-item" data-tooltip="Verify stock"><i class="fas fa-check-double"></i></button></div></td>
+        </tr>`;
     }
     
     attachRowEvents() {
@@ -4050,7 +5828,13 @@ class UltraStockSystem {
         }, 50);
     }
     
-    clearFilters() { document.getElementById('searchInput').value = ''; document.getElementById('categoryFilter').value = ''; document.getElementById('branchFilter').value = ''; document.getElementById('statusFilter').value = ''; this.renderTable(); }
+    clearFilters() { 
+        document.getElementById('searchInput').value = ''; 
+        document.getElementById('categoryFilter').value = ''; 
+        document.getElementById('branchFilter').value = ''; 
+        document.getElementById('statusFilter').value = ''; 
+        this.renderTable(); 
+    }
     
     updateCategoryFilter() {
         const filter = document.getElementById('categoryFilter');
@@ -4105,7 +5889,17 @@ class UltraStockSystem {
         const now = new Date();
         const expiringItems = this.stockItems.filter(i => i.branch === this.currentBranch).sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate)).slice(0,20);
         let totalPotentialLoss = 0;
-        tbody.innerHTML = expiringItems.map(i => { const daysToExpiry = Math.ceil((new Date(i.expiryDate) - now) / (86400000)); const potentialLoss = i.quantityDisplay * i.purchasePricePerDisplay; totalPotentialLoss += potentialLoss; let status = ''; let statusClass = ''; if (daysToExpiry < 0) { status = 'EXPIRED'; statusClass = 'status-expired'; } else if (daysToExpiry <= 30) { status = 'Critical'; statusClass = 'status-critical'; } else if (daysToExpiry <= 90) { status = 'Warning'; statusClass = 'status-warning'; } else { status = 'OK'; statusClass = 'status-ok'; } return `<tr><td>${i.name}</td><td>${i.batchNumber}</td><td>${i.expiryDate}</td><td>${daysToExpiry > 0 ? daysToExpiry : 'Expired'}</td><td>${i.quantityDisplay.toFixed(2)} ${i.displayUnit}</td><td>ETB ${potentialLoss.toFixed(2)}</td><td><span class="status-indicator ${statusClass}"></span> ${status}</td></tr>`; }).join('') || '<tr><td colspan="7">No items found</td></tr>';
+        tbody.innerHTML = expiringItems.map(i => { 
+            const daysToExpiry = Math.ceil((new Date(i.expiryDate) - now) / (86400000)); 
+            const potentialLoss = i.quantityDisplay * i.purchasePricePerDisplay; 
+            totalPotentialLoss += potentialLoss; 
+            let status = ''; let statusClass = ''; 
+            if (daysToExpiry < 0) { status = 'EXPIRED'; statusClass = 'status-expired'; } 
+            else if (daysToExpiry <= 30) { status = 'Critical'; statusClass = 'status-critical'; } 
+            else if (daysToExpiry <= 90) { status = 'Warning'; statusClass = 'status-warning'; } 
+            else { status = 'OK'; statusClass = 'status-ok'; } 
+            return `<tr><td>${i.name}</td><td>${i.batchNumber}</td><td>${i.expiryDate}</td><td>${daysToExpiry > 0 ? daysToExpiry : 'Expired'}</td><td>${i.quantityDisplay.toFixed(2)} ${i.displayUnit}</td><td class="variance-negative">ETB ${potentialLoss.toFixed(2)}</td><td><span class="status-indicator ${statusClass}"></span> ${status}</td></tr>`; 
+        }).join('') || '<tr><td colspan="7">No items found</td></tr>';
         if (footer) footer.innerHTML = `<tr class="total-row"><td colspan="5">TOTAL POTENTIAL LOSS</td><td colspan="2">ETB ${totalPotentialLoss.toFixed(2)}</td></tr>`;
     }
     
@@ -4118,14 +5912,7 @@ class UltraStockSystem {
         if (search) activities = activities.filter(a => a.itemName?.toLowerCase().includes(search) || a.user?.toLowerCase().includes(search));
         if (type) activities = activities.filter(a => a.action === type);
         activities.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
-        tbody.innerHTML = activities.slice(0, 100).map(a => `<tr>
-            <td>${new Date(a.timestamp).toLocaleString()}</td>
-            <td>${a.action}</td>
-            <td>${a.user || 'System'}</td>
-            <td>${a.itemName || '-'}</td>
-            <td>${a.details ? JSON.stringify(a.details).substring(0, 50) : '-'}</td>
-            <td>${a.branch || '-'}</td>
-        </tr>`).join('') || '<tr><td colspan="6">No activities found</td></tr>';
+        tbody.innerHTML = activities.slice(0, 100).map(a => `<tr><td>${new Date(a.timestamp).toLocaleString()}</td><td>${a.action}</td><td>${a.user || 'System'}</td><td>${a.itemName || '-'}</td><td>${a.details ? JSON.stringify(a.details).substring(0, 50) : '-'}</td><td>${a.branch || '-'}</td></tr>`).join('') || '<tr><td colspan="6">No activities found</td></tr>';
     }
     
     exportActivityLog() {
@@ -4289,7 +6076,7 @@ class UltraStockSystem {
         this.auditTrail.unshift(audit);
         if (this.auditTrail.length > 1000) this.auditTrail.pop();
         this.saveToLocalStorage();
-        this.queueForSync('audit', audit);
+        if (this.supabaseSync) this.supabaseSync.syncAuditLog(audit);
     }
     
     loadSettings() {
@@ -4407,7 +6194,12 @@ class UltraStockSystem {
     }
     
     clearAllData() {
-        if (prompt('Type "DELETE ALL" to confirm:') === 'DELETE ALL') { localStorage.clear(); sessionStorage.clear(); this.showToast('All data cleared', 'info'); location.reload(); }
+        if (prompt('Type "DELETE ALL" to confirm:') === 'DELETE ALL') { 
+            localStorage.clear(); 
+            sessionStorage.clear(); 
+            this.showToast('All data cleared', 'info'); 
+            location.reload(); 
+        }
     }
     
     escapeHtml(str) {
@@ -4421,7 +6213,10 @@ class UltraStockSystem {
     }
 }
 
-document.addEventListener('DOMContentLoaded', () => { window.ultraStock = new UltraStockSystem(); });
+// Initialize the application
+document.addEventListener('DOMContentLoaded', () => { 
+    window.ultraStock = new UltraStockSystem(); 
+});
 </script>
 </body>
 </html>
