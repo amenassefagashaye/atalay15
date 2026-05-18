@@ -189,6 +189,38 @@
             color: var(--primary);
         }
 
+        .share-icon {
+            position: fixed;
+            top: 10px;
+            right: 55px;
+            width: 35px;
+            height: 35px;
+            background: linear-gradient(145deg, var(--success), #00cc66);
+            border: 1px solid var(--success);
+            border-radius: 6px;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 10000;
+            font-size: 16px;
+            transition: all 0.3s;
+            animation: greenFlash 2s infinite;
+            font-weight: bold;
+        }
+
+        .share-icon:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px rgba(0,255,136,0.5);
+        }
+
+        @keyframes greenFlash {
+            0% { box-shadow: 0 0 0 0 rgba(0,255,136,0.4); background: linear-gradient(145deg, var(--success), #00cc66); }
+            50% { box-shadow: 0 0 0 5px rgba(0,255,136,0.2); background: linear-gradient(145deg, #00ffaa, var(--success)); }
+            100% { box-shadow: 0 0 0 0 rgba(0,255,136,0); background: linear-gradient(145deg, var(--success), #00cc66); }
+        }
+
         .settings-icon {
             position: fixed;
             top: 10px;
@@ -267,11 +299,11 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             text-align: center;
-            animation: greenFlash 2s infinite;
+            animation: greenFlashText 2s infinite;
             text-shadow: 0 0 10px rgba(0,255,136,0.5);
         }
 
-        @keyframes greenFlash {
+        @keyframes greenFlashText {
             0% { filter: brightness(1); }
             50% { filter: brightness(1.3); text-shadow: 0 0 20px rgba(0,255,136,0.8); }
             100% { filter: brightness(1); }
@@ -676,6 +708,16 @@
             background: rgba(255,215,0,0.1);
         }
 
+        .btn-success {
+            background: linear-gradient(145deg, var(--success), #00cc66);
+            color: var(--primary);
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,255,136,0.3);
+        }
+
         .table-container {
             overflow-x: auto;
             border-radius: 10px;
@@ -1040,6 +1082,111 @@
             color: var(--accent);
         }
 
+        /* Share Modal Styles */
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.95);
+            z-index: 40000;
+            display: none;
+            overflow-y: auto;
+            padding: 20px;
+        }
+        .share-modal.active {
+            display: block;
+        }
+        .share-container {
+            max-width: 1400px;
+            margin: 20px auto;
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary), var(--primary-light));
+            border: 2px solid var(--accent);
+            border-radius: 20px;
+            padding: 1.5rem;
+        }
+        .share-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid rgba(255,215,0,0.2);
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .share-header h2 {
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .share-preview {
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            padding: 1rem;
+            margin-top: 1rem;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        .checkbox-cell {
+            width: 40px;
+            text-align: center;
+        }
+        .checkbox-cell input {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .share-stats {
+            background: rgba(255,215,0,0.1);
+            border-radius: 8px;
+            padding: 0.8rem;
+            margin: 1rem 0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        .share-stat-item {
+            text-align: center;
+        }
+        .share-stat-item .label {
+            font-size: 0.7rem;
+            color: var(--gray);
+        }
+        .share-stat-item .value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--accent);
+        }
+        .share-table-wrapper {
+            overflow-x: auto;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        .share-table {
+            min-width: 1200px;
+            width: 100%;
+            font-size: 0.75rem;
+        }
+        .share-table th, .share-table td {
+            padding: 0.5rem;
+            text-align: left;
+            border-bottom: 1px solid rgba(255,215,0,0.1);
+        }
+        .share-table th {
+            background: rgba(255,215,0,0.15);
+            position: sticky;
+            top: 0;
+        }
+        .share-table tr.selected {
+            background: rgba(0,255,136,0.1);
+        }
+
         @media (max-width: 768px) {
             .nav-btn {
                 min-width: calc(50% - 0.25rem);
@@ -1198,8 +1345,35 @@
         .sync-offline { background: var(--danger); }
         .sync-syncing { background: var(--warning); animation: pulse 1s infinite; }
         @keyframes pulse { 0% { opacity: 0.4; } 50% { opacity: 1; } 100% { opacity: 0.4; } }
+        
+        /* Detail Tables for Audit Summary, Demand Forecast, Reorder Recommendations */
+        .detail-table-container {
+            margin-top: 1rem;
+            border-top: 1px solid rgba(255,215,0,0.2);
+            padding-top: 1rem;
+        }
+        .detail-table {
+            width: 100%;
+            font-size: 0.75rem;
+        }
+        .detail-table th, .detail-table td {
+            padding: 0.5rem;
+            text-align: left;
+        }
+        .toggle-detail-btn {
+            background: none;
+            border: none;
+            color: var(--accent);
+            cursor: pointer;
+            font-size: 0.8rem;
+            margin-left: 0.5rem;
+        }
+        .hidden-detail {
+            display: none;
+        }
     </style>
 </head>
+<body>
 <body>
 <!-- MASTER PASSWORD OVERLAY - with masked master password field -->
 <div id="masterOverlay" class="master-overlay">
@@ -1215,6 +1389,10 @@
 
 <div class="fullscreen-toggle" id="fullscreenToggle" data-tooltip="Toggle fullscreen mode">
     <i class="fas fa-expand"></i>
+</div>
+
+<div class="share-icon" id="shareIcon" data-tooltip="Share Report to Telegram (@assegas)">
+    <i class="fab fa-telegram-plane"></i>
 </div>
 
 <div class="settings-icon" id="settingsIcon" data-tooltip="Open settings">
@@ -1334,6 +1512,113 @@
 <audio id="notificationSound" loop preload="auto">
     <source src="data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gR2VuZXJpYyBTb3VuZCBFZmZlY3RzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/mp3">
 </audio>
+
+<!-- SHARE MODAL -->
+<div class="share-modal" id="shareModal">
+    <div class="share-container">
+        <div class="share-header">
+            <h2><i class="fab fa-telegram-plane"></i> Share Pharmacy Report to Telegram</h2>
+            <button class="close-full-screen" id="closeShareModal">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        
+        <div class="form-grid" style="margin-bottom: 1rem;">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Recipient (Telegram @assegas or phone)</label>
+                <input type="text" id="shareRecipient" placeholder="@assegas or phone number" value="@assegas">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-user-edit"></i> Sender Name</label>
+                <input type="text" id="shareSenderName" placeholder="Your name">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-file-export"></i> Export Type</label>
+                <select id="shareExportType">
+                    <option value="telegram">Telegram Message (Text)</option>
+                    <option value="csv">CSV Export</option>
+                    <option value="json">JSON Export</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-filter"></i> Filter by Branch</label>
+                <select id="shareBranchFilter">
+                    <option value="all">All Branches</option>
+                    <option value="pharmacy">Pharmacy</option>
+                    <option value="wholesaler">Wholesaler</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="search-filter">
+            <div class="search-box"><i class="fas fa-search"></i><input type="text" id="shareSearchInput" placeholder="Search items..."></div>
+            <div class="filter-select"><select id="shareCategoryFilter"><option value="">All Categories</option></select></div>
+            <div class="filter-select"><select id="shareStatusFilter"><option value="">All Status</option><option value="low">Low Stock</option><option value="expiring">Expiring Soon</option><option value="expired">Expired</option><option value="overstock">Overstock</option></select></div>
+            <button class="btn btn-secondary" id="shareSelectAllBtn"><i class="fas fa-check-double"></i> Select All</button>
+            <button class="btn btn-secondary" id="shareClearAllBtn"><i class="fas fa-times"></i> Clear All</button>
+        </div>
+        
+        <div class="share-stats">
+            <div class="share-stat-item"><span class="label">Selected Items:</span><span class="value" id="shareSelectedCount">0</span></div>
+            <div class="share-stat-item"><span class="label">Total Items:</span><span class="value" id="shareTotalCount">0</span></div>
+            <div class="share-stat-item"><span class="label">Total Value (Masked):</span><span class="value" id="shareTotalValue">ETB ***</span></div>
+            <div class="share-stat-item"><span class="label">Expiring Soon:</span><span class="value" id="shareExpiringCount">0</span></div>
+            <div class="share-stat-item"><span class="label">Low Stock:</span><span class="value" id="shareLowStockCount">0</span></div>
+        </div>
+        
+        <div class="share-table-wrapper">
+            <table class="share-table" id="shareTable">
+                <thead>
+                    <tr>
+                        <th class="checkbox-cell"><input type="checkbox" id="shareMasterCheckbox"></th>
+                        <th>Generic Name</th>
+                        <th>Brand Name</th>
+                        <th>Batch #</th>
+                        <th>Std Unit</th>
+                        <th>Reg Unit</th>
+                        <th>Disp Unit</th>
+                        <th>Std Qty</th>
+                        <th>Avail Qty</th>
+                        <th>Unit Price*</th>
+                        <th>Total*</th>
+                        <th>Cost*</th>
+                        <th>Selling*</th>
+                        <th>Expiry Date</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="shareTableBody"></tbody>
+            </table>
+        </div>
+        
+        <div class="share-preview" id="sharePreview">
+            <strong>Preview:</strong> Select items to see preview...
+        </div>
+        
+        <div class="btn-group" style="margin-top: 1rem;">
+            <button class="btn btn-success" id="shareTelegramBtn">
+                <i class="fab fa-telegram-plane"></i> Share to Telegram (@assegas)
+            </button>
+            <button class="btn btn-primary" id="shareCopyPreviewBtn">
+                <i class="fas fa-copy"></i> Copy Preview
+            </button>
+            <button class="btn btn-secondary" id="shareExportBtn">
+                <i class="fas fa-download"></i> Export Selected
+            </button>
+        </div>
+        
+        <div class="form-container" style="margin-top: 1rem;">
+            <h3 style="color: var(--accent);"><i class="fas fa-history"></i> Share History</h3>
+            <div class="table-container" style="max-height: 200px;">
+                <table id="shareHistoryTable">
+                    <thead><tr><th>Date</th><th>Recipient</th><th>Items</th><th>Type</th><th>Status</th></tr></thead>
+                    <tbody id="shareHistoryBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="settings-panel" id="settingsPanel">
     <div class="settings-container">
         <div class="settings-header">
@@ -1497,11 +1782,14 @@
                     <input type="text" id="itemIdInput" placeholder="Auto-generated or custom ID" autocomplete="off">
                 </div>
                 <div class="form-group">
-                    <label data-tooltip="Enter the medicine name"><i class="fas fa-capsules"></i> Item Name *</label>
-                    <input type="text" id="itemName" required placeholder="Enter medicine name" list="itemNameList" autocomplete="off">
+                    <label data-tooltip="Enter the medicine name"><i class="fas fa-capsules"></i> Generic Name *</label>
+                    <input type="text" id="itemName" required placeholder="Enter generic name" list="itemNameList" autocomplete="off">
                     <datalist id="itemNameList"></datalist>
                 </div>
-                
+                <div class="form-group">
+                    <label data-tooltip="Brand/Trade name"><i class="fas fa-trademark"></i> Brand Name</label>
+                    <input type="text" id="brandName" placeholder="Brand/Trade name">
+                </div>
                 <div class="form-group">
                     <label data-tooltip="Select or enter category"><i class="fas fa-tags"></i> Category</label>
                     <input list="categoryList" id="category" placeholder="Type or select category">
@@ -1514,19 +1802,19 @@
                 </div>
                 
                 <div class="form-group">
-                    <label data-tooltip="Base unit for calculations (e.g., tablet, ml)"><i class="fas fa-balance-scale"></i> Base Unit *</label>
+                    <label data-tooltip="Base unit for calculations (e.g., tablet, ml)"><i class="fas fa-balance-scale"></i> Standard Unit *</label>
                     <input type="text" id="baseUnit" list="baseUnitList" required placeholder="e.g., tablet, ml">
                     <datalist id="baseUnitList"></datalist>
                 </div>
                 
                 <div class="form-group">
-                    <label data-tooltip="Unit used for purchasing (e.g., box, strip)"><i class="fas fa-box"></i> Registered Unit *</label>
+                    <label data-tooltip="Unit used for purchasing (e.g., box, strip)"><i class="fas fa-box"></i> Register Unit *</label>
                     <input list="registeredUnitList" id="registeredUnit" required placeholder="e.g., box, strip">
                     <datalist id="registeredUnitList"></datalist>
                 </div>
                 
                 <div class="form-group">
-                    <label data-tooltip="How many base units in one registered unit"><i class="fas fa-exchange-alt"></i> Registered → Base Factor *</label>
+                    <label data-tooltip="How many base units in one registered unit"><i class="fas fa-exchange-alt"></i> Register → Standard Factor *</label>
                     <input type="number" id="registeredToBaseFactor" min="1" step="1" value="1" required>
                 </div>
                 
@@ -1537,7 +1825,7 @@
                 </div>
                 
                 <div class="form-group">
-                    <label data-tooltip="How many base units in one display unit"><i class="fas fa-exchange-alt"></i> Display → Base Factor *</label>
+                    <label data-tooltip="How many base units in one display unit"><i class="fas fa-exchange-alt"></i> Display → Standard Factor *</label>
                     <input type="number" id="displayToBaseFactor" min="1" step="1" value="1" required>
                 </div>
                 
@@ -1553,9 +1841,9 @@
                     <label data-tooltip="Unit type for initial quantity entry"><i class="fas fa-hashtag"></i> Initial Stock Entry *</label>
                     <select id="initialQuantityType" required>
                         <option value="">Select type...</option>
-                        <option value="registered">Registered Units</option>
+                        <option value="registered">Register Units</option>
                         <option value="display">Display Units</option>
-                        <option value="base">Base Units</option>
+                        <option value="base">Standard Units</option>
                     </select>
                 </div>
                 
@@ -1803,7 +2091,7 @@
         </form>
     </div>
 
-    <!-- NEW: Detailed Sales History Table -->
+    <!-- Detailed Sales History Table -->
     <div class="form-container">
         <h3 style="color: var(--accent); margin-bottom: 1rem;"><i class="fas fa-history"></i> Detailed Sales History</h3>
         <div class="search-filter">
@@ -1864,6 +2152,7 @@
         </table>
     </div>
 </div>
+
 <div class="full-screen-mode" id="reduceStockPage">
     <div class="full-screen-header">
         <h2><i class="fas fa-arrow-up"></i> Deduct Stock (<span id="deductBranchLabel">Pharmacy</span>)</h2>
@@ -1917,7 +2206,6 @@
         </div>
     </div>
 </div>
-
 <!-- ENHANCED ENTERPRISE REVIEW PAGE -->
 <div class="full-screen-mode" id="reviewPage">
     <div class="full-screen-header">
@@ -1943,8 +2231,41 @@
         <div class="dashboard-card"><h3>Stock Accuracy</h3><div class="value" id="stockAccuracy">100%</div><div class="sub-value">Variance free</div></div>
     </div>
     
-    <div class="form-container"><h3 style="color: var(--accent);">Demand Forecast (Next 30 Days)</h3><div class="value-display" id="demandForecast">Calculating...</div></div>
-    <div class="form-container"><h3 style="color: var(--accent);">Reorder Recommendations</h3><div class="value-display" id="reorderRecommendations">No items need reorder</div></div>
+    <!-- Demand Forecast with Detail Table -->
+    <div class="form-container">
+        <h3 style="color: var(--accent); display: flex; align-items: center; justify-content: space-between;">
+            Demand Forecast (Next 30 Days)
+            <button class="toggle-detail-btn" onclick="toggleDetail('demandForecastDetail')"><i class="fas fa-chart-line"></i> View Details</button>
+        </h3>
+        <div class="value-display" id="demandForecast">Calculating...</div>
+        <div id="demandForecastDetail" class="detail-table-container hidden-detail">
+            <h4 style="color: var(--success);">Detailed Forecast by Item</h4>
+            <div class="table-container">
+                <table class="detail-table" id="demandForecastTable">
+                    <thead><tr><th>Item</th><th>Daily Avg Sales</th><th>30-Day Forecast</th><th>Current Stock</th><th>Coverage Days</th><th>Recommended Order</th></tr></thead>
+                    <tbody id="demandForecastTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Reorder Recommendations with Detail Table -->
+    <div class="form-container">
+        <h3 style="color: var(--accent); display: flex; align-items: center; justify-content: space-between;">
+            Reorder Recommendations
+            <button class="toggle-detail-btn" onclick="toggleDetail('reorderDetail')"><i class="fas fa-shopping-cart"></i> View Details</button>
+        </h3>
+        <div class="value-display" id="reorderRecommendations">No items need reorder</div>
+        <div id="reorderDetail" class="detail-table-container hidden-detail">
+            <h4 style="color: var(--success);">Items Needing Reorder</h4>
+            <div class="table-container">
+                <table class="detail-table" id="reorderDetailTable">
+                    <thead><tr><th>Item</th><th>Current Stock</th><th>Reorder Level</th><th>Suggested Qty</th><th>Urgency</th></tr></thead>
+                    <tbody id="reorderDetailTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     
     <div class="charts-container">
         <div class="chart-card"><h3>Stock Movement</h3><canvas id="stockMovementChart"></canvas></div>
@@ -1990,22 +2311,34 @@
     
     <div class="form-container">
         <div class="audit-summary-grid">
-            <div class="audit-summary-item"><h4>Beginning Balance</h4><div class="audit-summary-value" id="auditBeginningBalance">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Stock on Hand</h4><div class="audit-summary-value" id="auditStockOnHandValue">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Ending Balance</h4><div class="audit-summary-value" id="auditEndingBalance">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Positive Variance (Items)</h4><div class="audit-summary-value" id="auditPosVarItems">0</div></div>
-            <div class="audit-summary-item"><h4>Negative Variance (Items)</h4><div class="audit-summary-value" id="auditNegVarItems">0</div></div>
-            <div class="audit-summary-item"><h4>Positive Variance (Cost)</h4><div class="audit-summary-value" id="auditPosVarCost">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Negative Variance (Cost)</h4><div class="audit-summary-value" id="auditNegVarCost">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Net Variance</h4><div class="audit-summary-value" id="auditNetVariance">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Total Loss</h4><div class="audit-summary-value" id="auditTotalLoss">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Total Gain</h4><div class="audit-summary-value" id="auditTotalGain">ETB 0</div></div>
-            <div class="audit-summary-item"><h4>Recommendation</h4><div class="audit-summary-value" id="auditRecommendation">-</div></div>
-            <div class="audit-summary-item"><h4>Audit Status</h4><div class="audit-summary-value" id="auditStatus">-</div></div>
-            <div class="audit-summary-item"><h4>Accuracy %</h4><div class="audit-summary-value" id="auditAccuracy">100%</div></div>
-            <div class="audit-summary-item"><h4>Item Diff</h4><div class="audit-summary-value" id="auditItemDiff">0</div></div>
-            <div class="audit-summary-item"><h4>Financial Impact</h4><div class="audit-summary-value" id="auditFinancialImpact">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="beginning"><h4>Beginning Balance</h4><div class="audit-summary-value" id="auditBeginningBalance">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="onhand"><h4>Stock on Hand</h4><div class="audit-summary-value" id="auditStockOnHandValue">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="ending"><h4>Ending Balance</h4><div class="audit-summary-value" id="auditEndingBalance">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="posvar"><h4>Positive Variance (Items)</h4><div class="audit-summary-value" id="auditPosVarItems">0</div></div>
+            <div class="audit-summary-item" data-audit-type="negvar"><h4>Negative Variance (Items)</h4><div class="audit-summary-value" id="auditNegVarItems">0</div></div>
+            <div class="audit-summary-item" data-audit-type="poscost"><h4>Positive Variance (Cost)</h4><div class="audit-summary-value" id="auditPosVarCost">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="negcost"><h4>Negative Variance (Cost)</h4><div class="audit-summary-value" id="auditNegVarCost">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="netvar"><h4>Net Variance</h4><div class="audit-summary-value" id="auditNetVariance">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="loss"><h4>Total Loss</h4><div class="audit-summary-value" id="auditTotalLoss">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="gain"><h4>Total Gain</h4><div class="audit-summary-value" id="auditTotalGain">ETB 0</div></div>
+            <div class="audit-summary-item" data-audit-type="recommend"><h4>Recommendation</h4><div class="audit-summary-value" id="auditRecommendation">-</div></div>
+            <div class="audit-summary-item" data-audit-type="status"><h4>Audit Status</h4><div class="audit-summary-value" id="auditStatus">-</div></div>
+            <div class="audit-summary-item" data-audit-type="accuracy"><h4>Accuracy %</h4><div class="audit-summary-value" id="auditAccuracy">100%</div></div>
+            <div class="audit-summary-item" data-audit-type="itemdiff"><h4>Item Diff</h4><div class="audit-summary-value" id="auditItemDiff">0</div></div>
+            <div class="audit-summary-item" data-audit-type="impact"><h4>Financial Impact</h4><div class="audit-summary-value" id="auditFinancialImpact">ETB 0</div></div>
         </div>
+        
+        <!-- Audit Summary Detail Table -->
+        <div id="auditSummaryDetail" class="detail-table-container hidden-detail">
+            <h4 style="color: var(--success);">Detailed Variance by Item</h4>
+            <div class="table-container">
+                <table class="detail-table" id="auditVarianceDetailTable">
+                    <thead><tr><th>Item</th><th>Expected</th><th>Physical</th><th>Variance</th><th>Variance Value</th><th>Status</th></tr></thead>
+                    <tbody id="auditVarianceDetailBody"></tbody>
+                </table>
+            </div>
+        </div>
+        
         <div class="form-grid" style="margin-top: 1rem;">
             <div class="form-group"><label>Reason</label><input type="text" id="auditReasonField" placeholder="Enter variance reason"></div>
             <div class="form-group"><label>Responsible</label><input type="text" id="auditResponsibleField" placeholder="Responsible person/department"></div>
@@ -2016,6 +2349,7 @@
         <div class="btn-group">
             <button class="btn btn-primary" id="updateAuditFindings">Update Audit Findings</button>
             <button class="btn btn-secondary" id="exportAuditReport">Export Audit Report</button>
+            <button class="btn btn-secondary" id="toggleAuditDetailBtn" onclick="toggleDetail('auditSummaryDetail')">View Variance Details</button>
         </div>
         
         <div class="search-filter" style="margin: 1rem 0;">
@@ -2037,9 +2371,18 @@
         <button class="btn btn-primary" id="modalConfirmBtn" style="margin-top: 20px;">OK</button>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
-// MASTER PASSWORD HANDLER - with masked field and proper working
+// Helper function to toggle detail views
+function toggleDetail(detailId) {
+    const element = document.getElementById(detailId);
+    if (element) {
+        element.classList.toggle('hidden-detail');
+    }
+}
+
+// MASTER PASSWORD HANDLER
 (function() {
     const MASTER_PASSWORD = "asse19maki23elishi13";
     const STORAGE_KEY = "bp-sms-master-authenticated";
@@ -2093,6 +2436,7 @@ class UltraStockSystem {
         this.transactions = [];
         this.auditTrail = [];
         this.notifications = [];
+        this.shareHistory = [];
         this.currentId = 1;
         this.salesCounter = 1001;
         this.auditCounter = 1;
@@ -2120,6 +2464,7 @@ class UltraStockSystem {
         };
         this.charts = {};
         this.notificationInterval = null;
+        this.selectedShareItems = new Set();
         this.init();
     }
     
@@ -2138,6 +2483,7 @@ class UltraStockSystem {
         this.startPeriodicSync();
         this.renderSalesHistory();
         this.updateSyncStatus();
+        this.loadShareHistory();
     }
     
     setupOnlineOfflineListeners() {
@@ -2166,6 +2512,7 @@ class UltraStockSystem {
                 if (op.type === 'sale') await supabaseClient.from('sales_backup').insert([op.data]);
                 else if (op.type === 'stock') await supabaseClient.from('stock_backup').insert([op.data]);
                 else if (op.type === 'audit') await supabaseClient.from('audit_backup').insert([op.data]);
+                else if (op.type === 'share') await supabaseClient.from('share_backup').insert([op.data]);
             } catch (e) { console.warn('Sync failed for op', op); this.syncQueue.push(op); }
         }
         this.lastSyncTime = new Date();
@@ -2245,11 +2592,13 @@ class UltraStockSystem {
                 const savedAudit = localStorage.getItem('bp-sms-audit');
                 const savedSettings = localStorage.getItem('bp-sms-settings');
                 const savedTransactions = localStorage.getItem('bp-sms-transactions');
+                const savedShareHistory = localStorage.getItem('bp-sms-share-history');
                 if (savedStock) { const data = JSON.parse(savedStock); this.stockItems = data.stockItems || []; this.currentId = data.currentId || 1; }
                 if (savedSales) this.salesData = JSON.parse(savedSales);
                 if (savedAudit) this.auditTrail = JSON.parse(savedAudit);
                 if (savedTransactions) this.transactions = JSON.parse(savedTransactions);
                 if (savedSettings) this.settings = { ...this.settings, ...JSON.parse(savedSettings) };
+                if (savedShareHistory) this.shareHistory = JSON.parse(savedShareHistory);
                 this.stockItems.forEach(item => {
                     if (item.beginningBalance === undefined) {
                         const qtyDisplay = item.quantityBase / item.displayToBaseFactor;
@@ -2262,6 +2611,7 @@ class UltraStockSystem {
                         item.reorderLevelDisplay = item.reorderLevelBase / item.displayToBaseFactor;
                     }
                     if (item.customId === undefined) item.customId = item.id;
+                    if (item.brandName === undefined) item.brandName = '';
                 });
                 this.auditCounter = this.auditTrail.length > 0 ? Math.max(...this.auditTrail.map(a => a.id)) + 1 : 1;
                 resolve();
@@ -2276,6 +2626,7 @@ class UltraStockSystem {
         localStorage.setItem('bp-sms-audit', JSON.stringify(this.auditTrail));
         localStorage.setItem('bp-sms-transactions', JSON.stringify(this.transactions));
         localStorage.setItem('bp-sms-settings', JSON.stringify(this.settings));
+        localStorage.setItem('bp-sms-share-history', JSON.stringify(this.shareHistory));
     }
     
     setupUnitLists() {
@@ -2294,6 +2645,7 @@ class UltraStockSystem {
                 const value = itemNameInput.value;
                 const existing = this.stockItems.find(i => i.name.toLowerCase() === value.toLowerCase());
                 if (existing && !this.isEditing) {
+                    document.getElementById('brandName').value = existing.brandName || '';
                     document.getElementById('category').value = existing.category || '';
                     document.getElementById('itemType').value = existing.type || '';
                     document.getElementById('baseUnit').value = existing.baseUnit || '';
@@ -2432,6 +2784,7 @@ class UltraStockSystem {
         document.getElementById('navAudit').addEventListener('click', () => this.openPage('auditPage'));
         document.querySelectorAll('.close-full-screen').forEach(btn => { btn.addEventListener('click', (e) => { const pageId = btn.dataset.close || btn.closest('.full-screen-mode').id; document.getElementById(pageId).classList.remove('active'); }); });
         document.querySelectorAll('.dashboard-card').forEach(card => { card.addEventListener('click', (e) => { const page = card.dataset.page; const filter = card.dataset.filter; if (page) this.openPage(page, filter); }); });
+        document.querySelectorAll('.audit-summary-item').forEach(item => { item.addEventListener('click', (e) => { const type = item.dataset.auditType; this.showAuditDetail(type); }); });
         document.getElementById('stockForm').addEventListener('submit', (e) => { e.preventDefault(); this.saveItem(); });
         document.getElementById('clearForm').addEventListener('click', () => this.clearRegisterForm());
         document.getElementById('salesForm').addEventListener('submit', (e) => { e.preventDefault(); this.processSale(); });
@@ -2456,6 +2809,20 @@ class UltraStockSystem {
         document.getElementById('activitySearch')?.addEventListener('input', () => this.renderActivityLog());
         document.getElementById('activityTypeFilter')?.addEventListener('change', () => this.renderActivityLog());
         document.getElementById('exportActivityBtn')?.addEventListener('click', () => this.exportActivityLog());
+        
+        // Share Modal Event Listeners
+        document.getElementById('shareIcon').addEventListener('click', () => this.openShareModal());
+        document.getElementById('closeShareModal').addEventListener('click', () => this.closeShareModal());
+        document.getElementById('shareMasterCheckbox')?.addEventListener('change', (e) => this.toggleSelectAllShares(e.target.checked));
+        document.getElementById('shareSelectAllBtn')?.addEventListener('click', () => this.toggleSelectAllShares(true));
+        document.getElementById('shareClearAllBtn')?.addEventListener('click', () => this.toggleSelectAllShares(false));
+        document.getElementById('shareSearchInput')?.addEventListener('input', () => this.renderShareTable());
+        document.getElementById('shareCategoryFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareStatusFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareBranchFilter')?.addEventListener('change', () => this.renderShareTable());
+        document.getElementById('shareTelegramBtn')?.addEventListener('click', () => this.shareToTelegram());
+        document.getElementById('shareCopyPreviewBtn')?.addEventListener('click', () => this.copySharePreview());
+        document.getElementById('shareExportBtn')?.addEventListener('click', () => this.exportSelectedItems());
     }
     
     handleLogin() {
@@ -2488,8 +2855,8 @@ class UltraStockSystem {
             case 'salesPage': document.getElementById('salesDate').value = new Date().toISOString().split('T')[0]; if(!document.getElementById('salesInvoiceNumber').value) document.getElementById('salesInvoiceNumber').value = `INV-${Date.now()}`; this.clearSalesForm(); this.renderSalesHistory(); break;
             case 'stockInventoryPage': this.renderTable(); if(filter){ setTimeout(()=>{const f=document.getElementById('statusFilter'); if(f){ f.value=filter; this.renderTable();}},100);} break;
             case 'reduceStockPage': this.initReducePage(); break;
-            case 'reviewPage': this.updateReviewDashboard(); this.renderActivityLog(); break;
-            case 'auditPage': this.renderAuditTable(); this.updateAuditSummary(); break;
+            case 'reviewPage': this.updateReviewDashboard(); this.renderActivityLog(); this.renderDemandForecastDetail(); this.renderReorderDetail(); break;
+            case 'auditPage': this.renderAuditTable(); this.updateAuditSummary(); this.renderAuditVarianceDetail(); break;
         }
     }
     
@@ -2497,11 +2864,603 @@ class UltraStockSystem {
         const active = document.querySelector('.full-screen-mode.active');
         if (active) {
             if (active.id === 'stockInventoryPage') this.renderTable();
-            else if (active.id === 'reviewPage') { this.updateReviewDashboard(); this.renderActivityLog(); }
-            else if (active.id === 'auditPage') { this.renderAuditTable(); this.updateAuditSummary(); }
+            else if (active.id === 'reviewPage') { this.updateReviewDashboard(); this.renderActivityLog(); this.renderDemandForecastDetail(); this.renderReorderDetail(); }
+            else if (active.id === 'auditPage') { this.renderAuditTable(); this.updateAuditSummary(); this.renderAuditVarianceDetail(); }
             else if (active.id === 'reduceStockPage') this.renderDeductionHistory();
             else if (active.id === 'salesPage') this.renderSalesHistory();
         }
+    }
+    
+    // Share Functionality Methods
+    openShareModal() {
+        if (!this.isLoggedIn) { this.showToast('Please login first', 'warning'); return; }
+        document.getElementById('shareModal').classList.add('active');
+        this.updateShareCategoryFilter();
+        this.renderShareTable();
+        this.updateShareStats();
+    }
+    
+    closeShareModal() {
+        document.getElementById('shareModal').classList.remove('active');
+        this.selectedShareItems.clear();
+    }
+    
+    updateShareCategoryFilter() {
+        const filter = document.getElementById('shareCategoryFilter');
+        if (!filter) return;
+        const cats = [...new Set(this.stockItems.map(i => i.category).filter(Boolean))];
+        filter.innerHTML = '<option value="">All Categories</option>' + cats.map(c => `<option value="${c}">${c}</option>`).join('');
+    }
+    
+    renderShareTable() {
+        const tbody = document.getElementById('shareTableBody');
+        if (!tbody) return;
+        
+        let items = [...this.stockItems];
+        const branchFilter = document.getElementById('shareBranchFilter')?.value;
+        if (branchFilter && branchFilter !== 'all') {
+            items = items.filter(i => i.branch === branchFilter);
+        }
+        
+        const search = document.getElementById('shareSearchInput')?.value.toLowerCase() || '';
+        if (search) {
+            items = items.filter(i => i.name.toLowerCase().includes(search) || (i.brandName && i.brandName.toLowerCase().includes(search)));
+        }
+        
+        const category = document.getElementById('shareCategoryFilter')?.value;
+        if (category) {
+            items = items.filter(i => i.category === category);
+        }
+        
+        const status = document.getElementById('shareStatusFilter')?.value;
+        if (status) {
+            const now = new Date();
+            items = items.filter(i => {
+                const expiry = new Date(i.expiryDate);
+                const diff = Math.ceil((expiry - now) / (86400000));
+                const qty = i.quantityDisplay;
+                switch(status) {
+                    case 'low': return qty > 0 && qty < i.minStockDisplay;
+                    case 'expiring': return diff > 0 && diff <= 90;
+                    case 'expired': return diff < 0;
+                    case 'overstock': return qty > i.maxStockDisplay;
+                    default: return true;
+                }
+            });
+        }
+        
+        items.sort((a,b) => new Date(a.expiryDate) - new Date(b.expiryDate));
+        
+        document.getElementById('shareTotalCount').textContent = items.length;
+        
+        tbody.innerHTML = items.map(item => {
+            const isSelected = this.selectedShareItems.has(item.id);
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - new Date()) / (86400000));
+            let statusClass = '';
+            let statusText = '';
+            if (diff < 0) { statusClass = 'status-expired'; statusText = 'Expired'; }
+            else if (diff <= 30) { statusClass = 'status-critical'; statusText = 'Expiring Soon'; }
+            else if (diff <= 90) { statusClass = 'status-warning'; statusText = 'Near Expiry'; }
+            else { statusClass = 'status-ok'; statusText = 'Good'; }
+            
+            return `<tr class="${isSelected ? 'selected' : ''}" data-item-id="${item.id}">
+                <td class="checkbox-cell"><input type="checkbox" class="share-item-checkbox" data-id="${item.id}" ${isSelected ? 'checked' : ''}></td>
+                <td>${this.escapeHtml(item.name)}</td>
+                <td>${this.escapeHtml(item.brandName || '-')}</td>
+                <td>${this.escapeHtml(item.batchNumber)}</td>
+                <td>${item.baseUnit}</td>
+                <td>${item.registeredUnit}</td>
+                <td>${item.displayUnit}</td>
+                <td>${item.quantityBase.toFixed(2)}</td>
+                <td><strong>${item.quantityDisplay.toFixed(2)}</strong></td>
+                <td>***</td>
+                <td>***</td>
+                <td>***</td>
+                <td>***</td>
+                <td><span class="status-indicator ${statusClass}"></span> ${expiry.toLocaleDateString()}</td>
+                <td><span class="status-indicator ${statusClass}"></span> ${statusText}</td>
+            </tr>`;
+        }).join('') || '<tr><td colspan="15" style="text-align:center;">No items found</td></tr>';
+        
+        // Attach checkbox event listeners
+        document.querySelectorAll('.share-item-checkbox').forEach(cb => {
+            cb.addEventListener('change', (e) => {
+                const id = parseInt(e.target.dataset.id);
+                if (e.target.checked) {
+                    this.selectedShareItems.add(id);
+                } else {
+                    this.selectedShareItems.delete(id);
+                }
+                this.updateShareStats();
+                this.updateSharePreview();
+                // Update master checkbox state
+                const masterCb = document.getElementById('shareMasterCheckbox');
+                if (masterCb) {
+                    const allBoxes = document.querySelectorAll('.share-item-checkbox');
+                    const checkedBoxes = document.querySelectorAll('.share-item-checkbox:checked');
+                    masterCb.checked = allBoxes.length === checkedBoxes.length && allBoxes.length > 0;
+                    masterCb.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+                }
+                // Highlight row
+                const row = e.target.closest('tr');
+                if (row) {
+                    if (e.target.checked) row.classList.add('selected');
+                    else row.classList.remove('selected');
+                }
+            });
+        });
+        
+        this.updateShareStats();
+        this.updateSharePreview();
+        
+        // Update master checkbox
+        const masterCb = document.getElementById('shareMasterCheckbox');
+        if (masterCb) {
+            const allBoxes = document.querySelectorAll('.share-item-checkbox');
+            const checkedBoxes = document.querySelectorAll('.share-item-checkbox:checked');
+            masterCb.checked = allBoxes.length === checkedBoxes.length && allBoxes.length > 0;
+            masterCb.indeterminate = checkedBoxes.length > 0 && checkedBoxes.length < allBoxes.length;
+        }
+    }
+    
+    toggleSelectAllShares(select) {
+        document.querySelectorAll('.share-item-checkbox').forEach(cb => {
+            cb.checked = select;
+            const id = parseInt(cb.dataset.id);
+            if (select) this.selectedShareItems.add(id);
+            else this.selectedShareItems.delete(id);
+            const row = cb.closest('tr');
+            if (row) {
+                if (select) row.classList.add('selected');
+                else row.classList.remove('selected');
+            }
+        });
+        this.updateShareStats();
+        this.updateSharePreview();
+    }
+    
+    updateShareStats() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        document.getElementById('shareSelectedCount').textContent = selectedItems.length;
+        
+        // Calculate masked total value
+        const totalValue = selectedItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0);
+        document.getElementById('shareTotalValue').innerHTML = `ETB ${totalValue.toFixed(0).replace(/\d/g, '*')}`;
+        
+        // Count expiring and low stock items among selected
+        const now = new Date();
+        const expiringCount = selectedItems.filter(i => {
+            const diff = Math.ceil((new Date(i.expiryDate) - now) / (86400000));
+            return diff > 0 && diff <= 90;
+        }).length;
+        const lowStockCount = selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length;
+        document.getElementById('shareExpiringCount').textContent = expiringCount;
+        document.getElementById('shareLowStockCount').textContent = lowStockCount;
+    }
+    
+    updateSharePreview() {
+        const previewDiv = document.getElementById('sharePreview');
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        
+        if (selectedItems.length === 0) {
+            previewDiv.innerHTML = '<strong>Preview:</strong> Select items to see preview...';
+            return;
+        }
+        
+        const now = new Date();
+        const pharmacyName = this.settings.pharmacyName;
+        const brandName = this.settings.brandName;
+        const dateStr = now.toLocaleString();
+        
+        let preview = `🏥 *${pharmacyName} (${brandName})*\n📊 *INVENTORY REPORT*\n📅 ${dateStr}\n👤 Generated by: ${this.currentUserType || 'User'}\n\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📋 *SELECTED ITEMS (${selectedItems.length})*\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        selectedItems.slice(0, 15).forEach((item, idx) => {
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - now) / (86400000));
+            let expiryStatus = diff < 0 ? '⚠️ EXPIRED' : diff <= 30 ? '🔴 Expiring Soon' : diff <= 90 ? '🟡 Near Expiry' : '🟢 Good';
+            
+            preview += `*${idx + 1}. ${item.name}*\n`;
+            if (item.brandName) preview += `   Brand: ${item.brandName}\n`;
+            preview += `   Batch: ${item.batchNumber} | Expiry: ${item.expiryDate} (${expiryStatus})\n`;
+            preview += `   Stock: ${item.quantityDisplay.toFixed(2)} ${item.displayUnit}\n`;
+            preview += `   Unit: ${item.baseUnit} (Reg: ${item.registeredUnit}, Disp: ${item.displayUnit})\n`;
+            preview += `   ─────────────────────────────────\n`;
+        });
+        
+        if (selectedItems.length > 15) {
+            preview += `\n   ... and ${selectedItems.length - 15} more items\n`;
+        }
+        
+        preview += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📈 *SUMMARY*\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📦 Total Items: ${selectedItems.length}\n`;
+        preview += `⚠️ Low Stock Items: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
+        preview += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
+        preview += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `*Report generated by BP-SMS v2.0*`;
+        
+        previewDiv.innerHTML = `<strong>Preview (Telegram Format):</strong><br><pre style="background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; white-space: pre-wrap; font-family: monospace;">${this.escapeHtml(preview)}</pre>`;
+    }
+    
+    generateTelegramMessage() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        const now = new Date();
+        const pharmacyName = this.settings.pharmacyName;
+        const brandName = this.settings.brandName;
+        const dateStr = now.toLocaleString();
+        const senderName = document.getElementById('shareSenderName').value || this.currentUserType || 'User';
+        
+        let message = `🏥 *${pharmacyName} (${brandName})*\n`;
+        message += `📊 *PHARMACEUTICAL INVENTORY REPORT*\n`;
+        message += `📅 ${dateStr}\n`;
+        message += `👤 Generated by: ${senderName}\n\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📋 *INVENTORY DETAILS*\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        // Create table format for better readability
+        message += `┌─────┬──────────────────────────┬──────────────┬────────────┬──────────┐\n`;
+        message += `│ #   │ Generic Name             │ Batch/Expiry │ Qty (Disp) │ Status   │\n`;
+        message += `├─────┼──────────────────────────┼──────────────┼────────────┼──────────┤\n`;
+        
+        selectedItems.forEach((item, idx) => {
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - now) / 86400000);
+            let status = diff < 0 ? 'EXPIRED' : diff <= 30 ? 'URGENT' : diff <= 90 ? 'WARNING' : 'OK';
+            const nameShort = item.name.length > 24 ? item.name.substring(0, 21) + '...' : item.name;
+            const batchShort = item.batchNumber.length > 12 ? item.batchNumber.substring(0, 9) + '...' : item.batchNumber;
+            message += `│ ${(idx+1).toString().padEnd(3)} │ ${nameShort.padEnd(24)} │ ${batchShort.padEnd(12)} │ ${item.quantityDisplay.toFixed(0).padStart(8)} │ ${status.padEnd(8)} │\n`;
+        });
+        
+        message += `└─────┴──────────────────────────┴──────────────┴────────────┴──────────┘\n\n`;
+        
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📈 *SUMMARY STATISTICS*\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `📦 Total Items Shared: ${selectedItems.length}\n`;
+        message += `📊 Total Stock Value: (masked)\n`;
+        message += `⚠️ Low Stock Alerts: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
+        message += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
+        message += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        message += `🔄 Turnover Rate: ${this.calculateTurnoverRate().toFixed(2)}%\n`;
+        message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        message += `🔒 *Confidential Report*\n`;
+        message += `*Report generated by Bete-Markose BP-SMS*`;
+        
+        return message;
+    }
+    
+    calculateTurnoverRate() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const sales = this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).reduce((sum, s) => sum + s.grandTotal, 0);
+        const avgInventory = this.stockItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0) / (this.stockItems.length || 1);
+        return avgInventory > 0 ? (sales / avgInventory) * 100 : 0;
+    }
+    
+    async shareToTelegram() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        if (selectedIds.length === 0) {
+            this.showToast('Please select at least one item to share', 'warning');
+            return;
+        }
+        
+        const recipient = document.getElementById('shareRecipient').value.trim();
+        if (!recipient) {
+            this.showToast('Please enter recipient (@assegas or phone number)', 'warning');
+            return;
+        }
+        
+        const message = this.generateTelegramMessage();
+        const encodedMessage = encodeURIComponent(message);
+        
+        // Log share activity
+        this.recordShareHistory(recipient, selectedIds.length, 'telegram', 'sent');
+        
+        // Create Telegram share URL
+        // For direct messaging to @assegas, we use tg://resolve?domain=assegas&text=
+        let telegramUrl;
+        if (recipient.startsWith('@')) {
+            const username = recipient.substring(1);
+            telegramUrl = `tg://resolve?domain=${username}&text=${encodedMessage}`;
+        } else {
+            // For phone number, use tg://msg?to=phone_number
+            telegramUrl = `tg://msg?to=${recipient}&text=${encodedMessage}`;
+        }
+        
+        // Also provide a fallback web link
+        const webUrl = `https://t.me/share/url?url=&text=${encodedMessage}`;
+        
+        this.showFullscreenModal(
+            `Preparing to share ${selectedIds.length} items to ${recipient}\n\n` +
+            `Click OK to open Telegram. If the app doesn't open, please use this link:\n${webUrl.substring(0, 80)}...`,
+            'info'
+        );
+        
+        // Try to open Telegram app
+        setTimeout(() => {
+            window.open(telegramUrl, '_blank');
+            // Also open web fallback in new tab
+            setTimeout(() => {
+                if (!document.hidden) {
+                    window.open(webUrl, '_blank');
+                }
+            }, 500);
+        }, 100);
+        
+        this.showToast(`Shared ${selectedIds.length} items to ${recipient}`, 'success');
+        this.closeShareModal();
+    }
+    
+    copySharePreview() {
+        const message = this.generateTelegramMessage();
+        navigator.clipboard.writeText(message).then(() => {
+            this.showToast('Preview copied to clipboard!', 'success');
+        }).catch(() => {
+            this.showToast('Failed to copy', 'warning');
+        });
+    }
+    
+    exportSelectedItems() {
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        const exportType = document.getElementById('shareExportType').value;
+        const recipient = document.getElementById('shareRecipient').value || 'Unknown';
+        
+        let data, filename, mimeType;
+        
+        if (exportType === 'csv') {
+            let csv = "Generic Name,Brand Name,Batch Number,Standard Unit,Register Unit,Display Unit,Standard Quantity,Available Quantity,Expiry Date,Status\n";
+            selectedItems.forEach(item => {
+                const expiry = new Date(item.expiryDate);
+                const status = expiry < new Date() ? 'Expired' : 'Active';
+                csv += `"${item.name}","${item.brandName || ''}","${item.batchNumber}","${item.baseUnit}","${item.registeredUnit}","${item.displayUnit}","${item.quantityBase.toFixed(2)}","${item.quantityDisplay.toFixed(2)}","${item.expiryDate}","${status}"\n`;
+            });
+            data = csv;
+            filename = `inventory_export_${new Date().toISOString().slice(0,10)}.csv`;
+            mimeType = 'text/csv';
+        } else {
+            const exportData = {
+                exportedAt: new Date().toISOString(),
+                recipient: recipient,
+                exportedBy: this.currentUserType,
+                itemCount: selectedItems.length,
+                items: selectedItems.map(item => ({
+                    genericName: item.name,
+                    brandName: item.brandName,
+                    batchNumber: item.batchNumber,
+                    standardUnit: item.baseUnit,
+                    registerUnit: item.registeredUnit,
+                    displayUnit: item.displayUnit,
+                    standardQuantity: item.quantityBase,
+                    availableQuantity: item.quantityDisplay,
+                    expiryDate: item.expiryDate,
+                    purchasePrice: '***MASKED***',
+                    sellingPrice: '***MASKED***',
+                    totalValue: '***MASKED***'
+                }))
+            };
+            data = JSON.stringify(exportData, null, 2);
+            filename = `inventory_export_${new Date().toISOString().slice(0,10)}.json`;
+            mimeType = 'application/json';
+        }
+        
+        const blob = new Blob([data], { type: mimeType });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
+        
+        this.recordShareHistory(recipient, selectedItems.length, exportType, 'exported');
+        this.showToast(`Exported ${selectedItems.length} items as ${exportType.toUpperCase()}`, 'success');
+    }
+    
+    recordShareHistory(recipient, itemCount, type, status) {
+        const record = {
+            id: Date.now(),
+            date: new Date().toISOString(),
+            recipient: recipient,
+            itemCount: itemCount,
+            type: type,
+            status: status,
+            user: this.currentUserType
+        };
+        this.shareHistory.unshift(record);
+        if (this.shareHistory.length > 100) this.shareHistory.pop();
+        this.saveToLocalStorage();
+        this.queueForSync('share', record);
+        this.renderShareHistory();
+    }
+    
+    loadShareHistory() {
+        this.renderShareHistory();
+    }
+    
+    renderShareHistory() {
+        const tbody = document.getElementById('shareHistoryBody');
+        if (!tbody) return;
+        
+        tbody.innerHTML = this.shareHistory.slice(0, 50).map(h => `
+            <tr>
+                <td>${new Date(h.date).toLocaleString()}</td>
+                <td>${this.escapeHtml(h.recipient)}</td>
+                <td>${h.itemCount}</td>
+                <td>${h.type}</td>
+                <td><span class="status-indicator ${h.status === 'sent' ? 'status-ok' : 'status-warning'}"></span> ${h.status}</td>
+            </tr>
+        `).join('') || '<tr><td colspan="5">No share history</td></tr>';
+    }
+    
+    // Demand Forecast Detail
+    renderDemandForecastDetail() {
+        const tbody = document.getElementById('demandForecastTableBody');
+        if (!tbody) return;
+        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const salesByItem = {};
+        this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).forEach(sale => {
+            sale.items.forEach(item => {
+                if (!salesByItem[item.itemId]) {
+                    salesByItem[item.itemId] = { totalQty: 0 };
+                }
+                salesByItem[item.itemId].totalQty += item.quantity;
+            });
+        });
+        
+        const forecasts = [];
+        this.stockItems.forEach(item => {
+            const dailyAvg = (salesByItem[item.id]?.totalQty || 0) / 30;
+            const forecast30 = dailyAvg * 30;
+            const coverageDays = dailyAvg > 0 ? item.quantityDisplay / dailyAvg : 999;
+            const recommendedOrder = Math.max(0, forecast30 - item.quantityDisplay);
+            forecasts.push({
+                item: item,
+                dailyAvg: dailyAvg,
+                forecast30: forecast30,
+                coverageDays: coverageDays,
+                recommendedOrder: recommendedOrder
+            });
+        });
+        
+        forecasts.sort((a,b) => b.recommendedOrder - a.recommendedOrder);
+        
+        tbody.innerHTML = forecasts.slice(0, 30).map(f => `
+            <tr>
+                <td>${this.escapeHtml(f.item.name)}</td>
+                <td>${f.dailyAvg.toFixed(2)} ${f.item.displayUnit}</td>
+                <td>${f.forecast30.toFixed(2)} ${f.item.displayUnit}</td>
+                <td>${f.item.quantityDisplay.toFixed(2)} ${f.item.displayUnit}</td>
+                <td>${f.coverageDays.toFixed(1)} days</td>
+                <td class="${f.recommendedOrder > 0 ? 'variance-positive' : ''}">${f.recommendedOrder > 0 ? f.recommendedOrder.toFixed(2) : 'OK'}</td>
+            </tr>
+        `).join('');
+    }
+    
+    // Reorder Detail
+    renderReorderDetail() {
+        const tbody = document.getElementById('reorderDetailTableBody');
+        if (!tbody) return;
+        
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        
+        const salesByItem = {};
+        this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).forEach(sale => {
+            sale.items.forEach(item => {
+                if (!salesByItem[item.itemId]) {
+                    salesByItem[item.itemId] = { totalQty: 0 };
+                }
+                salesByItem[item.itemId].totalQty += item.quantity;
+            });
+        });
+        
+        const reorderItems = [];
+        this.stockItems.forEach(item => {
+            if (item.quantityDisplay <= item.reorderLevelDisplay && item.quantityDisplay > 0) {
+                const dailyAvg = (salesByItem[item.id]?.totalQty || 0) / 30;
+                const suggestedQty = Math.max(item.reorderLevelDisplay * 2, dailyAvg * 14) - item.quantityDisplay;
+                let urgency = 'Normal';
+                if (item.quantityDisplay <= item.reorderLevelDisplay / 2) urgency = 'Critical';
+                else if (item.quantityDisplay <= item.reorderLevelDisplay * 0.8) urgency = 'High';
+                reorderItems.push({
+                    item: item,
+                    suggestedQty: Math.max(10, suggestedQty),
+                    urgency: urgency
+                });
+            }
+        });
+        
+        reorderItems.sort((a,b) => {
+            const urgencyOrder = { 'Critical': 0, 'High': 1, 'Normal': 2 };
+            return urgencyOrder[a.urgency] - urgencyOrder[b.urgency];
+        });
+        
+        if (reorderItems.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5">No items need reorder at this time</td></tr>';
+            return;
+        }
+        
+        tbody.innerHTML = reorderItems.map(r => `
+            <tr>
+                <td>${this.escapeHtml(r.item.name)}</td>
+                <td>${r.item.quantityDisplay.toFixed(2)} ${r.item.displayUnit}</td>
+                <td>${r.item.reorderLevelDisplay} ${r.item.displayUnit}</td>
+                <td class="variance-positive">${r.suggestedQty.toFixed(2)} ${r.item.displayUnit}</td>
+                <td><span class="status-indicator ${r.urgency === 'Critical' ? 'status-expired' : r.urgency === 'High' ? 'status-critical' : 'status-warning'}"></span> ${r.urgency}</td>
+            </tr>
+        `).join('');
+        
+        const reorderText = reorderItems.map(r => `${r.item.name}: ${r.item.quantityDisplay.toFixed(0)} left, Order ${r.suggestedQty.toFixed(0)} ${r.item.displayUnit} (${r.urgency})`).join('; ');
+        document.getElementById('reorderRecommendations').innerHTML = reorderText || 'No items need reorder';
+    }
+    
+    // Audit Variance Detail
+    renderAuditVarianceDetail() {
+        const tbody = document.getElementById('auditVarianceDetailBody');
+        if (!tbody) return;
+        
+        const variances = [];
+        this.stockItems.forEach(item => {
+            const expected = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
+            const physical = item.physicalCount !== undefined ? item.physicalCount : item.quantityDisplay;
+            const variance = physical - expected;
+            if (Math.abs(variance) > 0.01) {
+                variances.push({
+                    item: item,
+                    expected: expected,
+                    physical: physical,
+                    variance: variance,
+                    varianceValue: variance * item.sellingPricePerDisplay
+                });
+            }
+        });
+        
+        variances.sort((a,b) => Math.abs(b.varianceValue) - Math.abs(a.varianceValue));
+        
+        tbody.innerHTML = variances.slice(0, 50).map(v => `
+            <tr>
+                <td>${this.escapeHtml(v.item.name)}</td>
+                <td>${v.expected.toFixed(2)} ${v.item.displayUnit}</td>
+                <td>${v.physical.toFixed(2)} ${v.item.displayUnit}</td>
+                <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}${v.variance.toFixed(2)}</td>
+                <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}ETB ${Math.abs(v.varianceValue).toFixed(2)}</td>
+                <td><span class="status-indicator ${v.variance >= 0 ? 'status-ok' : 'status-critical'}"></span> ${v.variance >= 0 ? 'Surplus' : 'Shortage'}</td>
+            </tr>
+        `).join('') || '<tr><td colspan="6">No variances found</td></tr>';
+    }
+    
+    showAuditDetail(type) {
+        // Open audit page and filter based on type
+        this.openPage('auditPage');
+        setTimeout(() => {
+            const filterMap = {
+                'beginning': 'Beginning Balance',
+                'onhand': 'Stock on Hand',
+                'ending': 'Ending Balance',
+                'posvar': 'Positive Variance',
+                'negvar': 'Negative Variance',
+                'loss': 'Loss',
+                'gain': 'Gain'
+            };
+            const message = filterMap[type] || 'Audit Detail';
+            this.showToast(`Viewing ${message} details`, 'info');
+            // Scroll to audit table
+            const table = document.getElementById('auditTable');
+            if (table) table.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
     }
     
     saveItem() {
@@ -2519,6 +3478,7 @@ class UltraStockSystem {
             id: this.isEditing ? this.editingId : this.currentId++,
             customId: document.getElementById('itemIdInput').value.trim() || `ITEM-${Date.now()}`,
             name: document.getElementById('itemName').value.trim(),
+            brandName: document.getElementById('brandName').value.trim(),
             category: document.getElementById('category').value.trim() || 'Uncategorized',
             type: document.getElementById('itemType').value.trim() || 'General',
             baseUnit: document.getElementById('baseUnit').value.trim(),
@@ -2580,6 +3540,7 @@ class UltraStockSystem {
         this.applyMarkup();
         document.getElementById('branch').value = this.currentBranch;
         document.getElementById('itemIdInput').value = '';
+        document.getElementById('brandName').value = '';
     }
     
     addSalesRow() {
@@ -3057,6 +4018,7 @@ class UltraStockSystem {
         setTimeout(() => {
             document.getElementById('itemIdInput').value = item.customId || '';
             document.getElementById('itemName').value = item.name;
+            document.getElementById('brandName').value = item.brandName || '';
             document.getElementById('category').value = item.category;
             document.getElementById('itemType').value = item.type || '';
             document.getElementById('baseUnit').value = item.baseUnit;
@@ -3129,12 +4091,11 @@ class UltraStockSystem {
         const avgDailySales = totalSales30 / 30;
         const totalValue = branchItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0);
         document.getElementById('demandForecast').innerHTML = `ETB ${(avgDailySales * 30).toFixed(2)} (${((avgDailySales * 30) / (totalValue || 1)).toFixed(1)}x current inventory) | Daily Avg: ETB ${avgDailySales.toFixed(2)}`;
-        const reorderItems = branchItems.filter(i => i.quantityDisplay <= i.reorderLevelDisplay && i.quantityDisplay > 0);
-        const reorderText = reorderItems.length ? reorderItems.map(i => { const dailyDemand = avgDailySales > 0 ? (i.quantityIssued || 0) / 30 : 0; const leadTime = 7; const safetyStock = dailyDemand * 3; const reorderPoint = dailyDemand * leadTime + safetyStock; const suggestedQty = Math.max(i.reorderLevelDisplay, reorderPoint) - i.quantityDisplay; return `${i.name}: ${i.quantityDisplay.toFixed(0)} left, Reorder ${suggestedQty.toFixed(0)} ${i.displayUnit}`; }).join('; ') : 'All items above reorder level';
-        document.getElementById('reorderRecommendations').innerHTML = reorderText;
         this.renderExpiryWastageReport();
         this.updateCharts();
         this.updateTopItems();
+        this.renderDemandForecastDetail();
+        this.renderReorderDetail();
     }
     
     renderExpiryWastageReport() {
@@ -3158,8 +4119,12 @@ class UltraStockSystem {
         if (type) activities = activities.filter(a => a.action === type);
         activities.sort((a,b) => new Date(b.timestamp) - new Date(a.timestamp));
         tbody.innerHTML = activities.slice(0, 100).map(a => `<tr>
-            <td>${new Date(a.timestamp).toLocaleString()}</td><td>${a.action}</td><td>${a.user || 'System'}</td><td>${a.itemName || '-'}</td>
-            <td>${a.details ? JSON.stringify(a.details).substring(0, 50) : '-'}</td><td>${a.branch || '-'}</td>
+            <td>${new Date(a.timestamp).toLocaleString()}</td>
+            <td>${a.action}</td>
+            <td>${a.user || 'System'}</td>
+            <td>${a.itemName || '-'}</td>
+            <td>${a.details ? JSON.stringify(a.details).substring(0, 50) : '-'}</td>
+            <td>${a.branch || '-'}</td>
         </tr>`).join('') || '<tr><td colspan="6">No activities found</td></tr>';
     }
     
@@ -3291,6 +4256,7 @@ class UltraStockSystem {
         document.getElementById('auditAccuracy').innerHTML = `${accuracy.toFixed(1)}%`;
         document.getElementById('auditItemDiff').innerHTML = itemDiffCount;
         document.getElementById('auditFinancialImpact').innerHTML = `ETB ${Math.abs(netVariance).toFixed(2)}`;
+        this.renderAuditVarianceDetail();
     }
     
     updateAuditFindingsManual() {
@@ -3397,7 +4363,7 @@ class UltraStockSystem {
     }
     
     backupData() {
-        const data = { stockItems: this.stockItems, salesData: this.salesData, transactions: this.transactions, auditTrail: this.auditTrail, settings: this.settings, currentId: this.currentId, salesCounter: this.salesCounter, auditCounter: this.auditCounter, backupDate: new Date().toISOString() };
+        const data = { stockItems: this.stockItems, salesData: this.salesData, transactions: this.transactions, auditTrail: this.auditTrail, settings: this.settings, currentId: this.currentId, salesCounter: this.salesCounter, auditCounter: this.auditCounter, shareHistory: this.shareHistory, backupDate: new Date().toISOString() };
         const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -3425,6 +4391,7 @@ class UltraStockSystem {
                         this.transactions = data.transactions || [];
                         this.auditTrail = data.auditTrail || [];
                         this.settings = data.settings || this.settings;
+                        this.shareHistory = data.shareHistory || [];
                         this.currentId = data.currentId || 1;
                         this.salesCounter = data.salesCounter || 1001;
                         this.auditCounter = data.auditCounter || 1;
@@ -3441,6 +4408,16 @@ class UltraStockSystem {
     
     clearAllData() {
         if (prompt('Type "DELETE ALL" to confirm:') === 'DELETE ALL') { localStorage.clear(); sessionStorage.clear(); this.showToast('All data cleared', 'info'); location.reload(); }
+    }
+    
+    escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
     }
 }
 
