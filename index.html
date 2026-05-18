@@ -8,7 +8,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.25/jspdf.plugin.autotable.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         * {
             margin: 0;
@@ -1188,25 +1187,6 @@
             background: rgba(0,255,136,0.1);
         }
 
-        /* Amharic info text styles */
-        .amharic-info {
-            background: rgba(0, 255, 136, 0.1);
-            border-left: 4px solid var(--success);
-            padding: 0.8rem 1rem;
-            margin: 1rem 0;
-            border-radius: 8px;
-            font-size: 0.85rem;
-            color: var(--light);
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
-            flex-wrap: wrap;
-        }
-        .amharic-info i {
-            color: var(--success);
-            font-size: 1.2rem;
-        }
-
         @media (max-width: 768px) {
             .nav-btn {
                 min-width: calc(50% - 0.25rem);
@@ -1394,6 +1374,7 @@
     </style>
 </head>
 <body>
+<body>
 <!-- MASTER PASSWORD OVERLAY - with masked master password field -->
 <div id="masterOverlay" class="master-overlay">
     <div class="master-box">
@@ -1531,7 +1512,8 @@
 <audio id="notificationSound" loop preload="auto">
     <source src="data:audio/mp3;base64,SUQzBAAAAAABEVRYWFgAAAAtAAADY29tbWVudABCaWdTb3VuZEJhbmsuY29tIC8gR2VuZXJpYyBTb3VuZCBFZmZlY3RzAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA//uQxAAAAAAAAAAAAAAAAAAAAAAABJxBTU0zLTEwMAAAAAAAAAPAAAABgAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" type="audio/mp3">
 </audio>
-<!-- SHARE MODAL - UPDATED with fixed recipient options, Amharic info, no preview section -->
+
+<!-- SHARE MODAL -->
 <div class="share-modal" id="shareModal">
     <div class="share-container">
         <div class="share-header">
@@ -1541,26 +1523,14 @@
             </button>
         </div>
         
-        <!-- Amharic Informational Text -->
-        <div class="amharic-info">
-            <i class="fas fa-info-circle"></i>
-            <span>📢 የፋርማሲ/መድሀኒት አጠቃላይ መረጃ ለ Assefa Gashaye ማጋራት የሚቻል ሲሆን ይህም ከሌሎች ፋርማሲዎች ጋር የመድሀኒት ግዢ እና ሽያጭ ልውውጥ ለማመቻቸት ይረዳል። (Pharmacy/general drug information can be shared to Assefa Gashaye to facilitate medicine purchasing and selling exchange with other pharmaceutical companies.)</span>
-        </div>
-        
         <div class="form-grid" style="margin-bottom: 1rem;">
             <div class="form-group">
-                <label><i class="fab fa-telegram"></i> Recipient (Telegram Username) *</label>
-                <select id="shareRecipient" required>
-                    <option value="@assegas">@assegas (Main Contact)</option>
-                    <option value="@gogs21">@gogs21</option>
-                    <option value="@t.meGOGSmore">@t.meGOGSmore</option>
-                </select>
-                <small style="color: var(--gray); display: block; margin-top: 4px;">Select the Telegram username to receive the report</small>
+                <label><i class="fas fa-user"></i> Recipient (Telegram @assegas or phone)</label>
+                <input type="text" id="shareRecipient" placeholder="@assegas or phone number" value="@assegas">
             </div>
             <div class="form-group">
-                <label><i class="fas fa-user-edit"></i> Sender Name and Phone *</label>
-                <input type="text" id="shareSenderName" placeholder="e.g., Assefa Gashaye - 0912345678" required>
-                <small style="color: var(--gray); display: block; margin-top: 4px;">Enter your full name and phone number together</small>
+                <label><i class="fas fa-user-edit"></i> Sender Name</label>
+                <input type="text" id="shareSenderName" placeholder="Your name">
             </div>
             <div class="form-group">
                 <label><i class="fas fa-file-export"></i> Export Type</label>
@@ -1621,12 +1591,16 @@
             </table>
         </div>
         
+        <div class="share-preview" id="sharePreview">
+            <strong>Preview:</strong> Select items to see preview...
+        </div>
+        
         <div class="btn-group" style="margin-top: 1rem;">
             <button class="btn btn-success" id="shareTelegramBtn">
-                <i class="fab fa-telegram-plane"></i> Share to Telegram
+                <i class="fab fa-telegram-plane"></i> Share to Telegram (@assegas)
             </button>
             <button class="btn btn-primary" id="shareCopyPreviewBtn">
-                <i class="fas fa-copy"></i> Copy Message
+                <i class="fas fa-copy"></i> Copy Preview
             </button>
             <button class="btn btn-secondary" id="shareExportBtn">
                 <i class="fas fa-download"></i> Export Selected
@@ -1644,6 +1618,7 @@
         </div>
     </div>
 </div>
+
 <div class="settings-panel" id="settingsPanel">
     <div class="settings-container">
         <div class="settings-header">
@@ -1791,7 +1766,6 @@
         </div>
     </div>
 </div>
-
 <div class="full-screen-mode" id="registerStockPage">
     <div class="full-screen-header">
         <h2><i class="fas fa-pills"></i> Register Stock (<span id="registerBranchLabel">Pharmacy</span>)</h2>
@@ -1983,6 +1957,7 @@
         </form>
     </div>
 </div>
+
 <div class="full-screen-mode" id="salesPage">
     <div class="full-screen-header">
         <h2><i class="fas fa-shopping-cart"></i> Sales Transaction (<span id="salesBranchLabel">Pharmacy</span>)</h2>
@@ -2177,6 +2152,7 @@
         </table>
     </div>
 </div>
+
 <div class="full-screen-mode" id="reduceStockPage">
     <div class="full-screen-header">
         <h2><i class="fas fa-arrow-up"></i> Deduct Stock (<span id="deductBranchLabel">Pharmacy</span>)</h2>
@@ -2230,7 +2206,6 @@
         </div>
     </div>
 </div>
-
 <!-- ENHANCED ENTERPRISE REVIEW PAGE -->
 <div class="full-screen-mode" id="reviewPage">
     <div class="full-screen-header">
@@ -2326,6 +2301,7 @@
         <div><span class="sync-status" id="syncStatusDot"></span> <span id="syncStatusText">Online</span> | Last Sync: <span id="lastSyncTime">Never</span> | Pending Operations: <span id="pendingOps">0</span></div>
     </div>
 </div>
+
 <div class="full-screen-mode" id="auditPage">
     <div class="full-screen-header">
         <h2><i class="fas fa-shield-alt"></i> Audit Summary</h2>
@@ -2396,6 +2372,7 @@
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 <script>
 // Helper function to toggle detail views
 function toggleDetail(detailId) {
@@ -2404,11 +2381,6 @@ function toggleDetail(detailId) {
         element.classList.toggle('hidden-detail');
     }
 }
-
-// Supabase Initialization (frontend-only)
-const SUPABASE_URL = "https://nvebvmqsnonghmavivwu.supabase.co";
-const SUPABASE_ANON_KEY = "sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 // MASTER PASSWORD HANDLER
 (function() {
@@ -2450,6 +2422,12 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     verifyBtn.addEventListener('click', verifyMaster);
     passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') verifyMaster(); });
 })();
+
+// Initialize Supabase
+const supabaseClient = window.supabase.createClient(
+    "https://nvebvmqsnonghmavivwu.supabase.co",
+    "sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF"
+);
 
 class UltraStockSystem {
     constructor() {
@@ -2506,97 +2484,6 @@ class UltraStockSystem {
         this.renderSalesHistory();
         this.updateSyncStatus();
         this.loadShareHistory();
-        this.initSupabaseRealtime();
-    }
-    
-    // Supabase Realtime Initialization
-    async initSupabaseRealtime() {
-        try {
-            // Subscribe to stock items changes
-            const stockSubscription = supabase
-                .channel('stock_changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'stock_items' }, (payload) => {
-                    console.log('Stock change detected:', payload);
-                    this.handleRemoteChange('stock', payload);
-                })
-                .subscribe();
-            
-            // Subscribe to sales changes
-            const salesSubscription = supabase
-                .channel('sales_changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'sales_records' }, (payload) => {
-                    console.log('Sales change detected:', payload);
-                    this.handleRemoteChange('sales', payload);
-                })
-                .subscribe();
-            
-            // Subscribe to audit changes
-            const auditSubscription = supabase
-                .channel('audit_changes')
-                .on('postgres_changes', { event: '*', schema: 'public', table: 'audit_trails' }, (payload) => {
-                    console.log('Audit change detected:', payload);
-                    this.handleRemoteChange('audit', payload);
-                })
-                .subscribe();
-            
-            this.supabaseSubscriptions = [stockSubscription, salesSubscription, auditSubscription];
-        } catch (error) {
-            console.warn('Supabase realtime subscription failed:', error);
-        }
-    }
-    
-    handleRemoteChange(type, payload) {
-        // Handle remote changes with conflict resolution
-        if (payload.eventType === 'INSERT') {
-            this.queueForSync(type, payload.new);
-        } else if (payload.eventType === 'UPDATE') {
-            this.updateLocalRecord(type, payload.new);
-        } else if (payload.eventType === 'DELETE') {
-            this.deleteLocalRecord(type, payload.old);
-        }
-    }
-    
-    updateLocalRecord(type, record) {
-        // Implement conflict resolution based on timestamp
-        if (type === 'stock') {
-            const index = this.stockItems.findIndex(i => i.id === record.id);
-            if (index !== -1 && new Date(record.updated_at) > new Date(this.stockItems[index].updated_at || 0)) {
-                this.stockItems[index] = record;
-                this.saveToLocalStorage();
-                this.renderTable();
-            }
-        } else if (type === 'sales') {
-            const index = this.salesData.findIndex(s => s.id === record.id);
-            if (index !== -1 && new Date(record.timestamp) > new Date(this.salesData[index].timestamp || 0)) {
-                this.salesData[index] = record;
-                this.saveToLocalStorage();
-                this.renderSalesHistory();
-            }
-        }
-    }
-    
-    deleteLocalRecord(type, record) {
-        if (type === 'stock') {
-            this.stockItems = this.stockItems.filter(i => i.id !== record.id);
-            this.saveToLocalStorage();
-            this.renderTable();
-        }
-    }
-    
-    async syncToSupabase(table, data) {
-        if (!this.isOnline) {
-            this.queueForSync(table, data);
-            return;
-        }
-        try {
-            const { error } = await supabase.from(table).upsert([data]);
-            if (error) throw error;
-            this.showToast(`Synced to cloud: ${table}`, 'success');
-        } catch (error) {
-            console.error('Supabase sync error:', error);
-            this.queueForSync(table, data);
-            this.showToast('Sync failed, will retry later', 'warning');
-        }
     }
     
     setupOnlineOfflineListeners() {
@@ -2622,10 +2509,10 @@ class UltraStockSystem {
         this.syncQueue = [];
         for (const op of queueCopy) {
             try {
-                if (op.type === 'sale') await supabase.from('sales_records').upsert([op.data]);
-                else if (op.type === 'stock') await supabase.from('stock_items').upsert([op.data]);
-                else if (op.type === 'audit') await supabase.from('audit_trails').upsert([op.data]);
-                else if (op.type === 'share') await supabase.from('share_history').upsert([op.data]);
+                if (op.type === 'sale') await supabaseClient.from('sales_backup').insert([op.data]);
+                else if (op.type === 'stock') await supabaseClient.from('stock_backup').insert([op.data]);
+                else if (op.type === 'audit') await supabaseClient.from('audit_backup').insert([op.data]);
+                else if (op.type === 'share') await supabaseClient.from('share_backup').insert([op.data]);
             } catch (e) { console.warn('Sync failed for op', op); this.syncQueue.push(op); }
         }
         this.lastSyncTime = new Date();
@@ -2638,13 +2525,11 @@ class UltraStockSystem {
     startPeriodicSync() { setInterval(() => this.processSyncQueue(), 30000); }
     
     queueForSync(type, data) {
-        const syncData = { ...data, synced_at: new Date().toISOString() };
-        this.syncQueue.push({ type, data: syncData, timestamp: new Date().toISOString() });
+        this.syncQueue.push({ type, data, timestamp: new Date().toISOString() });
         this.updateSyncStatus();
         if (this.isOnline) this.processSyncQueue();
-        // Also save to localStorage for offline access
-        this.saveToLocalStorage();
     }
+    
     setupEditableText() {
         document.querySelectorAll('.editable-text').forEach(el => {
             el.addEventListener('click', (e) => {
@@ -2986,7 +2871,7 @@ class UltraStockSystem {
         }
     }
     
-    // Share Functionality Methods (Updated with fixed recipients, no preview section, Amharic info)
+    // Share Functionality Methods
     openShareModal() {
         if (!this.isLoggedIn) { this.showToast('Please login first', 'warning'); return; }
         document.getElementById('shareModal').classList.add('active');
@@ -3075,7 +2960,7 @@ class UltraStockSystem {
                 <td>***</td>
                 <td><span class="status-indicator ${statusClass}"></span> ${expiry.toLocaleDateString()}</td>
                 <td><span class="status-indicator ${statusClass}"></span> ${statusText}</td>
-             </tr>`;
+            </tr>`;
         }).join('') || '<tr><td colspan="15" style="text-align:center;">No items found</td></tr>';
         
         // Attach checkbox event listeners
@@ -3088,6 +2973,7 @@ class UltraStockSystem {
                     this.selectedShareItems.delete(id);
                 }
                 this.updateShareStats();
+                this.updateSharePreview();
                 // Update master checkbox state
                 const masterCb = document.getElementById('shareMasterCheckbox');
                 if (masterCb) {
@@ -3106,6 +2992,7 @@ class UltraStockSystem {
         });
         
         this.updateShareStats();
+        this.updateSharePreview();
         
         // Update master checkbox
         const masterCb = document.getElementById('shareMasterCheckbox');
@@ -3130,6 +3017,7 @@ class UltraStockSystem {
             }
         });
         this.updateShareStats();
+        this.updateSharePreview();
     }
     
     updateShareStats() {
@@ -3152,6 +3040,56 @@ class UltraStockSystem {
         document.getElementById('shareLowStockCount').textContent = lowStockCount;
     }
     
+    updateSharePreview() {
+        const previewDiv = document.getElementById('sharePreview');
+        const selectedIds = Array.from(this.selectedShareItems);
+        const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
+        
+        if (selectedItems.length === 0) {
+            previewDiv.innerHTML = '<strong>Preview:</strong> Select items to see preview...';
+            return;
+        }
+        
+        const now = new Date();
+        const pharmacyName = this.settings.pharmacyName;
+        const brandName = this.settings.brandName;
+        const dateStr = now.toLocaleString();
+        
+        let preview = `🏥 *${pharmacyName} (${brandName})*\n📊 *INVENTORY REPORT*\n📅 ${dateStr}\n👤 Generated by: ${this.currentUserType || 'User'}\n\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📋 *SELECTED ITEMS (${selectedItems.length})*\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
+        
+        selectedItems.slice(0, 15).forEach((item, idx) => {
+            const expiry = new Date(item.expiryDate);
+            const diff = Math.ceil((expiry - now) / (86400000));
+            let expiryStatus = diff < 0 ? '⚠️ EXPIRED' : diff <= 30 ? '🔴 Expiring Soon' : diff <= 90 ? '🟡 Near Expiry' : '🟢 Good';
+            
+            preview += `*${idx + 1}. ${item.name}*\n`;
+            if (item.brandName) preview += `   Brand: ${item.brandName}\n`;
+            preview += `   Batch: ${item.batchNumber} | Expiry: ${item.expiryDate} (${expiryStatus})\n`;
+            preview += `   Stock: ${item.quantityDisplay.toFixed(2)} ${item.displayUnit}\n`;
+            preview += `   Unit: ${item.baseUnit} (Reg: ${item.registeredUnit}, Disp: ${item.displayUnit})\n`;
+            preview += `   ─────────────────────────────────\n`;
+        });
+        
+        if (selectedItems.length > 15) {
+            preview += `\n   ... and ${selectedItems.length - 15} more items\n`;
+        }
+        
+        preview += `\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📈 *SUMMARY*\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `📦 Total Items: ${selectedItems.length}\n`;
+        preview += `⚠️ Low Stock Items: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
+        preview += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
+        preview += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        preview += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
+        preview += `*Report generated by BP-SMS v2.0*`;
+        
+        previewDiv.innerHTML = `<strong>Preview (Telegram Format):</strong><br><pre style="background: rgba(0,0,0,0.3); padding: 0.5rem; border-radius: 8px; white-space: pre-wrap; font-family: monospace;">${this.escapeHtml(preview)}</pre>`;
+    }
+    
     generateTelegramMessage() {
         const selectedIds = Array.from(this.selectedShareItems);
         const selectedItems = this.stockItems.filter(i => selectedIds.includes(i.id));
@@ -3159,12 +3097,12 @@ class UltraStockSystem {
         const pharmacyName = this.settings.pharmacyName;
         const brandName = this.settings.brandName;
         const dateStr = now.toLocaleString();
-        const senderInfo = document.getElementById('shareSenderName').value.trim() || (this.currentUserType || 'User');
+        const senderName = document.getElementById('shareSenderName').value || this.currentUserType || 'User';
         
         let message = `🏥 *${pharmacyName} (${brandName})*\n`;
         message += `📊 *PHARMACEUTICAL INVENTORY REPORT*\n`;
         message += `📅 ${dateStr}\n`;
-        message += `👤 Sender: ${senderInfo}\n\n`;
+        message += `👤 Generated by: ${senderName}\n\n`;
         message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
         message += `📋 *INVENTORY DETAILS*\n`;
         message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n\n`;
@@ -3189,15 +3127,24 @@ class UltraStockSystem {
         message += `📈 *SUMMARY STATISTICS*\n`;
         message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
         message += `📦 Total Items Shared: ${selectedItems.length}\n`;
-        message += `📊 Total Stock Value: (masked for security)\n`;
+        message += `📊 Total Stock Value: (masked)\n`;
         message += `⚠️ Low Stock Alerts: ${selectedItems.filter(i => i.quantityDisplay < i.minStockDisplay && i.quantityDisplay > 0).length}\n`;
         message += `⏰ Expiring Soon (≤90 days): ${selectedItems.filter(i => { const d = Math.ceil((new Date(i.expiryDate) - now) / 86400000); return d > 0 && d <= 90; }).length}\n`;
         message += `❌ Expired Items: ${selectedItems.filter(i => new Date(i.expiryDate) < now).length}\n`;
+        message += `🔄 Turnover Rate: ${this.calculateTurnoverRate().toFixed(2)}%\n`;
         message += `━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n`;
-        message += `🔒 *Confidential Report - For authorized use only*\n`;
-        message += `*Generated by Bete-Markose BP-SMS Enterprise System*`;
+        message += `🔒 *Confidential Report*\n`;
+        message += `*Report generated by Bete-Markose BP-SMS*`;
         
         return message;
+    }
+    
+    calculateTurnoverRate() {
+        const thirtyDaysAgo = new Date();
+        thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+        const sales = this.salesData.filter(s => new Date(s.date) >= thirtyDaysAgo).reduce((sum, s) => sum + s.grandTotal, 0);
+        const avgInventory = this.stockItems.reduce((sum, i) => sum + (i.quantityDisplay * i.sellingPricePerDisplay), 0) / (this.stockItems.length || 1);
+        return avgInventory > 0 ? (sales / avgInventory) * 100 : 0;
     }
     
     async shareToTelegram() {
@@ -3207,15 +3154,9 @@ class UltraStockSystem {
             return;
         }
         
-        const recipient = document.getElementById('shareRecipient').value;
+        const recipient = document.getElementById('shareRecipient').value.trim();
         if (!recipient) {
-            this.showToast('Please select a recipient', 'warning');
-            return;
-        }
-        
-        const senderInfo = document.getElementById('shareSenderName').value.trim();
-        if (!senderInfo) {
-            this.showToast('Please enter your name and phone number', 'warning');
+            this.showToast('Please enter recipient (@assegas or phone number)', 'warning');
             return;
         }
         
@@ -3225,12 +3166,14 @@ class UltraStockSystem {
         // Log share activity
         this.recordShareHistory(recipient, selectedIds.length, 'telegram', 'sent');
         
-        // Create Telegram share URL based on selected recipient
+        // Create Telegram share URL
+        // For direct messaging to @assegas, we use tg://resolve?domain=assegas&text=
         let telegramUrl;
         if (recipient.startsWith('@')) {
             const username = recipient.substring(1);
             telegramUrl = `tg://resolve?domain=${username}&text=${encodedMessage}`;
         } else {
+            // For phone number, use tg://msg?to=phone_number
             telegramUrl = `tg://msg?to=${recipient}&text=${encodedMessage}`;
         }
         
@@ -3261,7 +3204,7 @@ class UltraStockSystem {
     copySharePreview() {
         const message = this.generateTelegramMessage();
         navigator.clipboard.writeText(message).then(() => {
-            this.showToast('Message copied to clipboard!', 'success');
+            this.showToast('Preview copied to clipboard!', 'success');
         }).catch(() => {
             this.showToast('Failed to copy', 'warning');
         });
@@ -3355,7 +3298,7 @@ class UltraStockSystem {
                 <td>${h.itemCount}</td>
                 <td>${h.type}</td>
                 <td><span class="status-indicator ${h.status === 'sent' ? 'status-ok' : 'status-warning'}"></span> ${h.status}</td>
-             </tr>
+            </tr>
         `).join('') || '<tr><td colspan="5">No share history</td></tr>';
     }
     
@@ -3402,7 +3345,7 @@ class UltraStockSystem {
                 <td>${f.item.quantityDisplay.toFixed(2)} ${f.item.displayUnit}</td>
                 <td>${f.coverageDays.toFixed(1)} days</td>
                 <td class="${f.recommendedOrder > 0 ? 'variance-positive' : ''}">${f.recommendedOrder > 0 ? f.recommendedOrder.toFixed(2) : 'OK'}</td>
-             </tr>
+            </tr>
         `).join('');
     }
     
@@ -3457,7 +3400,7 @@ class UltraStockSystem {
                 <td>${r.item.reorderLevelDisplay} ${r.item.displayUnit}</td>
                 <td class="variance-positive">${r.suggestedQty.toFixed(2)} ${r.item.displayUnit}</td>
                 <td><span class="status-indicator ${r.urgency === 'Critical' ? 'status-expired' : r.urgency === 'High' ? 'status-critical' : 'status-warning'}"></span> ${r.urgency}</td>
-             </tr>
+            </tr>
         `).join('');
         
         const reorderText = reorderItems.map(r => `${r.item.name}: ${r.item.quantityDisplay.toFixed(0)} left, Order ${r.suggestedQty.toFixed(0)} ${r.item.displayUnit} (${r.urgency})`).join('; ');
@@ -3495,11 +3438,12 @@ class UltraStockSystem {
                 <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}${v.variance.toFixed(2)}</td>
                 <td class="${v.variance >= 0 ? 'variance-positive' : 'variance-negative'}">${v.variance >= 0 ? '+' : ''}ETB ${Math.abs(v.varianceValue).toFixed(2)}</td>
                 <td><span class="status-indicator ${v.variance >= 0 ? 'status-ok' : 'status-critical'}"></span> ${v.variance >= 0 ? 'Surplus' : 'Shortage'}</td>
-             </tr>
+            </tr>
         `).join('') || '<tr><td colspan="6">No variances found</td></tr>';
     }
     
     showAuditDetail(type) {
+        // Open audit page and filter based on type
         this.openPage('auditPage');
         setTimeout(() => {
             const filterMap = {
@@ -3513,6 +3457,7 @@ class UltraStockSystem {
             };
             const message = filterMap[type] || 'Audit Detail';
             this.showToast(`Viewing ${message} details`, 'info');
+            // Scroll to audit table
             const table = document.getElementById('auditTable');
             if (table) table.scrollIntoView({ behavior: 'smooth' });
         }, 100);
@@ -3572,14 +3517,12 @@ class UltraStockSystem {
             variance: 0,
             movement: 'normal',
             createdAt: new Date().toISOString(),
-            movementHistory: [],
-            updated_at: new Date().toISOString()
+            movementHistory: []
         };
         if (!item.name || !item.baseUnit || !item.registeredUnit || !item.displayUnit) { this.showToast('Fill all required fields', 'warning'); return; }
         if (this.isEditing) { const index = this.stockItems.findIndex(i => i.id === item.id); this.stockItems[index] = item; this.showToast('Item updated', 'success'); }
         else { this.stockItems.push(item); this.recordAudit('purchase', item.id, item.name, displayQty, 'stock_in', item.branch, item.registrant, { value: displayQty * item.purchasePricePerDisplay }); this.showToast('Item registered', 'success'); }
         this.saveToLocalStorage();
-        this.syncToSupabase('stock_items', item);
         this.clearRegisterForm();
         this.updateItemNameList();
         this.isEditing = false;
@@ -3776,7 +3719,6 @@ class UltraStockSystem {
         });
         this.salesData.push(sale);
         this.saveToLocalStorage();
-        this.syncToSupabase('sales_records', sale);
         this.queueForSync('sale', sale);
         this.showToast(`Sale saved: ${sale.invoiceNumber}`, 'success');
         this.clearSalesForm();
@@ -3917,12 +3859,10 @@ class UltraStockSystem {
         item.quantityIssued = (item.quantityIssued || 0) + qty;
         item.endingBalance = item.quantityDisplay;
         item.variance = (item.physicalCount || item.quantityDisplay) - item.endingBalance;
-        item.updated_at = new Date().toISOString();
         const transaction = { id: Date.now(), date: new Date().toISOString().split('T')[0], itemId: item.id, itemName: item.name, category: item.category, type: item.type, quantity: qty, quantityBase: baseQty, unit: item.displayUnit, batch: item.batchNumber, expiry: item.expiryDate, oldQuantity: oldQty, newQuantity: item.quantityDisplay, reason: reason, branch: this.currentBranch, warehouse: document.getElementById('reduceWarehouse').value, storageCondition: document.getElementById('reduceStorageCondition').value, shelfBin: document.getElementById('reduceShelfBin').value, responsible: whom, notes: document.getElementById('reduceNotes').value, valueLost: baseQty * (item.purchasePricePerDisplay / item.displayToBaseFactor) };
         this.transactions.unshift(transaction);
         this.recordAudit(reason, item.id, item.name, qty, 'stock_deduct', transaction.branch, whom, { oldQty, newQty: item.quantityDisplay, value: transaction.valueLost, reason: reason });
         this.saveToLocalStorage();
-        this.syncToSupabase('stock_items', item);
         this.queueForSync('stock', transaction);
         this.showToast(`Deducted ${qty} ${item.displayUnit}`, 'success');
         this.clearReduceForm();
@@ -4044,10 +3984,8 @@ class UltraStockSystem {
             const expectedEnding = (item.beginningBalance || item.quantityDisplay) + (item.quantityReceived || item.quantityDisplay) - (item.quantityIssued || 0);
             item.physicalCount = newCount;
             item.variance = newCount - expectedEnding;
-            item.updated_at = new Date().toISOString();
             this.recordAudit('verification', item.id, item.name, Math.abs(item.variance), 'stock_verify', this.currentBranch, 'System', { expected: expectedEnding, physical: newCount, variance: item.variance });
             this.saveToLocalStorage();
-            this.syncToSupabase('stock_items', item);
             this.renderTable();
             this.showToast(`${item.name}: Variance ${item.variance >= 0 ? '+' : ''}${item.variance.toFixed(2)} ${item.displayUnit}`, item.variance === 0 ? 'success' : 'warning');
         }
@@ -4351,7 +4289,6 @@ class UltraStockSystem {
         this.auditTrail.unshift(audit);
         if (this.auditTrail.length > 1000) this.auditTrail.pop();
         this.saveToLocalStorage();
-        this.syncToSupabase('audit_trails', audit);
         this.queueForSync('audit', audit);
     }
     
