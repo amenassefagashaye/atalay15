@@ -1,0 +1,104 @@
+/**
+ * ADDITIONAL STYLES FOR IMPORT BUTTON AND TOOLTIPS
+ * Version: 1.0.0
+ */
+
+/* Import Button Styling */
+#importDataBtn {
+    background: linear-gradient(145deg, #00cc66, #00994d);
+    color: white;
+    border: none;
+    transition: all 0.3s ease;
+}
+
+#importDataBtn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 204, 102, 0.4);
+}
+
+#importDataBtn i {
+    margin-right: 5px;
+}
+
+/* Reorder Level Field Group */
+.reorder-group {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.reorder-group > div {
+    flex: 1;
+}
+
+/* Tooltip Enhancement */
+[data-amharic-tooltip] {
+    cursor: help;
+    position: relative;
+}
+
+/* Import Success Animation */
+@keyframes importFlash {
+    0% { background: rgba(0, 255, 136, 0); }
+    50% { background: rgba(0, 255, 136, 0.3); }
+    100% { background: rgba(0, 255, 136, 0); }
+}
+
+.import-flash {
+    animation: importFlash 0.5s ease;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .reorder-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .amharic-tooltip-content {
+        font-size: 11px;
+        max-width: 280px;
+    }
+}
+
+/* Print Protection */
+@media print {
+    body::before {
+        content: "Printing is disabled for security reasons.";
+        display: block;
+        text-align: center;
+        font-size: 20px;
+        color: red;
+        margin: 50px;
+    }
+    
+    body * {
+        display: none !important;
+    }
+}
+
+/* Loading Indicator for Import */
+.import-loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(10, 31, 61, 0.95);
+    padding: 20px 40px;
+    border-radius: 10px;
+    border: 2px solid var(--accent);
+    z-index: 100000;
+    text-align: center;
+}
+
+.import-loading i {
+    font-size: 30px;
+    color: var(--accent);
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}

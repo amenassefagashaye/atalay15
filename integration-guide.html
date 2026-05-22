@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Integration Guide - BP-SMS Enhancements</title>
+    <style>
+        body {
+            font-family: 'Times New Roman', Times, serif;
+            background: linear-gradient(135deg, #0a1f3d, #061224);
+            color: #e6f0ff;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: rgba(10,31,61,0.95);
+            border-radius: 15px;
+            padding: 30px;
+            border: 1px solid rgba(255,215,0,0.2);
+        }
+        h1 { color: #ffd700; border-bottom: 2px solid #ffd700; padding-bottom: 10px; }
+        h2 { color: #00ff88; margin-top: 30px; }
+        h3 { color: #ffd700; }
+        code {
+            background: rgba(0,0,0,0.5);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        pre {
+            background: rgba(0,0,0,0.5);
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border-left: 3px solid #ffd700;
+        }
+        .step {
+            background: rgba(255,215,0,0.1);
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+        .warning {
+            background: rgba(255,68,68,0.2);
+            border-left: 3px solid #ff4444;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        .success {
+            background: rgba(0,255,136,0.1);
+            border-left: 3px solid #00ff88;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid rgba(255,215,0,0.2);
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background: rgba(255,215,0,0.1);
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📦 BP-SMS Enhancement Integration Guide</h1>
+    <p>Version 2.0.0 | Last Updated: May 2026</p>
+    
+    <div class="success">
+        ✅ <strong>Three new features</strong> have been added to your pharmacy management system:
+        <ul>
+            <li>🔒 Maximum Browser-Safe Anti-Copy Protection</li>
+            <li>📚 Amharic Enterprise Rich Overlay Tooltip System</li>
+            <li>📥 Import Button with Auto-Mapping Functionality</li>
+        </ul>
+    </div>
+    
+    <h2>📁 File Structure After Integration</h2>
+    <pre>
+your-project-folder/
+├── index.html                 (EXISTING - will be modified)
+├── anti-copy-protection.js    (NEW - add this file)
+├── amharic-tooltips.js        (NEW - add this file)
+├── import-module.js           (NEW - add this file)
+├── styles-additions.css       (NEW - add this file)
+└── integration-guide.html     (NEW - this file)
+    </pre>
+    
+    <h2>🔧 Step-by-Step Integration</h2>
+    
+    <div class="step">
+        <h3>STEP 1: Create All New Files</h3>
+        <p>Create the following files in your project root directory:</p>
+        <ul>
+            <li><code>anti-copy-protection.js</code> - Copy the entire content from above</li>
+            <li><code>amharic-tooltips.js</code> - Copy the entire content from above</li>
+            <li><code>import-module.js</code> - Copy the entire content from above</li>
+            <li><code>styles-additions.css</code> - Copy the entire content from above</li>
+        </ul>
+    </div>
+    
+    <div class="step">
+        <h3>STEP 2: Modify index.html - Add CSS Link</h3>
+        <p>Add this line inside the <code>&lt;head&gt;</code> section, after existing styles:</p>
+        <pre>&lt;link rel="stylesheet" href="styles-additions.css"&gt;</pre>
+    </div>
+    
+    <div class="step">
+        <h3>STEP 3: Modify index.html - Add Scripts</h3>
+        <p>Add these lines at the end of the <code>&lt;body&gt;</code> section, before the closing <code>&lt;/body&gt;</code> tag, AFTER the main script:</p>
+        <pre>&lt;script src="anti-copy-protection.js"&gt;&lt;/script&gt;
+&lt;script src="amharic-tooltips.js"&gt;&lt;/script&gt;
+&lt;script src="import-module.js"&gt;&lt;/script&gt;</pre>
+    </div>
+    
+    <div class="step">
+        <h3>STEP 4: Modify index.html - Add Import Button HTML</h3>
+        <p>Find the <code>reorderLevelDisplay</code> field in the register form and REPLACE that <code>&lt;div class="form-group"&gt;</code> with:</p>
+        <pre>&lt;div class="form-group"&gt;
+    &lt;div class="reorder-group"&gt;
+        &lt;div&gt;
+            &lt;label data-tooltip="Reorder level in display units"&gt;&lt;i class="fas fa-redo-alt"&gt;&lt;/i&gt; Reorder Level (Display) *&lt;/label&gt;
+            &lt;input type="number" id="reorderLevelDisplay" min="0" value="20" required&gt;
+        &lt;/div&gt;
+        &lt;button type="button" id="importDataBtn" class="btn btn-secondary" data-tooltip="Import data from CSV/JSON file"&gt;
+            &lt;i class="fas fa-file-import"&gt;&lt;/i&gt; Import
+        &lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</pre>
+    </div>
+    
+    <div class="step">
+        <h3>STEP 5: Verify Integration</h3>
+        <p>After making all changes, verify that:</p>
+        <ul>
+            <li>✅ Right-click is disabled everywhere</li>
+            <li>✅ F12 and other dev tools shortcuts are blocked</li>
+            <li>✅ Hover over any button/field shows Amharic tooltip</li>
+            <li>✅ Import button appears next to Reorder Level field</li>
+            <li>✅ Clicking Import button opens file picker</li>
+            <li>✅ Existing functionality still works (sales, stock, etc.)</li>
+        </ul>
+    </div>
+    
+    <h2>📋 Git Commands for Separate Pushing</h2>
+    
+    <div class="step">
+        <h3>Option A: Push Each File Individually</h3>
+        <pre># 1. Anti-Copy Protection
+git add anti-copy-protection.js
+git commit -m "feat(security): add maximum browser-safe anti-copy protection"
+git push origin main
+
+# 2. Amharic Tooltips
+git add amharic-tooltips.js
+git commit -m "feat(ui): add Amharic enterprise rich overlay tooltip system"
+git push origin main
+
+# 3. Styles
+git add styles-additions.css
+git commit -m "style: add styles for import button and tooltips"
+git push origin main
+
+# 4. Import Module
+git add import-module.js
+git commit -m "feat(import): add CSV/JSON import with auto-mapping"
+git push origin main
+
+# 5. HTML Modifications
+git add index.html
+git commit -m "feat(integration): integrate all modules into main HTML"
+git push origin main
+
+# 6. Documentation
+git add integration-guide.html
+git commit -m "docs: add integration guide for new features"
+git push origin main</pre>
+    </div>
+    
+    <div class="step">
+        <h3>Option B: Push as One Feature Branch</h3>
+        <pre># Create feature branch
+git checkout -b feature/enhanced-security-and-import
+
+# Add all new files
+git add anti-copy-protection.js amharic-tooltips.js import-module.js styles-additions.css integration-guide.html
+git commit -m "feat: add anti-copy protection, Amharic tooltips, and import module"
+
+# Add modified HTML
+git add index.html
+git commit -m "feat: integrate new modules into main application"
+
+# Push branch
+git push origin feature/enhanced-security-and-import
+
+# Merge to main (on GitHub or locally)
+git checkout main
+git merge feature/enhanced-security-and-import
+git push origin main
+
+# Delete branch (optional)
+git branch -d feature/enhanced-security-and-import</pre>
+    </div>
+    
+    <div class="step">
+        <h3>Option C: Push with Version Tags</h3>
+        <pre># After pushing all changes
+git tag -a v2.0.0 -m "Major update: Anti-copy protection, Amharic tooltips, Import functionality"
+git push origin v2.0.0
+
+# For minor updates
+git tag -a v2.0.1 -m "Minor fix: tooltip positioning"
+git push origin v2.0.1</pre>
+    </div>
+    
+    <h2>🧪 Testing Checklist</h2>
+    <table>
+        <tr><th>Feature</th><th>Test Action</th><th>Expected Result</th></tr>
+        <tr><td>Anti-Copy</td><td>Right-click anywhere</td><td>No context menu appears</td></tr>
+        <tr><td>Anti-Copy</td><td>Press F12</td><td>Nothing happens (dev tools blocked)</td></tr>
+        <tr><td>Anti-Copy</td><td>Ctrl+Shift+I</td><td>Nothing happens</td></tr>
+        <tr><td>Tooltips</td><td>Hover over Register button</td><td>Amharic text appears floating</td></tr>
+        <tr><td>Tooltips</td><td>Hover over any form field</td><td>Amharic description appears</td></tr>
+        <tr><td>Import</td><td>Click Import button</td><td>File picker opens</td></tr>
+        <tr><td>Import</td><td>Select a CSV file</td><td>Fields auto-populate</td></tr>
+        <tr><td>Existing</td><td>Register a new item</td><td>Works as before</td></tr>
+        <tr><td>Existing</td><td>Process a sale</td><td>Works as before</td></tr>
+        <tr><td>Existing</td><td>View inventory</td><td>Works as before</td></tr>
+    </table>
+    
+    <h2>🐛 Troubleshooting</h2>
+    
+    <div class="warning">
+        <strong>Issue:</strong> Tooltips not showing<br>
+        <strong>Solution:</strong> Check if <code>amharic-tooltips.js</code> is loaded. Open console - should see "Amharic tooltips initialized"
+    </div>
+    
+    <div class="warning">
+        <strong>Issue:</strong> Import button not visible<br>
+        <strong>Solution:</strong> Verify the HTML modification was made correctly. The button should appear next to Reorder Level field.
+    </div>
+    
+    <div class="warning">
+        <strong>Issue:</strong> Right-click still works<br>
+        <strong>Solution:</strong> Check if <code>anti-copy-protection.js</code> is loaded and no errors in console
+    </div>
+    
+    <div class="warning">
+        <strong>Issue:</strong> Git push rejected<br>
+        <strong>Solution:</strong> Run <code>git pull origin main --rebase</code> first, then push again
+    </div>
+    
+    <h2>📞 Support</h2>
+    <p>For issues with integration, contact the system administrator or refer to the original documentation.</p>
+    
+    <div class="success">
+        <strong>🎉 Congratulations!</strong> Your system is now enhanced with enterprise-grade security, Amharic tooltips, and import functionality.
+    </div>
+    
+    <hr style="border-color: rgba(255,215,0,0.2); margin: 30px 0;">
+    
+    <p style="text-align: center; color: #8da0c7;">
+        Bete-Markose Pharmaceuticals Stock Management System (BP-SMS)<br>
+        Version 2.0.0 | Enhanced with Anti-Copy, Amharic Tooltips & Import Module
+    </p>
+</div>
+</body>
+</html>
