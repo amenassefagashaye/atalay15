@@ -29,6 +29,22 @@
 }
 
 .reorder-group > div {
+    # Add all new files
+git add anti-copy-protection.js amharic-tooltips.js import-module.js styles-additions.css integration-guide.html
+
+# Commit
+git commit -m "feat: add anti-copy protection, Amharic tooltips, and import module"
+
+# Add modified HTML
+git add index.html
+git commit -m "feat: integrate all modules into main application"
+
+# Push to GitHub
+git push origin main
+
+# Add version tag
+git tag -a v2.0.0 -m "Major update: Security, Tooltips, Import"
+git push origin v2.0.0
     flex: 1;
 }
 
