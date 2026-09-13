@@ -256,16 +256,41 @@
         .notification-action-btn:hover { background: var(--success); color: var(--primary); }
         .notification-list-item .actions { display: flex; gap: 6px; margin-top: 8px; }
         .notification-list-item .actions button { flex: 1; }
-        /* New style for improved search result items */
         .search-result-item { padding: 8px 12px; cursor: pointer; border-bottom: 1px solid rgba(255,215,0,0.1); transition: background 0.2s; }
         .search-result-item:hover { background: rgba(255,215,0,0.15); }
         .search-result-id { color: var(--accent); font-weight: 600; margin-right: 8px; }
         .search-result-generic { color: var(--light); font-weight: 500; margin-right: 8px; }
         .search-result-brand { color: var(--gray); font-size: 0.85em; }
-        /* Ending Balance button – Review Page */
+        /* Ending Balance button – positioned beside Stock Accuracy */
         .ending-balance-btn { background: rgba(0,255,136,0.15); border: 2px solid var(--success); color: var(--success); padding: 10px 18px; border-radius: 10px; font-size: 0.9rem; font-weight: 700; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; transition: all 0.3s; }
         .ending-balance-btn:hover { background: var(--success); color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 15px rgba(0,255,136,0.3); }
         .ending-balance-btn i { font-size: 1.1rem; }
+        /* New: dashboard row for stock accuracy & ending balance side by side */
+        .accuracy-balance-row {
+            display: flex;
+            align-items: stretch;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        .accuracy-balance-row .dashboard-card {
+            flex: 1;
+            margin: 0;
+        }
+        .accuracy-balance-row .ending-balance-wrapper {
+            flex: 0 0 auto;
+            display: flex;
+            align-items: center;
+        }
+        @media (max-width: 768px) {
+            .accuracy-balance-row {
+                flex-wrap: wrap;
+            }
+            .accuracy-balance-row .ending-balance-wrapper {
+                width: 100%;
+                justify-content: center;
+                margin-top: 0.5rem;
+            }
+        }
     </style>
 </head>
 <body>
@@ -274,7 +299,6 @@
 <div class="fullscreen-toggle" id="fullscreenToggle" data-explain="fullscreenToggle"><i class="fas fa-expand"></i></div>
 <div class="share-icon" id="shareIcon" data-explain="shareIcon"><i class="fab fa-telegram-plane"></i></div>
 <div class="settings-icon" id="settingsIcon" data-explain="settingsIcon"><i class="fas fa-cog"></i></div>
-<!-- EXPLAIN BUTTON REMOVED -->
 <div class="action-buttons-corner">
   <div class="import-dropdown" id="importDropdown">
     <button class="corner-btn green" id="importExportBtn" data-explain="importExportBtn"><i class="fas fa-file-import"></i></button>
@@ -283,8 +307,8 @@
       <a id="importWordBtn" data-explain="importWordBtn"><i class="fas fa-file-word"></i> Import Word (.docx)</a>
     </div>
   </div>
-  <!-- Export button starts disabled; enabled after activity -->
-  <button class="corner-btn red" id="exportDataBtn" disabled data-explain="exportDataBtn"><i class="fas fa-file-export"></i></button>
+  <!-- Export button now always active -->
+  <button class="corner-btn red" id="exportDataBtn" data-explain="exportDataBtn"><i class="fas fa-file-export"></i></button>
 </div>
 <div id="exportDropdown" style="display:none; position:fixed; bottom:105px; left:10px; background:var(--primary); border:1px solid var(--accent); border-radius:8px; z-index:10002;">
   <div style="padding:10px;">
@@ -960,16 +984,23 @@
     <div class="dashboard-card" data-explain="stockAccuracyCard"><h3>Stock Accuracy</h3><div class="value" id="stockAccuracy">100%</div><div class="sub-value">Variance free</div></div>
   </div>
 
-<!-- Ending Balance button moved next to Stock Accuracy card -->
-<div style="text-align:center; margin: 0.5rem 0;">
-    <button id="endingBalanceBtn" class="ending-balance-btn" data-explain="endingBalanceBtn"><i class="fas fa-calculator"></i> Ending Balance</button>
-</div>
-<div id="endingBalancePanel" class="form-container" style="display:none; margin-top:0.5rem;">
-    <h3 style="color:var(--success);"><i class="fas fa-chart-line"></i> Ending Balance Summary</h3>
-    <div id="endingBalanceContent" class="value-display" style="text-align:left; font-size:0.95rem; line-height:1.8;">
-        <!-- dynamically filled -->
+  <!-- Ending Balance placed beside Stock Accuracy -->
+  <div class="accuracy-balance-row">
+    <div class="dashboard-card" data-explain="stockAccuracyCard">
+      <h3>Stock Accuracy</h3>
+      <div class="value" id="stockAccuracyDuplicate">100%</div>
+      <div class="sub-value">Variance free</div>
     </div>
-</div>
+    <div class="ending-balance-wrapper">
+      <button id="endingBalanceBtn" class="ending-balance-btn" data-explain="endingBalanceBtn"><i class="fas fa-calculator"></i> Ending Balance</button>
+    </div>
+  </div>
+  <div id="endingBalancePanel" class="form-container" style="display:none; margin-top:0.5rem;">
+      <h3 style="color:var(--success);"><i class="fas fa-chart-line"></i> Ending Balance Summary</h3>
+      <div id="endingBalanceContent" class="value-display" style="text-align:left; font-size:0.95rem; line-height:1.8;">
+          <!-- dynamically filled -->
+      </div>
+  </div>
 
 <div class="form-container"><h3 style="color:var(--accent); display:flex; align-items:center; justify-content:space-between;">Demand Forecast (Next 30 Days) <button class="toggle-detail-btn" onclick="if(window.ultraStock) window.ultraStock.toggleDetail('demandForecastDetail')" data-explain="demandForecastToggle"><i class="fas fa-chart-line"></i> View Details</button></h3><div class="value-display" id="demandForecast" data-explain="demandForecastValue">Calculating...</div><div id="demandForecastDetail" class="detail-table-container hidden-detail"><h4 style="color:var(--success);">Detailed Forecast by Item</h4><div class="table-container"><table class="detail-table" id="demandForecastTable"><thead><tr><th>Item</th><th>Daily Avg Sales</th><th>30-Day Forecast</th><th>Current Stock</th><th>Coverage Days</th><th>Recommended Order</th></tr></thead><tbody id="demandForecastTableBody"></tbody></table></div></div></div>
 <div class="form-container"><h3 style="color:var(--accent); display:flex; align-items:center; justify-content:space-between;">Reorder Recommendations <button class="toggle-detail-btn" onclick="if(window.ultraStock) window.ultraStock.toggleDetail('reorderDetail')" data-explain="reorderRecommendationsToggle"><i class="fas fa-shopping-cart"></i> View Details</button></h3><div class="value-display" id="reorderRecommendations" data-explain="reorderRecommendationsValue">No items need reorder</div><div id="reorderDetail" class="detail-table-container hidden-detail"><h4 style="color:var(--success);">Items Needing Reorder</h4><div class="table-container"><table class="detail-table" id="reorderDetailTable"><thead><tr><th>Item</th><th>Current Stock</th><th>Reorder Level</th><th>Suggested Qty</th><th>Urgency</th></tr></thead><tbody id="reorderDetailTableBody"></tbody></table></div></div></div>
@@ -1169,8 +1200,7 @@ class ExplainOverlayManager {
             'auditPage': { title: '🛡️ Audit Summary Page', points: ['Complete audit trail with beginning/ending balances.', 'Track positive and negative variances.', 'Net profit calculation including losses and gains.', 'Add audit findings with reason, responsible person, and resolution.', 'Export full audit reports for compliance.'], hint: 'Tip: All audit entries are timestamped and linked to user actions.' },
             'notificationCenter': { title: '🔔 Notifications', points: ['Real-time alerts for critical stock levels.', 'Color-coded: Red = Urgent, Yellow = Warning, Gold = Update.', 'Click any counter to see detailed notifications.', 'Each alert has Review/Verify/Close actions.', 'Notification counts decrease when reviewed by admin.'], hint: 'Tip: Admin can verify each alert to clear it from the list.' },
             'shareIcon': { title: '📤 Telegram Share', points: ['Share inventory data securely via Telegram.', 'Select items to share — data is formatted as clear tables.', 'Masking toggles hide sensitive pricing info.', 'Reports are sent to @assegas for pharmacy exchange.', 'Share history is maintained for audit.'], hint: 'Tip: Use filters to select specific items before sharing.' },
-            // New explanations for Export controls and other buttons
-            'exportDataBtn': { title: '📤 Export Data', points: ['This button is disabled until you perform a qualifying activity.', 'Qualifying activities include: selecting an item, applying a filter, or interacting with the sales/deduction history.', 'Once enabled, clicking opens the export options panel.', 'Choose export type (Inventory/Sales/Deductions), apply filters, and select Excel or Word format.'], hint: 'Tip: The button becomes active after any filter or selection is made.' },
+            'exportDataBtn': { title: '📤 Export Data', points: ['This button is always active.', 'Click to open the export options panel.', 'Choose export type (Inventory/Sales/Deductions), apply filters, and select Excel or Word format.'], hint: 'Tip: The button becomes active after any filter or selection is made.' },
             'importExportBtn': { title: '📥 Import Data', points: ['Click to open the import dropdown.', 'Import from Excel (.xlsx) or Word (.docx) files.', 'Admin access required for import operations.'], hint: 'Tip: Ensure your file matches the expected column structure.' },
             'importExcelBtn': { title: '📥 Import Excel', points: ['Import stock items from an Excel file.', 'First row must be headers: Item ID, Generic Name, Brand Name, Category, Type, Base Unit, Register Unit, Display Unit, Register to Base Factor, Display to Base Factor, Quantity Display, Purchase Price, Markup %, Discount %, Selling Price, Batch Number, Expiry Date, Supplier, Invoice Number, Min Stock, Max Stock, Reorder Level.', 'Admin access required.'], hint: 'Tip: Download a template first by exporting current inventory.' },
             'importWordBtn': { title: '📥 Import Word', points: ['Import stock items from a Word document.', 'Use a table or pipe-delimited text format.', 'Columns expected: Generic Name, Brand Name, Category, Base Unit, Display Unit, Quantity, Purchase Price, Selling Price.', 'Admin access required.'], hint: 'Tip: Simple tables in Word work best.' },
@@ -1225,7 +1255,6 @@ class ExplainOverlayManager {
             'demandForecastToggle': { title: '📈 Demand Forecast Details', points: ['Toggle the detailed demand forecast table.', 'Shows daily average sales, 30-day forecast, current stock, coverage days, and recommended order per item.'], hint: 'Tip: Use to plan purchases.' },
             'reorderRecommendationsToggle': { title: '🛒 Reorder Details', points: ['Toggle the detailed reorder recommendation table.', 'Shows current stock, reorder level, suggested order quantity, and urgency.'], hint: 'Tip: Act on critical items first.' },
             'totalLossDetailBtn': { title: '📊 Total Loss Report', points: ['Open a detailed modal showing loss by reason and by item.', 'Includes quantities and values.'], hint: 'Tip: Use this to identify major loss causes.' },
-            // ... add more as needed
         };
     }
     init() {
@@ -1335,7 +1364,7 @@ class UltraStockSystem {
         this.supabase = null;
         this.realtimeSubscription = null;
         this.rightClickDisabled = false;
-        this.exportEnabled = false; // New flag to track export availability
+        this.exportEnabled = true; // Export is always enabled
         this.settings = {
             lowStockThreshold: 20, expiryWarningDays: 30, expiryWarningDays60: 60, expiryWarningDays90: 90,
             defaultMarkup: 50.0, defaultVAT: 15.0, overstockAlert: 150, profitMarginAlert: 10,
@@ -1381,7 +1410,7 @@ class UltraStockSystem {
         this.setupUnifiedUnitSystem();
         if (window.supabase) { try { this.supabase = window.supabase.createClient("https://nvebvmqsnonghmavivwu.supabase.co","sb_publishable_OVkLOGyNwQOXjO2Tgx2g3w_Tj1aErgF"); } catch(e) { console.warn('Supabase init failed'); } }
         this.setupEndingBalanceButton();
-        this.updateExportButtonState(); // Set initial state
+        this.updateExportButtonState();
     }
 
     // ============================================================
@@ -1535,10 +1564,10 @@ class UltraStockSystem {
     }
 
     // ============================================================
-    // EXPORT BUTTON STATE MANAGEMENT
+    // EXPORT BUTTON STATE MANAGEMENT (always active)
     // ============================================================
     enableExport() {
-        if (this.exportEnabled) return;
+        // Export is always enabled; no-op kept for compatibility
         this.exportEnabled = true;
         this.updateExportButtonState();
     }
@@ -1547,19 +1576,11 @@ class UltraStockSystem {
         const exportBtn = document.getElementById('exportDataBtn');
         const exportDropdown = document.getElementById('exportDropdown');
         if (exportBtn) {
-            exportBtn.disabled = !this.exportEnabled;
-            // Update tooltip/explanation to reflect state
-            if (this.exportEnabled) {
-                exportBtn.setAttribute('data-explain', 'exportDataBtn');
-            } else {
-                exportBtn.setAttribute('data-explain', 'exportDataBtnDisabled');
-            }
+            exportBtn.disabled = false; // Always active
+            exportBtn.setAttribute('data-explain', 'exportDataBtn');
         }
         if (exportDropdown) {
-            // If not enabled, ensure dropdown is hidden
-            if (!this.exportEnabled) {
-                exportDropdown.style.display = 'none';
-            }
+            // Keep dropdown state as is; it will be shown when user clicks the button
         }
     }
 
@@ -3119,6 +3140,8 @@ class UltraStockSystem {
         document.getElementById('grossProfit').innerHTML = `ETB ${grossProfit.toFixed(2)}`;
         document.getElementById('inventoryTurnover').textContent = turnover.toFixed(2);
         document.getElementById('stockAccuracy').innerHTML = `${accuracy.toFixed(1)}%`;
+        const stockAccuracyDuplicate = document.getElementById('stockAccuracyDuplicate');
+        if (stockAccuracyDuplicate) stockAccuracyDuplicate.innerHTML = `${accuracy.toFixed(1)}%`;
         const totalDailySales = salesInPeriod.reduce((sum, s) => sum + s.grandTotal, 0) / Math.max(1, Math.ceil((end - start) / (86400000)));
         const forecast30 = totalDailySales * 30;
         document.getElementById('demandForecast').innerHTML = `ETB ${forecast30.toFixed(2)} (estimated next 30 days)`;
@@ -3643,10 +3666,7 @@ class UltraStockSystem {
         if (exportBtn && exportDropdownDiv) {
             exportBtn.addEventListener('click', (e) => {
                 e.stopPropagation();
-                if (!this.exportEnabled) {
-                    this.showToast('Perform an activity (select, filter, or interact) before exporting.', 'warning');
-                    return;
-                }
+                // Export is always enabled, no need to check this.exportEnabled
                 exportDropdownDiv.style.display = exportDropdownDiv.style.display === 'none' ? 'block' : 'none';
             });
             document.addEventListener('click', () => exportDropdownDiv.style.display = 'none');
@@ -3664,7 +3684,6 @@ class UltraStockSystem {
                 this.enableExport();
             });
         });
-        // Enable export when filter inputs change
         document.getElementById('exportItemFilter')?.addEventListener('input', () => this.enableExport());
         document.getElementById('exportCategoryFilter')?.addEventListener('input', () => this.enableExport());
         document.getElementById('exportStartDate')?.addEventListener('change', () => this.enableExport());
@@ -3788,10 +3807,7 @@ class UltraStockSystem {
     }
 
     exportData(format) {
-        if (!this.exportEnabled) {
-            this.showToast('Perform an activity before exporting.', 'warning');
-            return;
-        }
+        // Export is always enabled, no check needed
         const exportType = document.getElementById('exportTypeSelect')?.value || 'inventory';
         const itemFilter = document.getElementById('exportItemFilter')?.value.trim().toLowerCase() || '';
         const categoryFilter = document.getElementById('exportCategoryFilter')?.value.trim().toLowerCase() || '';
